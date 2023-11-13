@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+  app:
+    environment:
+      - TERM=xterm-256color
+    build:
+      context: docker
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app
+    container_name: pendrej-app
+    depends_on:
+      - database
+
+  database:
+    image: postgres:${POSTGRES_VERSION:-15}-alpine
+    container_name: pendrej-database
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app}
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+    volumes:
+      - pendrej_database_data:/var/lib/postgresql/data:rw
+
+  adminer:
+    image: adminer
+    container_name: pendrej-adminer
+    ports:
+      - "8081:8080"
+    depends_on:
+      - database
+
+volumes:
+  pendrej_database_data:
