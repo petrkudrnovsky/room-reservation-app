@@ -10,6 +10,13 @@ git clone git@gitlab.fit.cvut.cz:BI-TWA/B231/team-pendrej.git
 cd team-pendrej
 ```
 
+### Add your user and group information (for correct permission settings)
+Create a `.env.local` file with following content, this file is not committed:
+```txt
+USER_NAME=<your PC user name>
+GROUP_NAME=< your PC group name>
+```
+
 #### Start-up Docker
 ```
 docker compose up
