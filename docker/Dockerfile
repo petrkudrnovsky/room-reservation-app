@@ -17,4 +17,13 @@ EXPOSE 8080
 
 WORKDIR /app
 
+ARG USER_ID
+ARG GROUP_ID
+ARG USER_NAME
+ARG GROUP_NAME
+
+RUN addgroup --gid $GROUP_ID $GROUP_NAME
+RUN adduser --disabled-password --gecos '' --uid $USER_ID --gid $GROUP_ID $USER_NAME
+USER $USER_NAME
+
 CMD ["symfony", "server:start", "--port=8080"]

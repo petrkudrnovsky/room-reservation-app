@@ -5,6 +5,11 @@ services:
     environment:
       - TERM=xterm-256color
     build:
+      args:
+        - USER_ID=${UID:-1000}
+        - GROUP_ID=${GID:-1000}
+        - USER_NAME=${USER_NAME:-petr}
+        - GROUP_NAME=${GROUP_NAME:-petr}
       context: docker
     ports:
       - "8080:8080"
