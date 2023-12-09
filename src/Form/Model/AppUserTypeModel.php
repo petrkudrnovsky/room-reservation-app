@@ -3,12 +3,18 @@
 namespace App\Form\Model;
 
 use App\Entity\AppUser;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class AppUserTypeModel
 {
+    #[Assert\NotBlank]
+    #[Assert\Length(min: 3, max: 250, minMessage: 'Username must have at least 3 characters', maxMessage: 'Username must have maximum of 250 characters')]
     public ?string $username = null;
+    #[Assert\NotBlank]
     public ?string $firstName = null;
+    #[Assert\NotBlank]
     public ?string $secondName = null;
+    #[Assert\Email]
     public ?string $email = null;
     public ?string $phone = null;
 
