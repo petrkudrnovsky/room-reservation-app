@@ -1,0 +1,9 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Pendrej Reservations App{% endblock %}
+
+{% block body %}
+    {% include 'components/_header.html.twig' %}
+    <h1>Pendrej Reservations App</h1>
+    <a href="{{ path('app_user_index') }}">List of users</a>
+{% endblock %}
