@@ -4,45 +4,30 @@
 
 {% block body %}
     {% include 'components/_header.html.twig' %}
-    <h1>Users</h1>
-
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Username</th>
-                <th>Password</th>
-                <th>Roles</th>
-                <th>First name</th>
-                <th>Second name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for app_user in app_users %}
-            <tr>
-                <td>{{ app_user.id }}</td>
-                <td>{{ app_user.username }}</td>
-                <td>{{ app_user.password }}</td>
-                <td>{{ app_user.roles ? app_user.roles|json_encode : '' }}</td>
-                <td>{{ app_user.firstName }}</td>
-                <td>{{ app_user.secondName }}</td>
-                <td>{{ app_user.email }}</td>
-                <td>{{ app_user.phone }}</td>
-                <td>
-                    <a href="{{ path('app_user_show', {'id': app_user.id}) }}">show</a>
-                    <a href="{{ path('app_user_edit', {'id': app_user.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="9">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-
-    <a href="{{ path('app_user_new') }}">Create new</a>
+    <div class="content-wrapper">
+        <h1>Users</h1>
+        <ul class="user-list">
+            {% for app_user in app_users %}
+                <li class="user-list__item">
+                    <strong class="user-list__item--name">
+                        <a href="{{ path('app_user_show', {'id': app_user.id}) }}">
+                            {{ app_user.firstName }} {{ app_user.secondName }}
+                        </a>
+                    </strong>
+                    <span class="user-list__text">Username: {{ app_user.username }}</span>
+                    <span class="user-list__text">Role: {{ app_user.roles ? app_user.roles|json_encode : '' }}</span>
+                    <div class="user-list__item--actions">
+                        <a href="{{ path('app_user_edit', {'id': app_user.id}) }}" class="user-list__edit-link">Edit</a>
+                        <a href="{{ path('app_user_show', {'id': app_user.id}) }}" class="user-list__detail-link">Detail</a>
+                    </div>
+                </li>
+            {% endfor %}
+                <li class="user-list__item user-list__item--new">
+                    <a href="{{ path('app_user_new') }}" class="user-list__new-link">
+                        <span class="user-list__plus">+</span> Create New
+                    </a>
+                </li>
+        </ul>
+    </div>
+    {% include 'components/_footer.html.twig' %}
 {% endblock %}

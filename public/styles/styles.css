@@ -1,0 +1,226 @@
+@import "helper.css";
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-family);
+    font-size: var(--font-size);
+    color: var(--color-black);
+    background-color: var(--color-white);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 100vh;
+}
+
+.content-wrapper {
+    flex-grow: 1;
+}
+
+h1 {
+    margin: var(--space-m) 0;
+    color: var(--color-secondary);
+    text-align: center;
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-m);
+    background-color: var(--color-primary);
+}
+
+.nav__item {
+    text-decoration: none;
+    color: var(--color-tertiary);
+}
+
+.nav__item:hover {
+    text-decoration: underline;
+}
+
+/* Block: login-form */
+.form {
+    width: 50%;
+    margin: 10% auto 0;
+    padding: var(--space-m);
+    background-color: var(--color-primary);
+    border-radius: var(--space-s);
+    align-items: center;
+}
+
+/* Element: input within login-form */
+.form__input {
+    display: block;
+    width: 80%;
+    padding: var(--space-s) var(--space-s);
+    margin: 0 auto var(--space-m) auto;
+    border: none;
+    border-radius: var(--space-xs);
+    font-size: var(--font-size);
+}
+
+
+/* Modifier: focus state of input */
+.form__input:focus {
+    outline: none;
+}
+
+/* Element: label within login-form */
+.form__label {
+    display: block;
+    width: 80%;
+    margin: 0 auto var(--space-s) auto;
+    color: var(--color-tertiary);
+}
+
+.form-button {
+    padding: var(--space-s) var(--space-xl);
+    margin: var(--space-m) 0;
+    border: none;
+    border-radius: var(--space-xs);
+    font-size: var(--font-size);
+    cursor: pointer;
+}
+
+/* Element: button within login-form */
+.form-button__confirm {
+    background-color: var(--color-tertiary);
+    color: var(--color-primary);
+}
+
+.form-button__delete {
+    background-color: var(--color-danger);
+    color: var(--color-tertiary);
+}
+
+/* Modifier: hover state of button */
+.form-button__confirm:hover {
+    background-color: var(--color-white);
+    color: var(--color-primary);
+}
+
+.form-button__delete:hover {
+    background-color: var(--color-white);
+    color: var(--color-danger);
+    border: 1px solid var(--color-danger);
+}
+
+/* Element: button wrapper within login-form */
+.form__button-wrapper {
+    text-align: center;
+}
+
+/* Element: paragraph within button wrapper */
+.form__button-wrapper p {
+    margin-bottom: var(--space-m);
+    color: var(--color-tertiary);
+}
+
+.form__button-wrapper a:hover {
+    color: var(--color-secondary);
+}
+
+/* Element: heading within login-form */
+.form h2 {
+    text-align: center;
+    margin-bottom: var(--space-m);
+    color: var(--color-tertiary);
+}
+
+footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: var(--space-m);
+    background-color: var(--color-secondary);
+}
+
+footer p, footer a {
+    color: var(--color-tertiary);
+}
+
+/* App users list */
+.user-list {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.user-list__item {
+    padding: 1rem;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: white;
+    margin: 1rem;
+    width: 15rem;
+    height: 15rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-radius: 0.5rem;
+    text-align: center;
+}
+
+.user-list__item--name {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.user-list__item--name a {
+    color: var(--color-primary);
+    text-decoration: none;
+}
+
+.user-list__text {
+    margin-top: var(--space-s);
+    display: block;
+}
+
+.user-list__item--actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: var(--space-m);
+}
+
+.user-list__item--actions a {
+    color: var(--color-primary);
+    margin: 0 var(--space-s);
+}
+
+.user-list__item--actions a:hover {
+    text-decoration: underline;
+    color: var(--color-secondary);
+}
+
+
+.user-list__new-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: inherit;
+}
+
+.user-list__plus {
+    font-size: var(--space-l);
+    margin-right: var(--space-s);
+}
+
+.user__profile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 auto;
+    padding: var(--space-m);
+}
+
+

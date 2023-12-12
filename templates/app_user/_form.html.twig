@@ -1,4 +1,7 @@
-{{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn">{{ button_label|default('Register') }}</button>
+{{ form_start(form, {'attr': {'class': 'form'}}) }}
+    <h2>{{ heading_label|default('Registration') }}</h2>
+{{ form_widget(form) }}
+    <div class="form__button-wrapper">
+        <button class="form-button form-button__confirm">{{ button_label|default('Register') }}</button>
+    </div>
 {{ form_end(form) }}

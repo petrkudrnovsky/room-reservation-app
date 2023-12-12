@@ -4,7 +4,8 @@
 
 {% block body %}
     {% include 'components/_header.html.twig' %}
-    <h1>Registration</h1>
-
-    {{ include('app_user/_form.html.twig') }}
+    <div class="content-wrapper">
+        {{ include('app_user/_form.html.twig') }}
+    </div>
+    {% include 'components/_footer.html.twig' %}
 {% endblock %}
