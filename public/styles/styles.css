@@ -46,7 +46,7 @@ nav {
 /* Block: login-form */
 .form {
     width: 50%;
-    margin: 10% auto 0;
+    margin: 10vh 50% var(--space-m) 50%;
     padding: var(--space-m);
     background-color: var(--color-primary);
     border-radius: var(--space-s);
