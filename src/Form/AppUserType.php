@@ -19,26 +19,68 @@ class AppUserType extends AbstractType
     {
         $builder
             ->add('username', TextType::class, [
+                'attr' => [
+                    'class' => 'form__input',
+                    'placeholder' => 'Your username',
+                ],
                 'label' => 'Username',
+                'label_attr' => [
+                    'class' => 'form__label',
+                ],
             ]);
         if(!$options['is_edit']) {
             $builder->add('password', PasswordType::class, [
+                'attr' => [
+                    'class' => 'form__input',
+                    'placeholder' => 'Your password',
+                ],
                 'label' => 'Password',
+                'label_attr' => [
+                    'class' => 'form__label',
+                ],
                 'mapped' => false,
             ]);
         }
         $builder->add('firstName', TextType::class, [
+                'attr' => [
+                    'class' => 'form__input',
+                    'placeholder' => 'Your first name',
+                ],
                 'label' => 'Given name',
+                'label_attr' => [
+                    'class' => 'form__label',
+                ],
             ])
             ->add('secondName', TextType::class, [
+                'attr' => [
+                    'class' => 'form__input',
+                    'placeholder' => 'Your family name',
+                ],
                 'label' => 'Family name',
+                'label_attr' => [
+                    'class' => 'form__label',
+                ],
             ])
             ->add('email', EmailType::class, [
+                'attr' => [
+                    'class' => 'form__input',
+                    'placeholder' => 'Your email',
+                ],
                 'label' => 'Email',
+                'label_attr' => [
+                    'class' => 'form__label',
+                ],
                 'required' => false,
             ])
             ->add('phone', TelType::class, [
+                'attr' => [
+                    'class' => 'form__input',
+                    'placeholder' => 'Your phone number',
+                ],
                 'label' => 'Phone number',
+                'label_attr' => [
+                    'class' => 'form__label',
+                ],
                 'required' => false,
             ]);
     }

@@ -4,6 +4,9 @@
 
 {% block body %}
     {% include 'components/_header.html.twig' %}
-    <h1>Pendrej Reservations App</h1>
-    <a href="{{ path('app_user_index') }}">List of users</a>
+    <div class="content-wrapper">
+        <h1>Pendrej Reservations App</h1>
+        <a href="{{ path('app_user_index') }}">List of users</a>
+    </div>
+    {% include 'components/_footer.html.twig' %}
 {% endblock %}

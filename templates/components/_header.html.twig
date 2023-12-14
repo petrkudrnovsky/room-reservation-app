@@ -1,12 +1,12 @@
 <header class="app-header">
     <nav>
-        <a href="{{ path('app_index') }}">
+        <a class="nav__item" href="{{ path('app_index') }}">
             Pendrej Reservations App
         </a>
         {% if is_granted('IS_AUTHENTICATED') %}
-            <a href="{{ path('app_logout') }}">Logout</a>
+            <a class="nav__item" href="{{ path('app_logout') }}">Logout</a>
         {% else %}
-            <a href="{{ path('app_login') }}">Login</a>
+            <a class="nav__item" href="{{ path('app_login') }}">Login</a>
         {% endif %}
     </nav>
 </header>
