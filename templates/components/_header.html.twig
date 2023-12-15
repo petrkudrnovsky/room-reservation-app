@@ -3,8 +3,11 @@
         <a class="nav__item" href="{{ path('app_index') }}">
             Pendrej Reservations App
         </a>
-        {% if is_granted('IS_AUTHENTICATED') %}
-            <a class="nav__item" href="{{ path('app_logout') }}">Logout</a>
+        {% if app.user and is_granted('IS_AUTHENTICATED_FULLY') %}
+            <section>
+                <a class="nav__item" href="{{ path('app_user_edit', {'id': app.user.id}) }}">{{ app.user.firstName }} {{ app.user.secondName }}</a>
+                <a class="nav__item" href="{{ path('app_logout') }}">Logout</a>
+            </section>
         {% else %}
             <a class="nav__item" href="{{ path('app_login') }}">Login</a>
         {% endif %}
