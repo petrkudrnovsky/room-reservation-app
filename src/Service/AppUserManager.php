@@ -21,6 +21,10 @@ class AppUserManager
         return $appUser;
     }
 
+    public function getCurrentUser()
+    {
+    }
+
     public function getAppUserById(int $appUserId): AppUser
     {
         $appUser = $this->userRepository->find($appUserId);

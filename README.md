@@ -14,10 +14,10 @@ cd team-pendrej
 Create a `.env.local` file with following content, this file is not committed:
 ```txt
 USER_NAME=<your PC user name>
-GROUP_NAME=< your PC group name>
+GROUP_NAME=<your PC group name>
 ```
 
-#### Start-up Docker
+#### Start-up Docker and install all dependencies
 ```
 docker compose up
 docker exec -it pendrej-app composer install
@@ -31,12 +31,23 @@ Is database (Adminer connection) running? http://localhost:8081/
 - User: app
 - Password: app
 
+### Update database
+```
+docker exec -it pendrej-app php bin/console doctrine:migrations:migrate
+```
+
+### Load fixtures
+```
+docker exec -it pendrej-app php bin/console doctrine:fixtures:load
+```
+
 ### Useful commands
 ```
 docker exec -it pendrej-app composer ...
 docker exec -it pendrej-app symfony ... # access the Symfony binary
 docker exec -it pendrej-app php bin/console make: ... # make commands for Symfony apps
 ```
+
 
 ### Authors
 
