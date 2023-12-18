@@ -23,7 +23,7 @@ class LoginController extends AbstractController
         ]);
     }
 
-    #[Route('/logout', name: 'app_logout', methods: ['GET'])]
+    #[Route('/logout', name: 'app_logout')]
     public function logout(): never
     {
         // controller can be blank: it will never be called!

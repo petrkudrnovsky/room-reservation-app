@@ -7,19 +7,24 @@ use App\Form\AppUserType;
 use App\Form\Model\AppUserTypeModel;
 use App\Repository\AppUserRepository;
 use App\Service\AppUserManager;
+use Doctrine\DBAL\Driver\Mysqli\Initializer\Secure;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use function PHPUnit\Framework\throwException;
 
 #[Route('/user')]
 class AppUserController extends AbstractController
 {
-    #[Route('/', name: 'app_user_index', methods: ['GET'])]
-    #[IsGranted('ROLE_USER')]
+    #[Route('/', name: 'app_user_index')]
+    #[IsGranted(new Expression('is_granted("ROLE_SUPER_ADMIN") or is_granted("ROLE_ROOM_MANAGER") or is_granted("ROLE_GROUP_MANAGER")'))]
     public function index(AppUserRepository $appUserRepository): Response
     {
         return $this->render('app_user/index.html.twig', [
@@ -27,34 +32,7 @@ class AppUserController extends AbstractController
         ]);
     }
 
-    #[Route('/registration', name: 'app_user_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, AppUserManager $appUserManager, UserPasswordHasherInterface $passwordHasher): Response
-    {
-        $appUserModel = new AppUserTypeModel();
-        $form = $this->createForm(AppUserType::class, $appUserModel);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $appUser = $appUserModel->toEntity();
-            $appUser->addRole('ROLE_USER');
-            if($form->has('password')) {
-                $plainPassword = $form->get('password')->getData();
-                $hashedPassword = $passwordHasher->hashPassword($appUser, $plainPassword);
-                $appUser->setPassword($hashedPassword);
-            }
-            $appUserManager->saveToDatabase($appUser);
-
-            return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
-        }
-
-        return $this->render('app_user/new.html.twig', [
-            'app_user' => $appUserModel,
-            'form' => $form,
-        ]);
-    }
-
-    #[Route('/{id}', name: 'app_user_show', methods: ['GET'])]
-    #[IsGranted('ROLE_USER')]
+    #[Route('/{id}', name: 'app_user_show')]
     public function show(AppUser $appUser): Response
     {
         return $this->render('app_user/show.html.twig', [
@@ -62,8 +40,8 @@ class AppUserController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_user_edit', methods: ['GET', 'POST'])]
-    #[IsGranted('ROLE_USER')]
+    #[Route('/{id}/edit', name: 'app_user_edit')]
+    #[IsGranted('user_edit', 'appUser')]
     public function edit(Request $request, AppUser $appUser, AppUserManager $appUserManager): Response
     {
         $appUserModel = AppUserTypeModel::fromEntity($appUser);
@@ -74,7 +52,7 @@ class AppUserController extends AbstractController
             $appUser = $appUserModel->toEntity($appUser);
             $appUserManager->saveToDatabase($appUser);
 
-            return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_user_show', ['id' => $appUser->getId()]);
         }
 
         return $this->render('app_user/edit.html.twig', [
@@ -83,15 +61,21 @@ class AppUserController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_user_delete', methods: ['POST'])]
-    #[IsGranted('ROLE_USER')]
-    public function delete(Request $request, AppUser $appUser, EntityManagerInterface $entityManager): Response
+    #[Route('/{id}/delete', name: 'app_user_delete')]
+    #[IsGranted('user_delete', 'appUser')]
+    public function delete(Request $request, AppUser $appUser, EntityManagerInterface $entityManager, SessionInterface $session): Response
     {
+        $isCurrentUser = $this->getUser()->getId() == $appUser->getId();
         if ($this->isCsrfTokenValid('delete'.$appUser->getId(), $request->request->get('_token'))) {
             $entityManager->remove($appUser);
             $entityManager->flush();
         }
 
+        if($isCurrentUser) {
+            // TO-DO: not working
+            $session->invalidate();
+            return $this->render('app_user/deleted_user.html.twig');
+        }
         return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
     }
 }
