@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Group{% endblock %}
+
+{% block body %}
+    {% include 'components/_header.html.twig' %}
+    <div class="content-wrapper">
+        <h1>Create new Group</h1>
+
+        {{ include('group/_form.html.twig') }}
+
+        <a href="{{ path('app_group_index') }}">back to list</a>
+    </div>
+    {% include 'components/_footer.html.twig' %}
+{% endblock %}

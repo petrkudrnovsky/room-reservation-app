@@ -7,18 +7,14 @@ use App\Form\AppUserType;
 use App\Form\Model\AppUserTypeModel;
 use App\Repository\AppUserRepository;
 use App\Service\AppUserManager;
-use Doctrine\DBAL\Driver\Mysqli\Initializer\Secure;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use function PHPUnit\Framework\throwException;
 
 #[Route('/user')]
 class AppUserController extends AbstractController

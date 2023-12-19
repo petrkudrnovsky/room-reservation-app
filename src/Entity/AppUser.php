@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\AppUserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -39,6 +41,18 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $phone = null;
+
+    #[ORM\ManyToMany(targetEntity: Group::class, mappedBy: 'members')]
+    private Collection $memberGroups;
+
+    #[ORM\ManyToMany(targetEntity: Group::class, mappedBy: 'admins')]
+    private Collection $adminGroups;
+
+    public function __construct()
+    {
+        $this->memberGroups = new ArrayCollection();
+        $this->adminGroups = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -160,6 +174,60 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPhone(?string $phone): static
     {
         $this->phone = $phone;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Group>
+     */
+    public function getMemberGroups(): Collection
+    {
+        return $this->memberGroups;
+    }
+
+    public function addMemberGroup(Group $group): static
+    {
+        if (!$this->memberGroups->contains($group)) {
+            $this->memberGroups->add($group);
+            $group->addMember($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMemberGroup(Group $group): static
+    {
+        if ($this->memberGroups->removeElement($group)) {
+            $group->removeMember($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Group>
+     */
+    public function getAdminGroups(): Collection
+    {
+        return $this->adminGroups;
+    }
+
+    public function addAdminGroup(Group $adminGroup): static
+    {
+        if (!$this->adminGroups->contains($adminGroup)) {
+            $this->adminGroups->add($adminGroup);
+            $adminGroup->addAdmin($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAdminGroup(Group $adminGroup): static
+    {
+        if ($this->adminGroups->removeElement($adminGroup)) {
+            $adminGroup->removeAdmin($this);
+        }
 
         return $this;
     }
