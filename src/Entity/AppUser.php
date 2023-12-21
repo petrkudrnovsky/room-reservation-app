@@ -48,10 +48,18 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\ManyToMany(targetEntity: Group::class, mappedBy: 'admins')]
     private Collection $adminGroups;
 
+    #[ORM\ManyToMany(targetEntity: Room::class, mappedBy: 'members')]
+    private Collection $memberRooms;
+
+    #[ORM\ManyToMany(targetEntity: Room::class, mappedBy: 'admins')]
+    private Collection $adminRooms;
+
     public function __construct()
     {
         $this->memberGroups = new ArrayCollection();
         $this->adminGroups = new ArrayCollection();
+        $this->memberRooms = new ArrayCollection();
+        $this->adminRooms = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -227,6 +235,60 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if ($this->adminGroups->removeElement($adminGroup)) {
             $adminGroup->removeAdmin($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Room>
+     */
+    public function getMemberRooms(): Collection
+    {
+        return $this->memberRooms;
+    }
+
+    public function addMemberRoom(Room $memberRoom): static
+    {
+        if (!$this->memberRooms->contains($memberRoom)) {
+            $this->memberRooms->add($memberRoom);
+            $memberRoom->addMember($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMemberRoom(Room $memberRoom): static
+    {
+        if ($this->memberRooms->removeElement($memberRoom)) {
+            $memberRoom->removeMember($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Room>
+     */
+    public function getAdminRooms(): Collection
+    {
+        return $this->adminRooms;
+    }
+
+    public function addAdminRoom(Room $adminRoom): static
+    {
+        if (!$this->adminRooms->contains($adminRoom)) {
+            $this->adminRooms->add($adminRoom);
+            $adminRoom->addAdmin($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAdminRoom(Room $adminRoom): static
+    {
+        if ($this->adminRooms->removeElement($adminRoom)) {
+            $adminRoom->removeAdmin($this);
         }
 
         return $this;
