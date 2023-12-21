@@ -14,7 +14,7 @@ final class Version20231219125228 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return '';
+        return 'Add Room table and it\'s relation to other entities';
     }
 
     public function up(Schema $schema): void

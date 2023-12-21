@@ -73,7 +73,7 @@ class RoomController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_room_delete')]
+    #[Route('/{id}/delete', name: 'app_room_delete')]
     public function delete(Request $request, Room $room, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$room->getId(), $request->request->get('_token'))) {
