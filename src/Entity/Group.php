@@ -27,10 +27,14 @@ class Group
     #[ORM\JoinTable(name: 'appGroup_admin_appUser')]
     private Collection $admins;
 
+    #[ORM\ManyToMany(targetEntity: Room::class, mappedBy: 'owningGroups')]
+    private Collection $rooms;
+
     public function __construct()
     {
         $this->members = new ArrayCollection();
         $this->admins = new ArrayCollection();
+        $this->rooms = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -101,6 +105,33 @@ class Group
     public function removeAdmin(AppUser $admin): static
     {
         $this->admins->removeElement($admin);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Room>
+     */
+    public function getRooms(): Collection
+    {
+        return $this->rooms;
+    }
+
+    public function addRoom(Room $room): static
+    {
+        if (!$this->rooms->contains($room)) {
+            $this->rooms->add($room);
+            $room->addOwningGroup($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRoom(Room $room): static
+    {
+        if ($this->rooms->removeElement($room)) {
+            $room->removeOwningGroup($this);
+        }
 
         return $this;
     }
