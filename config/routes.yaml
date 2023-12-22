@@ -3,3 +3,13 @@ controllers:
         path: ../src/Controller/
         namespace: App\Controller
     type: attribute
+api:
+    resource: ../src/Api/Controller/
+    prefix: /api
+    type: attribute
+fallback:
+    path: /{route}
+    requirements:
+        route: .+
+    defaults:
+        _controller: App\Controller\AppUserController::fallback
