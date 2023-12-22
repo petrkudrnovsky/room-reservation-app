@@ -80,4 +80,19 @@ class AppUserRepository extends ServiceEntityRepository implements PasswordUpgra
 //            ->getOneOrNullResult()
 //        ;
 //    }
+    public function save(AppUser $appUser, bool $flush = false): void
+    {
+        $this->getEntityManager()->persist($appUser);
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    public function remove(AppUser $appUser, bool $flush = false): void
+    {
+        $this->getEntityManager()->remove($appUser);
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
 }
