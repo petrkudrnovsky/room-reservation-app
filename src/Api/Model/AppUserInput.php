@@ -7,23 +7,27 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class AppUserInput {
     #[Assert\NotBlank]
-    private ?string $username;
+    public ?string $username;
 
-    private array $roles;
+    public array $roles = [];
 
-    private ?string $firstName;
+    public ?string $password = 'default';
 
-    private ?string $secondName;
+    public ?string $firstName;
+
+    public ?string $secondName;
 
     #[Assert\Email(message: 'Email musí byť platný')]
-    private ?string $email;
+    public ?string $email;
 
-    private ?string $phone;
+    public ?string $phone;
+
 
 
     public function toEntity(AppUser $appUser = new AppUser()): AppUser {
         $appUser->setUsername($this->username);
         $appUser->setRoles($this->roles);
+        $appUser->setPassword($this->password);
         $appUser->setFirstName($this->firstName);
         $appUser->setSecondName($this->secondName);
         $appUser->setEmail($this->email);

@@ -6,30 +6,39 @@ use App\Api\Model\AppUserInput;
 use App\Api\Model\AppUserOutput;
 use App\Entity\AppUser;
 use App\Repository\AppUserRepository;
+use App\Service\AppUserManager;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Validator\ConstraintViolationInterface;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 class AppUserController extends AbstractFOSRestController {
     public function __construct(
-        private readonly AppUserRepository $appUserRepository
+        private readonly AppUserRepository $appUserRepository,
+        private readonly AppUserManager $appUserManager
     ) {
     }
 
     #[Rest\Get('/user', name: 'api_app_users_list')]
     #[Rest\View]
-    public function list(): array
-    {
+    public function list(Request $request): array {
+        $username = $request->query->get('username');
+        $name = $request->query->get('name');
+        $email = $request->query->get('email');
+        $phone = $request->query->get('phone');
+
         $appUsers = array_map(
             fn (AppUser $entity) => AppUserOutput::fromEntity($entity),
-            $this->appUserRepository->findAll()
+            $this->appUserManager->findAppUsersByFilters($username, $name, $email, $phone)
         );
 
         return ['appUsers' => $appUsers];
     }
+
+
 
     #[Rest\Get('/user/{id}', name: 'api_app_users_detail', requirements: ['id' => '\d+'])]
     #[Rest\View]
@@ -59,7 +68,7 @@ class AppUserController extends AbstractFOSRestController {
         }
 
         $appUser = $appUserInput->toEntity($appUser);
-        $this->appUserRepository->save($appUser, true);
+        $this->appUserManager->saveToDatabase($appUser);
         return AppUserOutput::fromEntity($appUser);
     }
 
@@ -68,7 +77,7 @@ class AppUserController extends AbstractFOSRestController {
     public function destroy(int $id): void
     {
         $appUser = $this->findOrFail($id);
-        $this->appUserRepository->remove($appUser, true);
+        $this->appUserManager->removeFromDatabase($appUser);
     }
 
     private function findOrFail(int $id): AppUser
@@ -79,5 +88,26 @@ class AppUserController extends AbstractFOSRestController {
         }
 
         return $appUser;
+    }
+
+    #[Rest\Post('/user/register')]
+    #[ParamConverter('appUserInput', converter: 'fos_rest.request_body')]
+    #[Rest\View(statusCode: 201)]
+    public function register(AppUserInput $appUserInput, ConstraintViolationListInterface $errors): AppUserOutput
+    {
+        $appUser = new AppUser();
+        if ($errors->count() > 0) {
+            throw new HttpException(400, message: \implode("\n", \array_map(
+                fn (ConstraintViolationInterface $constraintViolation) => $constraintViolation->getMessage(),
+                array(...$errors)
+            )));
+        }
+
+        // TO-DO we need to hash the password and prepare it for the JWT authentication
+        $appUser = $appUserInput->toEntity($appUser);
+        // we need to assign a ROLE_USER by default to the user
+        $appUser->setRoles(['ROLE_USER']);
+        $this->appUserManager->saveToDatabase($appUser);
+        return AppUserOutput::fromEntity($appUser);
     }
 }
