@@ -43,13 +43,9 @@ class AppUserManager
 
     public function getAppUserByUsername(string $username): AppUser
     {
-        if($username) {
-            $appUser = $this->userRepository->findOneBy(array('username' => $username));
-            if(!$appUser) {
-                throw new NotFoundHttpException("User with username $username not found.");
-            }
-        } else {
-            $appUser = $this->userRepository->findAll();
+        $appUser = $this->userRepository->findOneBy(array('username' => $username));
+        if(!$appUser) {
+            throw new NotFoundHttpException("User with username $username not found.");
         }
 
         return $appUser;
