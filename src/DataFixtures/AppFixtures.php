@@ -10,6 +10,8 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class AppFixtures extends Fixture
 {
+    private const NUMBER_OF_USERS = 2;
+
     public function __construct(
         private readonly UserPasswordHasherInterface $hasher
     )
@@ -19,6 +21,7 @@ class AppFixtures extends Fixture
     {
         $this->loadSuperAdmin($manager);
         $this->loadBuildings($manager);
+        $this->loadUsers($manager);
 
         $manager->flush();
     }
@@ -35,6 +38,21 @@ class AppFixtures extends Fixture
         $appAdmin->addRole('ROLE_SUPER_ADMIN');
 
         $manager->persist($appAdmin);
+    }
+
+    public function loadUsers(ObjectManager $manager)
+    {
+        for($i = 0; $i < self::NUMBER_OF_USERS; $i++) {
+            $appUser = new AppUser();
+            $appUser->setUsername('user' . $i);
+            $appUser->setPassword($this->hasher->hashPassword($appUser, 'user' . $i));
+            $appUser->setFirstName('User');
+            $appUser->setSecondName('Userovič' . $i);
+
+            $appUser->addRole('ROLE_USER');
+
+            $manager->persist($appUser);
+        }
     }
 
     public function loadBuildings(ObjectManager $manager)

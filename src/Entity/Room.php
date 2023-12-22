@@ -35,11 +35,24 @@ class Room
     #[ORM\JoinTable(name: 'appRoom_admin_appUser')]
     private Collection $admins;
 
+    #[ORM\OneToMany(mappedBy: 'room', targetEntity: Reservation::class)]
+    private Collection $reservations;
+
+    #[ORM\ManyToOne(inversedBy: 'rooms')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Building $building = null;
+
     public function __construct()
     {
         $this->owningGroups = new ArrayCollection();
         $this->members = new ArrayCollection();
         $this->admins = new ArrayCollection();
+        $this->reservations = new ArrayCollection();
+    }
+
+    public function getCodeName(): string
+    {
+        return $this->building->getCode() . ':' . $this->code;
     }
 
     public function getId(): ?int
@@ -158,6 +171,48 @@ class Room
     public function removeAdmin(AppUser $admin): static
     {
         $this->admins->removeElement($admin);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Reservation>
+     */
+    public function getReservations(): Collection
+    {
+        return $this->reservations;
+    }
+
+    public function addReservation(Reservation $reservation): static
+    {
+        if (!$this->reservations->contains($reservation)) {
+            $this->reservations->add($reservation);
+            $reservation->setRoom($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReservation(Reservation $reservation): static
+    {
+        if ($this->reservations->removeElement($reservation)) {
+            // set the owning side to null (unless already changed)
+            if ($reservation->getRoom() === $this) {
+                $reservation->setRoom(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getBuilding(): ?Building
+    {
+        return $this->building;
+    }
+
+    public function setBuilding(?Building $building): static
+    {
+        $this->building = $building;
 
         return $this;
     }

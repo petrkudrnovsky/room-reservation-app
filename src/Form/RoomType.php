@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\AppUser;
+use App\Entity\Building;
 use App\Entity\Group;
 use App\Form\Model\RoomTypeModel;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -25,6 +26,10 @@ class RoomType extends AbstractType
             ])
             ->add('isPrivate', CheckboxType::class, [
                 'label' => 'Private room',
+            ])
+            ->add('building', EntityType::class, [
+                'class' => Building::class,
+                'choice_label' => 'name',
             ])
             ->add('owningGroups', EntityType::class, [
                 'class' => Group::class,
