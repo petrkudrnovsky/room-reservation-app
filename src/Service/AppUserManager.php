@@ -41,7 +41,7 @@ class AppUserManager
         return $appUser;
     }
 
-    public function getAppUserByUsername(?string $username): array
+    public function getAppUserByUsername(string $username): AppUser
     {
         if($username) {
             $appUser = $this->userRepository->findOneBy(array('username' => $username));
