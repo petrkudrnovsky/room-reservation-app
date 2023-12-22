@@ -2,6 +2,7 @@
 
 namespace App\Form\Model;
 
+use App\Entity\Building;
 use App\Entity\Room;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -17,6 +18,8 @@ class RoomTypeModel
     public ?Collection $owningGroups = null;
     public ?Collection $members = null;
     public ?Collection $admins = null;
+    #[Assert\NotBlank]
+    public ?Building $building = null;
 
     public function toEntity(?Room $room = null): Room
     {
@@ -26,6 +29,7 @@ class RoomTypeModel
         $room->setName($this->name);
         $room->setCode($this->code);
         $room->setIsPrivate($this->isPrivate);
+        $room->setBuilding($this->building);
 
         foreach ($this->owningGroups as $owningGroup) {
             $room->addOwningGroup($owningGroup);
@@ -49,6 +53,7 @@ class RoomTypeModel
         $model->owningGroups = $room->getOwningGroups();
         $model->members = $room->getMembers();
         $model->admins = $room->getAdmins();
+        $model->building = $room->getBuilding();
 
         return $model;
     }

@@ -1,0 +1,68 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Reservation{% endblock %}
+
+{% block body %}
+    {% include 'components/_header.html.twig' %}
+    <div class="content-wrapper">
+        <h1>Reservation</h1>
+
+        <table class="table">
+            <tbody>
+                <tr>
+                    <th>Id</th>
+                    <td>{{ reservation.id }}</td>
+                </tr>
+                <tr>
+                    <th>Title</th>
+                    <td>{{ reservation.title }}</td>
+                </tr>
+                <tr>
+                    <th>Description</th>
+                    <td>{{ reservation.description }}</td>
+                </tr>
+                <tr>
+                    <th>Start</th>
+                    <td>{{ reservation.startDatetime ? reservation.startDatetime|date('Y-m-d H:i:s') : '' }}</td>
+                </tr>
+                <tr>
+                    <th>EndTime</th>
+                    <td>{{ reservation.endDatetime ? reservation.endDatetime|date('Y-m-d H:i:s') : '' }}</td>
+                </tr>
+                <tr>
+                    <th>Status</th>
+                    <td>{{ reservation.status }}</td>
+                </tr>
+                <tr>
+                    <th>Room</th>
+                    <td>{{ reservation.room.name }}</td>
+                </tr>
+                <tr>
+                    <th>CreatedBy</th>
+                    <td>{{ reservation.createdBy.username }}</td>
+                </tr>
+                <tr>
+                    <th>ApprovedBy</th>
+                    <td>{{ reservation.approvedBy ? reservation.approvedBy.username }}</td>
+                </tr>
+                <tr>
+                    <th>Members</th>
+                    <td>
+                        <ul>
+                            {% for member in reservation.members %}
+                                <li>{{ member.username }}</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <a href="{{ path('app_reservation_index') }}">back to list</a>
+
+        <a href="{{ path('app_reservation_edit', {'id': reservation.id}) }}">edit</a>
+
+        {{ include('reservation/_delete_form.html.twig') }}
+    </div>
+    {% include 'components/_footer.html.twig' %}
+{% endblock %}

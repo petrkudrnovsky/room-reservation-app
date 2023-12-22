@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Reservation{% endblock %}
+
+{% block body %}
+    {% include 'components/_header.html.twig' %}
+    <div class="content-wrapper">
+        <h1>Create new Reservation</h1>
+
+        {{ include('reservation/_form.html.twig') }}
+
+        <a href="{{ path('app_reservation_index') }}">back to list</a>
+    </div>
+    {% include 'components/_footer.html.twig' %}
+{% endblock %}
