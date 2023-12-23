@@ -27,10 +27,10 @@ class Reservation
     private ?string $description = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $startDatetime = null;
+    private ?\DateTime $startDatetime = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $endDatetime = null;
+    private ?\DateTime $endDatetime = null;
 
     #[ORM\Column(length: 255)]
     private ?string $status = null;
@@ -64,24 +64,24 @@ class Reservation
         return $this;
     }
 
-    public function getStartDatetime(): ?\DateTimeInterface
+    public function getStartDatetime(): ?\DateTime
     {
         return $this->startDatetime;
     }
 
-    public function setStartDatetime(\DateTimeInterface $startDatetime): static
+    public function setStartDatetime(\DateTime $startDatetime): static
     {
         $this->startDatetime = $startDatetime;
 
         return $this;
     }
 
-    public function getEndDatetime(): ?\DateTimeInterface
+    public function getEndDatetime(): ?\DateTime
     {
         return $this->endDatetime;
     }
 
-    public function setEndDatetime(\DateTimeInterface $endDatetime): static
+    public function setEndDatetime(\DateTime $endDatetime): static
     {
         $this->endDatetime = $endDatetime;
 

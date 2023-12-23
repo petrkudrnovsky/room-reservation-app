@@ -1,0 +1,4 @@
+<form method="post" action="{{ path('app_room_reservation_reject', {'id': reservation.id, 'roomId': reservation.room.id}) }}" onsubmit="return confirm('Are you sure you want to reject reservation: {{ reservation.title }}?');">
+    <input type="hidden" name="_token" value="{{ csrf_token('reject' ~ reservation.id) }}">
+    <button class="btn">Reject</button>
+</form>

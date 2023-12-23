@@ -10,7 +10,9 @@ use App\Service\AppUserManager;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\ConstraintViolationInterface;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,6 +26,7 @@ class AppUserController extends AbstractFOSRestController {
 
     #[Rest\Get('/user', name: 'api_app_users_list')]
     #[Rest\View]
+    #[IsGranted(new Expression('is_granted("ROLE_SUPER_ADMIN") or is_granted("ROLE_ROOM_MANAGER") or is_granted("ROLE_GROUP_MANAGER")'))]
     public function list(Request $request): array {
         $username = $request->query->get('username');
         $name = $request->query->get('name');

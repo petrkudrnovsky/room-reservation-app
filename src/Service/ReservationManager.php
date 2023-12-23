@@ -2,9 +2,11 @@
 
 namespace App\Service;
 
+use App\Entity\AppUser;
 use App\Entity\Reservation;
 use App\Repository\ReservationRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 class ReservationManager
 {
@@ -17,6 +19,22 @@ class ReservationManager
     {
         $this->em->persist($reservation);
         $this->em->flush();
+        return $reservation;
+    }
+
+    public function deleteFromDatabase(Reservation $reservation): void
+    {
+        $this->em->remove($reservation);
+        $this->em->flush();
+    }
+
+    public function prepareNewReservation(Reservation $reservation, UserInterface $currentUser): Reservation
+    {
+        $reservation->setStatus(Reservation::STATUS_PENDING);
+        if($currentUser instanceof AppUser) {
+            $reservation->setCreatedBy($currentUser);
+            $reservation->addMember($currentUser);
+        }
         return $reservation;
     }
 }

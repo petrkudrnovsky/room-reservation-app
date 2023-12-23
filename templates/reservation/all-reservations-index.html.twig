@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}All reservations{% endblock %}
+
+{% block body %}
+    {% include 'components/_header.html.twig' %}
+    <h1>All reservations</h1>
+    <div class="content-wrapper">
+        {{ include('reservation/_list.html.twig', {reservations: reservations} ) }}
+    </div>
+    {% include 'components/_footer.html.twig' %}
+{% endblock %}

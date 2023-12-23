@@ -223,4 +223,33 @@ footer p, footer a {
     padding: var(--space-m);
 }
 
+.flash {
+    display: block;
+    position: fixed;
+    top: 0;
+    right: 0;
+    margin: var(--space-m);
+    padding: var(--space-m);
+    border-radius: var(--space-xs);
+}
+
+.flash__success {
+    background-color: var(--color-success);
+    color: var(--color-white);
+}
+
+.flash__error {
+    background-color: var(--color-error);
+    color: var(--color-white);
+}
+
+.flash__warning {
+    background-color: var(--color-warning);
+    color: var(--color-white);
+}
+
+.flash__info {
+    background-color: var(--color-info);
+}
+
 
