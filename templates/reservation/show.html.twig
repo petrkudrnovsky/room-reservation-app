@@ -35,7 +35,7 @@
                 </tr>
                 <tr>
                     <th>Room</th>
-                    <td>{{ reservation.room.codeName }} - {{ reservation.room.name }}</td>
+                    <td><a href="{{ path('app_room_show', {'id': reservation.room.id}) }}">{{ reservation.room.codeName }} - {{ reservation.room.name }}</a></td>
                 </tr>
                 <tr>
                     <th>CreatedBy</th>

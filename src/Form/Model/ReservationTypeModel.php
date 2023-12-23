@@ -16,6 +16,7 @@ class ReservationTypeModel
     public ?string $title = null;
     public ?string $description = null;
     #[Assert\NotBlank]
+    #[Assert\GreaterThan('now', message: 'Start date and time of the reservation must be in the future.')]
     public ?\DateTime $startDatetime = null;
     #[Assert\NotBlank]
     public ?\DateTime $endDatetime = null;

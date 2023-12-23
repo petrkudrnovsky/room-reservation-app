@@ -36,9 +36,11 @@ class ReservationRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('r')
             ->andWhere('r.room = :roomId')
+            ->andWhere('r.status = :status')
             ->andWhere('r.startDatetime < :endDatetime')
             ->andWhere('r.endDatetime > :startDatetime')
             ->setParameter('roomId', $roomId)
+            ->setParameter('status', Reservation::STATUS_APPROVED)
             ->setParameter('startDatetime', $start)
             ->setParameter('endDatetime', $end)
             ->getQuery()

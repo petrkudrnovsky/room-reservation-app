@@ -22,6 +22,10 @@
             <td>
                 <a href="{{ path('app_room_reservation_show', {'id': reservation.id, 'roomId': reservation.room.id}) }}">show</a>
                 <a href="{{ path('app_room_reservation_edit', {'id': reservation.id, 'roomId': reservation.room.id}) }}">edit</a>
+                {% if reservation.status == 'pending' %}
+                    {% include 'reservation/_approve.html.twig' %}
+                    {% include 'reservation/_reject.html.twig' %}
+                {% endif %}
             </td>
         </tr>
     {% else %}

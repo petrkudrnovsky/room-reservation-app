@@ -10,6 +10,9 @@
         {{ include('reservation/_form.html.twig') }}
 
         <a href="{{ path('app_room_reservation_index', {'roomId': reservation.room.id}) }}">back to list</a>
+
+        <h2>Approved reservations for this room</h2>
+        {{ include('reservation/_list.html.twig', {reservations: approvedReservations}) }}
     </div>
     {% include 'components/_footer.html.twig' %}
 {% endblock %}

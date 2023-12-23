@@ -38,12 +38,14 @@ class ReservationController extends AbstractController
             $reservation = $reservationManager->prepareNewReservation($reservation, $this->getUser());
             $reservationManager->saveToDatabase($reservation);
 
+            $this->addFlash('success', 'Reservation created.');
             return $this->redirectToRoute('app_room_show', ['id' => $roomId]);
         }
 
         return $this->render('reservation/new.html.twig', [
             'reservation' => $reservationModel,
             'form' => $form,
+            'approvedReservations' => $roomManager->getOrderedReservations($reservationModel->room, Reservation::STATUS_APPROVED),
         ]);
     }
 
@@ -80,6 +82,39 @@ class ReservationController extends AbstractController
     {
         if ($this->isCsrfTokenValid('delete'.$reservation->getId(), $request->request->get('_token'))) {
             $reservationManager->deleteFromDatabase($reservation);
+        }
+
+        return $this->redirectToRoute('app_room_show', ['id' => $reservation->getRoom()->getId()]);
+    }
+
+    #[Route('/{id}/approve', name: 'app_room_reservation_approve')]
+    public function approve(Request $request, Reservation $reservation, ReservationManager $reservationManager, ReservationRepository $reservationRepository): Response
+    {
+        if ($this->isCsrfTokenValid('approve'.$reservation->getId(), $request->request->get('_token'))) {
+            $overlappingReservations = $reservationRepository->findOverlappingReservations(
+                $reservation->getRoom()->getId(),
+                $reservation->getStartDatetime(),
+                $reservation->getEndDatetime(),
+            );
+            if(count($overlappingReservations) > 0) {
+                $this->addFlash('error', 'Cannot approve reservation because it overlaps with another reservation.');
+                return $this->redirectToRoute('app_room_show', ['id' => $reservation->getRoom()->getId()]);
+            }
+            $reservation->setStatus(Reservation::STATUS_APPROVED);
+            $reservationManager->saveToDatabase($reservation);
+            $this->addFlash('success', 'Reservation approved.');
+        }
+
+        return $this->redirectToRoute('app_room_show', ['id' => $reservation->getRoom()->getId()]);
+    }
+
+    #[Route('/{id}/reject', name: 'app_room_reservation_reject')]
+    public function reject(Request $request, Reservation $reservation, ReservationManager $reservationManager): Response
+    {
+        if ($this->isCsrfTokenValid('reject'.$reservation->getId(), $request->request->get('_token'))) {
+            $reservation->setStatus(Reservation::STATUS_REJECTED);
+            $reservationManager->saveToDatabase($reservation);
+            $this->addFlash('error', 'Reservation rejected.');
         }
 
         return $this->redirectToRoute('app_room_show', ['id' => $reservation->getRoom()->getId()]);
