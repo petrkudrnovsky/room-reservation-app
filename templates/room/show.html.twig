@@ -19,20 +19,44 @@
                 </tr>
                 <tr>
                     <th>Code</th>
-                    <td>{{ room.code }}</td>
+                    <td>{{ room.codeName }}</td>
+                </tr>
+                <tr>
+                    <th>Building</th>
+                    <td>{{ room.building.name }}</td>
                 </tr>
                 <tr>
                     <th>IsPrivate</th>
                     <td>{{ room.isPrivate ? 'Yes' : 'No' }}</td>
                 </tr>
+                <tr>
+                    <th>Members</th>
+                    <td>
+                        <ul>
+                            {% for member in room.members %}
+                                <li>
+                                    <a href="{{ path('app_user_show', {'id': member.id}) }}">{{ member.username }}</a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                </tr>
             </tbody>
         </table>
+
+        <a href="{{ path('app_room_reservation_new', {'roomId': room.id}) }}">reserve this room</a>
 
         <a href="{{ path('app_room_index') }}">back to list</a>
 
         <a href="{{ path('app_room_edit', {'id': room.id}) }}">edit</a>
 
         {{ include('room/_delete_form.html.twig') }}
+
+        <h2>Approved reservations for this room</h2>
+        {{ include('reservation/_list.html.twig', {reservations: approvedReservations}) }}
+
+        <h2>Pending reservations for this room</h2>
+        {{ include('reservation/_list.html.twig', {reservations: pendingReservations}) }}
     </div>
     {% include 'components/_footer.html.twig' %}
 {% endblock %}

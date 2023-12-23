@@ -52,6 +52,9 @@ class Room
 
     public function getCodeName(): string
     {
+        if(str_contains($this->building->getCode(), ':')) {
+            return $this->building->getCode() . '-' . $this->code;
+        }
         return $this->building->getCode() . ':' . $this->code;
     }
 

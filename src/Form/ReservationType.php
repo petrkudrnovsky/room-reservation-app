@@ -22,15 +22,21 @@ class ReservationType extends AbstractType
             ->add('description', TextareaType::class, [
                 'required' => false
             ])
-            ->add('startDatetime', DateTimeType::class)
-            ->add('endDatetime', DateTimeType::class)
-            ->add('room', EntityType::class, [
-                'class' => Room::class,
-                'choice_label' => function(Room $room) {
-                    return $room->getCodeName();
-                },
+            ->add('startDatetime', DateTimeType::class, [
+                'widget' => 'single_text'
             ])
-            ->add('members', EntityType::class, [
+            ->add('endDatetime', DateTimeType::class, [
+                'widget' => 'single_text'
+            ]);
+            if($options['edit_room']) {
+                $builder->add('room', EntityType::class, [
+                    'class' => Room::class,
+                    'choice_label' => function(Room $room) {
+                        return $room->getCodeName();
+                    },
+                ]);
+            }
+            $builder->add('members', EntityType::class, [
                 'class' => AppUser::class,
                 'choice_label' => 'username',
                 'multiple' => true,
@@ -44,6 +50,7 @@ class ReservationType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => ReservationTypeModel::class,
+            'edit_room' => false
         ]);
     }
 }

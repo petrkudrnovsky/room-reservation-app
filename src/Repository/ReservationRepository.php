@@ -21,6 +21,31 @@ class ReservationRepository extends ServiceEntityRepository
         parent::__construct($registry, Reservation::class);
     }
 
+    public function findReservationsByRoomId(int $roomId): array
+    {
+        return $this->createQueryBuilder('r')
+            ->andWhere('r.room = :roomId')
+            ->setParameter('roomId', $roomId)
+            ->orderBy('r.startDatetime', 'ASC')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
+    public function findOverlappingReservations(int $roomId, \DateTime $start, \DateTime $end): array
+    {
+        return $this->createQueryBuilder('r')
+            ->andWhere('r.room = :roomId')
+            ->andWhere('r.startDatetime < :endDatetime')
+            ->andWhere('r.endDatetime > :startDatetime')
+            ->setParameter('roomId', $roomId)
+            ->setParameter('startDatetime', $start)
+            ->setParameter('endDatetime', $end)
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
 //    /**
 //     * @return Reservation[] Returns an array of Reservation objects
 //     */

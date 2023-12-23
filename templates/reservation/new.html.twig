@@ -5,11 +5,11 @@
 {% block body %}
     {% include 'components/_header.html.twig' %}
     <div class="content-wrapper">
-        <h1>Create new Reservation</h1>
+        <h1>Create new Reservation (room {{ reservation.room.codeName }})</h1>
 
         {{ include('reservation/_form.html.twig') }}
 
-        <a href="{{ path('app_reservation_index') }}">back to list</a>
+        <a href="{{ path('app_room_reservation_index', {'roomId': reservation.room.id}) }}">back to list</a>
     </div>
     {% include 'components/_footer.html.twig' %}
 {% endblock %}

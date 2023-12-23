@@ -22,7 +22,7 @@
                 <tr>
                     <td>{{ room.id }}</td>
                     <td>{{ room.name }}</td>
-                    <td>{{ room.code }}</td>
+                    <td>{{ room.codeName }}</td>
                     <td>{{ room.isPrivate ? 'Yes' : 'No' }}</td>
                     <td>
                         <a href="{{ path('app_room_show', {'id': room.id}) }}">show</a>

@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Reservation for Room {{ room.codeName }}{% endblock %}
+
+{% block body %}
+    {% include 'components/_header.html.twig' %}
+    <div class="content-wrapper">
+        <h1>Create new Reservation for Room {{ room.codeName }}</h1>
+
+        {{ include('reservation/_form.html.twig') }}
+
+        <h2>Reservations for this room</h2>
+        {{ include('reservation/_list.html.twig', {reservations: reservations}) }}
+
+        <a href="{{ path('app_room_show', {'id': room.id}) }}">back to room detail</a>
+        <a href="{{ path('app_room_index') }}">back to list</a>
+    </div>
+    {% include 'components/_footer.html.twig' %}
+{% endblock %}

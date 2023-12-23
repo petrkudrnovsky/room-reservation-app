@@ -29,6 +29,7 @@ class AppUserController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_user_show')]
+    #[IsGranted('user_detail_view', 'appUser')]
     public function show(AppUser $appUser): Response
     {
         return $this->render('app_user/show.html.twig', [
