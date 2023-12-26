@@ -19,4 +19,22 @@ class GroupManager
         $this->em->flush();
         return $group;
     }
+
+    public function removeFromDatabase(Group $group): void
+    {
+        $this->em->remove($group);
+        $this->em->flush();
+    }
+
+    public function findGroupsByName(?string $name): array {
+        $qb = $this->groupRepository->createQueryBuilder('a');
+
+        if ($name) {
+            $pattern = '%' . strtolower($name) . '%';
+            $qb->andWhere('LOWER(a.name) LIKE :pattern')
+                ->setParameter('pattern', $pattern);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
 }

@@ -135,4 +135,19 @@ class Group
 
         return $this;
     }
+
+    public function clearMembers(): void
+    {
+        $this->members->clear();
+    }
+
+    public function clearAdmins(): void
+    {
+        $this->admins->clear();
+    }
+
+    public function clearRooms(): void
+    {
+        $this->rooms->clear();
+    }
 }
