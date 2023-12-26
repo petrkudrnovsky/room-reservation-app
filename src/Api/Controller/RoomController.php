@@ -55,7 +55,7 @@ class RoomController extends AbstractFOSRestController
         return RoomOutput::fromEntity($room);
     }
 
-    #[Rest\Post('/room', name: 'api_rooms_new')]
+    #[Rest\Post('/room', name: 'api_rooms_create')]
     #[Rest\Put('/room/{id}', name: 'api_rooms_edit', requirements: ['id' => '\d+'])]
     #[ParamConverter('roomInput', converter: 'fos_rest.request_body')]
     #[Rest\View]

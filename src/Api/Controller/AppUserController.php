@@ -78,7 +78,7 @@ class AppUserController extends AbstractFOSRestController {
         return AppUserOutput::fromEntity($appUser);
     }
 
-    #[Rest\Delete('/user/{id}', name: 'api_app_users_destroy', requirements: ['id' => '\d+'])]
+    #[Rest\Delete('/user/{id}', name: 'api_app_users_delete', requirements: ['id' => '\d+'])]
     #[Rest\View(statusCode: 204)]
     public function destroy(int $id): void
     {
