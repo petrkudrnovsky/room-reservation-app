@@ -6,6 +6,7 @@ use App\Entity\Reservation;
 use App\Entity\Room;
 use App\Form\Constraints\RoomAvailability;
 use App\Form\Constraints\Timespan;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Mapping\ClassMetadata;
@@ -35,6 +36,9 @@ class ReservationTypeModel
         $reservation->setEndDatetime($this->endDatetime);
         $reservation->setRoom($this->room);
 
+        foreach ($reservation->getMembers() as $member) {
+            $reservation->removeMember($member);
+        }
         foreach ($this->members as $member) {
             $reservation->addMember($member);
         }
@@ -50,7 +54,7 @@ class ReservationTypeModel
         $model->startDatetime = $reservation->getStartDatetime();
         $model->endDatetime = $reservation->getEndDatetime();
         $model->room = $reservation->getRoom();
-        $model->members = $reservation->getMembers();
+        $model->members = new ArrayCollection(iterator_to_array($reservation->getMembers()));
 
         return $model;
     }
