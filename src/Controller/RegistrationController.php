@@ -13,7 +13,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class RegistrationController extends AbstractController
 {
-    #[Route('/registration', name: 'app_user_new')]
+    #[Route('/registration', name: 'app_user_registration')]
     public function new(Request $request, AppUserManager $appUserManager, UserPasswordHasherInterface $passwordHasher): Response
     {
         $appUserModel = new AppUserTypeModel();
@@ -21,7 +21,6 @@ class RegistrationController extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $appUser = $appUserModel->toEntity();
-            $appUser->addRole('ROLE_USER'); // default
             if($form->has('password')) {
                 $plainPassword = $form->get('password')->getData();
                 $hashedPassword = $passwordHasher->hashPassword($appUser, $plainPassword);

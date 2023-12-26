@@ -48,13 +48,9 @@ security:
 
     # Application roles:
         # ROLE_USER: every authenticated user in the app
-        # ROLE_ROOM_MANAGER: manager of a room
-        # ROLE_GROUP_MANAGER: manager of a group of users
         # ROLE_SUPER_ADMIN: administrator of the whole app
     role_hierarchy:
-        ROLE_ROOM_MANAGER: ROLE_USER
-        ROLE_GROUP_MANAGER: ROLE_ROOM_MANAGER, ROLE_USER
-        ROLE_SUPER_ADMIN: ROLE_ROOM_MANAGER, ROLE_GROUP_MANAGER, ROLE_USER
+        ROLE_SUPER_ADMIN: ROLE_USER
 
 when@test:
     security:

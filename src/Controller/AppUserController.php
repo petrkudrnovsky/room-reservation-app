@@ -7,12 +7,14 @@ use App\Form\AppUserType;
 use App\Form\Model\AppUserTypeModel;
 use App\Repository\AppUserRepository;
 use App\Service\AppUserManager;
+use App\Voter\UserVoter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -20,7 +22,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class AppUserController extends AbstractController
 {
     #[Route('/', name: 'app_user_index')]
-    #[IsGranted(new Expression('is_granted("ROLE_SUPER_ADMIN") or is_granted("ROLE_ROOM_MANAGER") or is_granted("ROLE_GROUP_MANAGER")'))]
+    #[IsGranted(UserVoter::VIEW_INDEX)]
     public function index(AppUserRepository $appUserRepository): Response
     {
         return $this->render('app_user/index.html.twig', [
@@ -28,8 +30,32 @@ class AppUserController extends AbstractController
         ]);
     }
 
+    #[Route('/new', name: 'app_user_new')]
+    public function new(Request $request, AppUserManager $appUserManager, UserPasswordHasherInterface $passwordHasher): Response
+    {
+        $appUserModel = new AppUserTypeModel();
+        $form = $this->createForm(AppUserType::class, $appUserModel, ['is_registration' => false, 'is_super_admin' => $this->isGranted('ROLE_SUPER_ADMIN')]);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $appUser = $appUserModel->toEntity();
+            if($form->has('password')) {
+                $plainPassword = $form->get('password')->getData();
+                $hashedPassword = $passwordHasher->hashPassword($appUser, $plainPassword);
+                $appUser->setPassword($hashedPassword);
+            }
+            $appUserManager->saveToDatabase($appUser);
+
+            return $this->redirectToRoute('app_user_index');
+        }
+
+        return $this->render('app_user/new.html.twig', [
+            'app_user' => $appUserModel,
+            'form' => $form,
+        ]);
+    }
+
     #[Route('/{id}', name: 'app_user_show')]
-    #[IsGranted('user_detail_view', 'appUser')]
+    #[IsGranted(UserVoter::VIEW_DETAIL, 'appUser')]
     public function show(AppUser $appUser): Response
     {
         return $this->render('app_user/show.html.twig', [
@@ -38,11 +64,11 @@ class AppUserController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_user_edit')]
-    #[IsGranted('user_edit', 'appUser')]
+    #[IsGranted(UserVoter::EDIT, 'appUser')]
     public function edit(Request $request, AppUser $appUser, AppUserManager $appUserManager): Response
     {
         $appUserModel = AppUserTypeModel::fromEntity($appUser);
-        $form = $this->createForm(AppUserType::class, $appUserModel, ['is_edit' => true]);
+        $form = $this->createForm(AppUserType::class, $appUserModel, ['is_edit' => true, 'is_registration' => false, 'is_super_admin' => $this->isGranted('ROLE_SUPER_ADMIN')]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -59,7 +85,7 @@ class AppUserController extends AbstractController
     }
 
     #[Route('/{id}/delete', name: 'app_user_delete')]
-    #[IsGranted('user_delete', 'appUser')]
+    #[IsGranted(UserVoter::DELETE, 'appUser')]
     public function delete(Request $request, AppUser $appUser, EntityManagerInterface $entityManager, SessionInterface $session): Response
     {
         $isCurrentUser = $this->getUser()->getId() == $appUser->getId();
