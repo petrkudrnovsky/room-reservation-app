@@ -31,6 +31,7 @@ class AppUserController extends AbstractController
     }
 
     #[Route('/new', name: 'app_user_new')]
+    #[IsGranted(UserVoter::CREATE)]
     public function new(Request $request, AppUserManager $appUserManager, UserPasswordHasherInterface $passwordHasher): Response
     {
         $appUserModel = new AppUserTypeModel();
