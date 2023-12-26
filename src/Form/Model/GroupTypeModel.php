@@ -3,6 +3,7 @@
 namespace App\Form\Model;
 
 use App\Entity\Group;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -22,8 +23,15 @@ class GroupTypeModel
         }
         $group->setName($this->name);
 
+        foreach ($group->getMembers() as $member) {
+            $group->removeMember($member);
+        }
         foreach ($this->members as $member) {
             $group->addMember($member);
+        }
+
+        foreach ($group->getAdmins() as $admin) {
+            $group->removeAdmin($admin);
         }
         foreach ($this->admins as $admin) {
             $group->addAdmin($admin);
@@ -39,8 +47,8 @@ class GroupTypeModel
     {
         $model = new self();
         $model->name = $group->getName();
-        $model->members = $group->getMembers();
-        $model->admins = $group->getAdmins();
+        $model->members = new ArrayCollection(iterator_to_array($group->getMembers()));
+        $model->admins = new ArrayCollection(iterator_to_array($group->getAdmins()));
 
         return $model;
     }

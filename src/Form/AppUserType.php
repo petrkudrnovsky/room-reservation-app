@@ -3,8 +3,12 @@
 namespace App\Form;
 
 use App\Entity\AppUser;
+use App\Entity\Group;
+use App\Entity\Room;
 use App\Form\Model\AppUserTypeModel;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -83,13 +87,52 @@ class AppUserType extends AbstractType
                 ],
                 'required' => false,
             ]);
+            if(!$options['is_registration'] && $options['is_super_admin']) {
+                $builder->add('memberGroups', EntityType::class, [
+                    'class' => Group::class,
+                    'choice_label' => 'name',
+                    'multiple' => true,
+                    'expanded' => false,
+                    'required' => false,
+                ])
+                ->add('adminGroups', EntityType::class, [
+                    'class' => Group::class,
+                    'choice_label' => 'name',
+                    'multiple' => true,
+                    'expanded' => false,
+                    'required' => false,
+                ])
+                ->add('memberRooms', EntityType::class, [
+                    'class' => Room::class,
+                    'choice_label' => 'codeName',
+                    'multiple' => true,
+                    'expanded' => false,
+                    'required' => false,
+                ])
+                ->add('adminRooms', EntityType::class, [
+                    'class' => Room::class,
+                    'choice_label' => 'codeName',
+                    'multiple' => true,
+                    'expanded' => false,
+                    'required' => false,
+                ])
+                ->add('isSuperAdmin', CheckboxType::class, [
+                    'label' => 'Super admin',
+                    'label_attr' => [
+                        'class' => 'form__label',
+                    ],
+                    'required' => false,
+                ]);
+            }
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => AppUserTypeModel::class,
-            'is_edit' => false
+            'is_edit' => false,
+            'is_registration' => true,
+            'is_super_admin' => false,
         ]);
     }
 }
