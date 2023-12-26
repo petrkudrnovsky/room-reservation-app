@@ -6,6 +6,7 @@ use App\Repository\RoomRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: RoomRepository::class)]
 class Room
@@ -218,5 +219,20 @@ class Room
         $this->building = $building;
 
         return $this;
+    }
+
+    public function clearOwningGroups(): void
+    {
+        $this->owningGroups->clear();
+    }
+
+    public function clearMembers(): void
+    {
+        $this->members->clear();
+    }
+
+    public function clearAdmins(): void
+    {
+        $this->admins->clear();
     }
 }

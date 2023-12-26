@@ -1,0 +1,94 @@
+<?php
+
+namespace App\Api\Controller;
+
+use App\Api\Model\RoomInput;
+use App\Api\Model\RoomOutput;
+use App\Entity\Room;
+use App\Repository\AppUserRepository;
+use App\Repository\BuildingRepository;
+use App\Repository\GroupRepository;
+use App\Service\RoomManager;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+use Symfony\Component\HttpFoundation\Request;
+use FOS\RestBundle\Controller\Annotations as Rest;
+use FOS\RestBundle\Controller\AbstractFOSRestController;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\Validator\ConstraintViolationInterface;
+use Symfony\Component\Validator\ConstraintViolationListInterface;
+
+class RoomController extends AbstractFOSRestController
+{
+    public function __construct(
+        private readonly RoomManager $roomManager,
+        private readonly AppUserRepository $userRepository,
+        private readonly GroupRepository $groupRepository,
+        private readonly BuildingRepository $buildingRepository,
+    ) {}
+
+    #[Rest\Get('/room', name: 'api_rooms_list')]
+    #[Rest\View]
+    public function list(Request $request): array
+    {
+        $name = $request->query->get('name');
+        $code = $request->query->get('code');
+        $buildingId = $request->query->get('buildingId');
+
+        $rooms = array_map(
+            fn (Room $entity) => RoomOutput::fromEntity($entity),
+            $this->roomManager->findRoomsByFilters($name, $code, $buildingId)
+        );
+
+        return ['rooms' => $rooms];
+    }
+
+    #[Rest\Get('/room/{id}', name: 'api_rooms_detail', requirements: ['id' => '\d+'])]
+    #[Rest\View]
+    public function detail(int $id): RoomOutput
+    {
+        $room = $this->roomManager->getRoomById($id);
+
+        if (!$room) {
+            throw $this->createNotFoundException('Room not found');
+        }
+
+        return RoomOutput::fromEntity($room);
+    }
+
+    #[Rest\Post('/room', name: 'api_rooms_new')]
+    #[Rest\Put('/room/{id}', name: 'api_rooms_edit', requirements: ['id' => '\d+'])]
+    #[ParamConverter('roomInput', converter: 'fos_rest.request_body')]
+    #[Rest\View]
+    public function update(?int $id, RoomInput $roomInput, ConstraintViolationListInterface $errors): RoomOutput
+    {
+        $room = $id !== null ? $this->findOrFail($id) : new Room();
+
+        if ($errors->count() > 0) {
+            throw new HttpException(400, message: \implode("\n", \array_map(
+                fn (ConstraintViolationInterface $constraintViolation) => $constraintViolation->getMessage(),
+                array(...$errors)
+            )));
+        }
+
+        $room = $roomInput->toEntity($this->userRepository, $this->groupRepository, $this->buildingRepository, $room);
+        $room = $this->roomManager->saveToDatabase($room);
+        return RoomOutput::fromEntity($room);
+    }
+
+    #[Rest\Delete('/room/{id}', name: 'api_rooms_delete', requirements: ['id' => '\d+'])]
+    #[Rest\View]
+    public function delete(int $id): void
+    {
+        $room = $this->findOrFail($id);
+        $this->roomManager->deleteFromDatabase($room);
+    }
+
+    public function findOrFail(int $id): Room
+    {
+        $room = $this->roomManager->getRoomById($id);
+        if (!$room) {
+            throw $this->createNotFoundException('Room not found');
+        }
+        return $room;
+    }
+}

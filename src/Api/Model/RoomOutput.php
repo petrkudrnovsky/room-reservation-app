@@ -2,29 +2,30 @@
 
 namespace App\Api\Model;
 
-use App\Entity\Building;
 use App\Entity\Room;
-use phpDocumentor\Reflection\Types\Collection;
 
 class RoomOutput
 {
+    public int $id;
     public string $name;
     public string $code;
     public bool $isPrivate;
     public array $owningGroups;
     public array $members;
     public array $admins;
-    public Building $building;
+    public string $building;
 
     public function __construct(
+        int $id,
         string $name,
         string $code,
         bool $isPrivate,
         array $owningGroups,
         array $members,
         array $admins,
-        Building $building
+        string $building
     ) {
+        $this->id = $id;
         $this->name = $name;
         $this->code = $code;
         $this->isPrivate = $isPrivate;
@@ -34,28 +35,30 @@ class RoomOutput
         $this->building = $building;
     }
 
-    public static function fromEntity(Room $room): self
+    public static function fromEntity(Room $entity): self
     {
         $owningGroups = [];
-        foreach ($room->getOwningGroups() as $owningGroup) {
-            $owningGroups[] = GroupOutput::fromEntity($owningGroup);
+        foreach ($entity->getOwningGroups() as $owningGroup) {
+            $owningGroups[] = $owningGroup->getName();
         }
         $members = [];
-        foreach ($room->getMembers() as $member) {
+        foreach ($entity->getMembers() as $member) {
             $members[] = AppUserOutput::fromEntity($member);
         }
         $admins = [];
-        foreach ($room->getAdmins() as $admin) {
+        foreach ($entity->getAdmins() as $admin) {
             $admins[] = AppUserOutput::fromEntity($admin);
         }
+
         return new self(
-            $room->getName(),
-            $room->getCode(),
-            $room->isIsPrivate(),
+            $entity->getId(),
+            $entity->getName(),
+            $entity->getCode(),
+            $entity->isIsPrivate(),
             $owningGroups,
             $members,
             $admins,
-            $room->getBuilding()
+            $entity->getBuilding()->getName()
         );
     }
 }

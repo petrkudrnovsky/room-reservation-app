@@ -51,4 +51,28 @@ class RoomManager
         });
         return $orderedReservations;
     }
+
+    public function findRoomsByFilters(?string $name, ?string $code, ?int $buildingId): array
+    {
+        $qb = $this->roomRepository->createQueryBuilder('a');
+
+        if ($name) {
+            $pattern = '%' . strtolower($name) . '%';
+            $qb->andWhere('LOWER(a.name) LIKE :pattern')
+                ->setParameter('pattern', $pattern);
+        }
+
+        if ($code) {
+            $pattern = '%' . strtolower($code) . '%';
+            $qb->andWhere('LOWER(a.code) LIKE :pattern')
+                ->setParameter('pattern', $pattern);
+        }
+
+        if ($buildingId) {
+            $qb->andWhere('a.building = :buildingId')
+                ->setParameter('buildingId', $buildingId);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
 }

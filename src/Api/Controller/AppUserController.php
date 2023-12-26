@@ -12,6 +12,7 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\ConstraintViolationInterface;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
@@ -20,8 +21,10 @@ use Symfony\Component\HttpFoundation\Request;
 class AppUserController extends AbstractFOSRestController {
     public function __construct(
         private readonly AppUserRepository $appUserRepository,
-        private readonly AppUserManager $appUserManager
+        private readonly AppUserManager $appUserManager,
+        UserPasswordHasherInterface $passwordHasher
     ) {
+        $this->passwordHasher = $passwordHasher;
     }
 
     #[Rest\Get('/user', name: 'api_app_users_list')]
@@ -83,16 +86,6 @@ class AppUserController extends AbstractFOSRestController {
         $this->appUserManager->removeFromDatabase($appUser);
     }
 
-    private function findOrFail(int $id): AppUser
-    {
-        $appUser = $this->appUserRepository->find($id);
-        if ($appUser === null) {
-            throw $this->createNotFoundException();
-        }
-
-        return $appUser;
-    }
-
     #[Rest\Post('/user/register')]
     #[ParamConverter('appUserInput', converter: 'fos_rest.request_body')]
     #[Rest\View(statusCode: 201)]
@@ -106,11 +99,21 @@ class AppUserController extends AbstractFOSRestController {
             )));
         }
 
-        // TO-DO we need to hash the password and prepare it for the JWT authentication
         $appUser = $appUserInput->toEntity($appUser);
-        // we need to assign a ROLE_USER by default to the user
         $appUser->setRoles(['ROLE_USER']);
+        $hashedPassword = $this->passwordHasher->hashPassword($appUser, $appUserInput->getPlainPassword());
+        $appUser->setPassword($hashedPassword);
         $this->appUserManager->saveToDatabase($appUser);
         return AppUserOutput::fromEntity($appUser);
+    }
+
+    private function findOrFail(int $id): AppUser
+    {
+        $appUser = $this->appUserRepository->find($id);
+        if ($appUser === null) {
+            throw $this->createNotFoundException();
+        }
+
+        return $appUser;
     }
 }

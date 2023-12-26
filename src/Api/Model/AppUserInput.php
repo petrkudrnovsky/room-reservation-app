@@ -11,7 +11,7 @@ class AppUserInput {
 
     public array $roles = [];
 
-    public ?string $password = 'default';
+    public ?string $password;
 
     public ?string $firstName;
 
@@ -34,5 +34,10 @@ class AppUserInput {
         $appUser->setPhone($this->phone);
 
         return $appUser;
+    }
+
+    public function getPlainPassword(): ?string
+    {
+        return $this->password;
     }
 }

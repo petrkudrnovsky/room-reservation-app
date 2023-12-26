@@ -3,6 +3,8 @@
 namespace App\Service;
 
 use App\Entity\AppUser;
+use App\Entity\Group;
+use App\Entity\Room;
 use App\Repository\AppUserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -82,6 +84,54 @@ class AppUserManager
         }
 
         return $qb->getQuery()->getResult();
+    }
+
+    public function addMembersToGroup(Group $group, array $members): void
+    {
+        foreach ($members as $member) {
+            $user = $this->userRepository->find($member);
+            if ($user) {
+                $group->addMember($user);
+            } else {
+                throw new \Exception('User not found');
+            }
+        }
+    }
+
+    public function addAdminsToGroup(Group $group, array $admins): void
+    {
+        foreach ($admins as $admin) {
+            $user = $this->userRepository->find($admin);
+            if ($user) {
+                $group->addAdmin($user);
+            } else {
+                throw new \Exception('User not found');
+            }
+        }
+    }
+
+    public function addMembersToRoom(Room $room, array $members): void
+    {
+        foreach ($members as $member) {
+            $user = $this->userRepository->find($member);
+            if ($user) {
+                $room->addMember($user);
+            } else {
+                throw new \Exception('User not found');
+            }
+        }
+    }
+
+    public function addAdminsToRoom(Room $room, array $admins): void
+    {
+        foreach ($admins as $admin) {
+            $user = $this->userRepository->find($admin);
+            if ($user) {
+                $room->addAdmin($user);
+            } else {
+                throw new \Exception('User not found');
+            }
+        }
     }
 
 }
