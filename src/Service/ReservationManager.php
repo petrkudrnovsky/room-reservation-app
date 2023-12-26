@@ -37,4 +37,28 @@ class ReservationManager
         }
         return $reservation;
     }
+
+    public function findById(int $id): ?Reservation
+    {
+        return $this->reservationRepository->find($id);
+    }
+
+    public function findReservationsByFilters(?string $title, ?string $description): array
+    {
+        $qb = $this->reservationRepository->createQueryBuilder('a');
+
+        if ($description) {
+            $pattern = '%' . strtolower($description) . '%';
+            $qb->andWhere('LOWER(a.description) LIKE :pattern')
+                ->setParameter('pattern', $pattern);
+        }
+
+        if ($title) {
+            $pattern = '%' . strtolower($title) . '%';
+            $qb->andWhere('LOWER(a.title) LIKE :pattern')
+                ->setParameter('pattern', $pattern);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
 }

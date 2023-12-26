@@ -3,8 +3,10 @@
 namespace App\Api\Model;
 
 use App\Entity\AppUser;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 class AppUserOutput {
+    #[Groups(['reservation:read'])]
     public int $id;
     public string $username;
     public array $roles;

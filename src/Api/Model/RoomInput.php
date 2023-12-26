@@ -32,12 +32,8 @@ class RoomInput
         ?AppUserRepository $userRepository = null,
         ?GroupRepository $groupRepository = null,
         ?BuildingRepository $buildingRepository = null,
-        ?Room $room = null): Room
+        Room $room = new Room()): Room
     {
-        if(!$room) {
-            $room = new Room();
-        }
-
         $room->setName($this->name);
         $room->setCode($this->code);
         $room->setIsPrivate($this->isPrivate);
@@ -71,9 +67,6 @@ class RoomInput
                 throw new \Exception('Group not found');
             }
         }
-
-
-
         return $room;
     }
 
