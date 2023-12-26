@@ -116,6 +116,13 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
     public function addRole(string $role): static
     {
         $this->roles[] = $role;
+        $this->roles = array_unique($this->roles);
+        return $this;
+    }
+
+    public function removeRole(string $role): static
+    {
+        $this->roles = array_diff($this->roles, [$role]);
         return $this;
     }
 
@@ -124,6 +131,11 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
         $this->roles = $roles;
 
         return $this;
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return in_array('ROLE_SUPER_ADMIN', $this->roles);
     }
 
     /**
