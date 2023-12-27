@@ -26,19 +26,18 @@ class ReservationController extends AbstractFOSRestController
     ) {}
 
     #[Rest\Get('/reservation', name: 'api_reservations_list')]
-    #[Rest\View]
+    #[Rest\View(statusCode: 200)]
     public function list(Request $request): array
     {
         $title = $request->query->get('title');
         $description = $request->query->get('description');
 
-        // TODO if the approvedby is empty then it will not generate the url
         $reservations = array_map(
             fn (Reservation $entity) => ReservationOutput::fromEntity(
                 $entity,
-                $this->generateUrl('api_rooms_detail', ['id' => $entity->getRoom()?->getId()]),
-                $this->generateUrl('api_app_users_detail', ['id' => $entity->getApprovedBy()?->getId()]),
-                $this->generateUrl('api_app_users_detail', ['id' => $entity->getReservedFor()?->getId()]),
+                $this->generateUrlIfNotNull($entity->getRoom(), 'api_rooms_detail'),
+                $this->generateUrlIfNotNull($entity->getApprovedBy(), 'api_app_users_detail'),
+                $this->generateUrlIfNotNull($entity->getReservedFor(), 'api_app_users_detail'),
             ),
             $this->reservationManager->findReservationsByFilters($title, $description)
         );
@@ -47,7 +46,7 @@ class ReservationController extends AbstractFOSRestController
     }
 
     #[Rest\Get('/reservation/{id}', name: 'api_reservations_detail')]
-    #[Rest\View]
+    #[Rest\View(statusCode: 200)]
     public function detail(int $id): ReservationOutput
     {
         $reservation = $this->reservationManager->findById($id);
@@ -57,9 +56,9 @@ class ReservationController extends AbstractFOSRestController
 
         return ReservationOutput::fromEntity(
             $reservation,
-            $this->generateUrl('api_rooms_detail', ['id' => $reservation->getRoom()?->getId()]),
-            $this->generateUrl('api_app_users_detail', ['id' => $reservation->getApprovedBy()?->getId()]),
-            $this->generateUrl('api_app_users_detail', ['id' => $reservation->getReservedFor()?->getId()]),
+            $this->generateUrlIfNotNull($reservation->getRoom(), 'api_rooms_detail'),
+            $this->generateUrlIfNotNull($reservation->getApprovedBy(), 'api_app_users_detail'),
+            $this->generateUrlIfNotNull($reservation->getReservedFor(), 'api_app_users_detail'),
         );
     }
 
@@ -86,9 +85,57 @@ class ReservationController extends AbstractFOSRestController
 
         return ReservationOutput::fromEntity(
             $reservation,
-            $this->generateUrl('api_rooms_detail', ['id' => $reservation->getRoom()?->getId()]),
-            $this->generateUrl('api_app_users_detail', ['id' => $reservation->getApprovedBy()?->getId()]),
-            $this->generateUrl('api_app_users_detail', ['id' => $reservation->getReservedFor()?->getId()]),
+            $this->generateUrlIfNotNull($reservation->getRoom(), 'api_rooms_detail'),
+            $this->generateUrlIfNotNull($reservation->getApprovedBy(), 'api_app_users_detail'),
+            $this->generateUrlIfNotNull($reservation->getReservedFor(), 'api_app_users_detail'),
+        );
+    }
+
+    #[Rest\Delete('/reservation/{id}', name: 'api_reservations_delete', requirements: ['id' => '\d+'])]
+    #[Rest\View(statusCode: 204)]
+    public function delete(int $id): void
+    {
+        $reservation = $this->findOrFail($id);
+        $this->reservationManager->deleteFromDatabase($reservation);
+    }
+
+    /**
+     * @throws Exception
+     */
+    #[Rest\Patch('/reservation/{id}/approve', name: 'api_reservations_approve', requirements: ['id' => '\d+'])]
+    #[Rest\View(statusCode: 200)]
+    public function approve(int $id): ReservationOutput
+    {
+        $reservation = $this->findOrFail($id);
+
+        $reservation->setStatus('approved');
+        $reservation = $this->reservationManager->saveToDatabase($reservation);
+
+        return ReservationOutput::fromEntity(
+            $reservation,
+            $this->generateUrlIfNotNull($reservation->getRoom(), 'api_rooms_detail'),
+            $this->generateUrlIfNotNull($reservation->getApprovedBy(), 'api_app_users_detail'),
+            $this->generateUrlIfNotNull($reservation->getReservedFor(), 'api_app_users_detail'),
+        );
+    }
+
+    /**
+     * @throws Exception
+     */
+    #[Rest\Patch('/reservation/{id}/reject', name: 'api_reservations_reject', requirements: ['id' => '\d+'])]
+    #[Rest\View(statusCode: 200)]
+    public function reject(int $id): ReservationOutput
+    {
+        $reservation = $this->findOrFail($id);
+
+        $reservation->setStatus('rejected');
+        $reservation = $this->reservationManager->saveToDatabase($reservation);
+
+        return ReservationOutput::fromEntity(
+            $reservation,
+            $this->generateUrlIfNotNull($reservation->getRoom(), 'api_rooms_detail'),
+            $this->generateUrlIfNotNull($reservation->getApprovedBy(), 'api_app_users_detail'),
+            $this->generateUrlIfNotNull($reservation->getReservedFor(), 'api_app_users_detail'),
         );
     }
 
@@ -100,5 +147,12 @@ class ReservationController extends AbstractFOSRestController
         }
 
         return $reservation;
+    }
+
+    private function generateUrlIfNotNull(?object $entity, string $routeName): ?string {
+        if ($entity !== null && method_exists($entity, 'getId')) {
+            return $this->generateUrl($routeName, ['id' => $entity->getId()]);
+        }
+        return null;
     }
 }

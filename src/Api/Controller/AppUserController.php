@@ -13,6 +13,8 @@ use App\Service\AppUserManager;
 use App\Service\GroupManager;
 use App\Service\ReservationManager;
 use App\Service\RoomManager;
+use App\Voter\UserVoter;
+use Exception;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
@@ -38,22 +40,28 @@ class AppUserController extends AbstractFOSRestController {
 
     #[Rest\Get('/user', name: 'api_app_users_list')]
     #[Rest\View]
-    #[IsGranted(new Expression('is_granted("ROLE_SUPER_ADMIN") or is_granted("ROLE_ROOM_MANAGER") or is_granted("ROLE_GROUP_MANAGER")'))]
     public function list(Request $request): array {
+        $this->denyAccessUnlessGranted(UserVoter::VIEW_INDEX);
+
         $username = $request->query->get('username');
         $name = $request->query->get('name');
         $email = $request->query->get('email');
         $phone = $request->query->get('phone');
 
         $appUsers = array_map(
-            fn (AppUser $entity) => AppUserOutput::fromEntity($entity, $this->getGroupsUrls($entity, true), $this->getGroupsUrls($entity, false), $this->getRoomsUrls($entity, true), $this->getRoomsUrls($entity, false), $this->getReservationsUrls($entity, true), $this->getReservationsUrls($entity, false)),
+            fn (AppUser $entity) => AppUserOutput::fromEntity(
+                $entity,
+                $this->getGroupsUrls($entity, true),
+                $this->getGroupsUrls($entity, false),
+                $this->getRoomsUrls($entity, true),
+                $this->getRoomsUrls($entity, false),
+                $this->getReservationsUrls($entity, true),
+                $this->getReservationsUrls($entity, false)),
             $this->appUserManager->findAppUsersByFilters($username, $name, $email, $phone)
         );
 
         return ['appUsers' => $appUsers];
     }
-
-
 
     #[Rest\Get('/user/{id}', name: 'api_app_users_detail', requirements: ['id' => '\d+'])]
     #[Rest\View]
@@ -65,11 +73,20 @@ class AppUserController extends AbstractFOSRestController {
             throw $this->createNotFoundException('AppUser not found');
         }
 
-        return AppUserOutput::fromEntity($appUser, $this->getGroupsUrls($appUser, true), $this->getGroupsUrls($appUser, false), $this->getRoomsUrls($appUser, true), $this->getRoomsUrls($appUser, false), $this->getReservationsUrls($appUser, true), $this->getReservationsUrls($appUser, false));
+        $this->denyAccessUnlessGranted(UserVoter::VIEW_DETAIL, $appUser);
+
+        return AppUserOutput::fromEntity(
+            $appUser,
+            $this->getGroupsUrls($appUser, true),
+            $this->getGroupsUrls($appUser, false),
+            $this->getRoomsUrls($appUser, true),
+            $this->getRoomsUrls($appUser, false),
+            $this->getReservationsUrls($appUser, true),
+            $this->getReservationsUrls($appUser, false));
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     #[Rest\Post('/user', name: 'api_app_users_create', defaults: ['id' => null])]
     #[Rest\Put('/user/{id}', name: 'api_app_users_update', requirements: ['id' => '\d+'])]
@@ -78,6 +95,8 @@ class AppUserController extends AbstractFOSRestController {
     public function update(?int $id, AppUserInput $appUserInput, ConstraintViolationListInterface $errors): AppUserOutput
     {
         $appUser = $id !== null ? $this->findOrFail($id) : new AppUser();
+        $this->denyAccessUnlessGranted(UserVoter::EDIT, $appUser);
+
         if ($errors->count() > 0) {
             throw new HttpException(400, message: \implode("\n", \array_map(
                 fn (ConstraintViolationInterface $constraintViolation) => $constraintViolation->getMessage(),
@@ -89,7 +108,14 @@ class AppUserController extends AbstractFOSRestController {
         $hashedPassword = $this->passwordHasher->hashPassword($appUser, $appUserInput->getPlainPassword());
         $appUser->setPassword($hashedPassword);
         $this->appUserManager->saveToDatabase($appUser);
-        return AppUserOutput::fromEntity($appUser, $this->getGroupsUrls($appUser, true), $this->getGroupsUrls($appUser, false), $this->getRoomsUrls($appUser, true), $this->getRoomsUrls($appUser, false), $this->getReservationsUrls($appUser, true), $this->getReservationsUrls($appUser, false));
+        return AppUserOutput::fromEntity(
+            $appUser,
+            $this->getGroupsUrls($appUser, true),
+            $this->getGroupsUrls($appUser, false),
+            $this->getRoomsUrls($appUser, true),
+            $this->getRoomsUrls($appUser, false),
+            $this->getReservationsUrls($appUser, true),
+            $this->getReservationsUrls($appUser, false));
     }
 
     #[Rest\Delete('/user/{id}', name: 'api_app_users_delete', requirements: ['id' => '\d+'])]
@@ -97,9 +123,13 @@ class AppUserController extends AbstractFOSRestController {
     public function destroy(int $id): void
     {
         $appUser = $this->findOrFail($id);
+        $this->denyAccessUnlessGranted(UserVoter::DELETE, $appUser);
         $this->appUserManager->removeFromDatabase($appUser);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Rest\Post('/user/register')]
     #[ParamConverter('appUserInput', converter: 'fos_rest.request_body')]
     #[Rest\View(statusCode: 201)]
@@ -118,7 +148,14 @@ class AppUserController extends AbstractFOSRestController {
         $hashedPassword = $this->passwordHasher->hashPassword($appUser, $appUserInput->getPlainPassword());
         $appUser->setPassword($hashedPassword);
         $this->appUserManager->saveToDatabase($appUser);
-        return AppUserOutput::fromEntity($appUser, $this->getGroupsUrls($appUser, true), $this->getGroupsUrls($appUser, false), $this->getRoomsUrls($appUser, true), $this->getRoomsUrls($appUser, false), $this->getReservationsUrls($appUser, true), $this->getReservationsUrls($appUser, false));
+        return AppUserOutput::fromEntity(
+            $appUser,
+            $this->getGroupsUrls($appUser, true),
+            $this->getGroupsUrls($appUser, false),
+            $this->getRoomsUrls($appUser, true),
+            $this->getRoomsUrls($appUser, false),
+            $this->getReservationsUrls($appUser, true),
+            $this->getReservationsUrls($appUser, false));
     }
 
     private function findOrFail(int $id): AppUser

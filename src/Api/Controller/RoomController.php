@@ -30,6 +30,7 @@ class RoomController extends AbstractFOSRestController
 
     #[Rest\Get('/room', name: 'api_rooms_list')]
     #[Rest\View(statusCode: 200)]
+
     public function list(Request $request): array
     {
         $name = $request->query->get('name');
