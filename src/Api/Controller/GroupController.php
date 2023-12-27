@@ -2,8 +2,11 @@
 
 namespace App\Api\Controller;
 
+use App\Api\Model\AppUserInput;
 use App\Api\Model\GroupInput;
 use App\Api\Model\GroupOutput;
+use App\Api\Model\RoomInput;
+use App\Entity\AppUser;
 use App\Entity\Group;
 use App\Repository\AppUserRepository;
 use App\Repository\GroupRepository;
@@ -12,8 +15,6 @@ use App\Service\GroupManager;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
-use Symfony\Component\ExpressionLanguage\Expression;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\ConstraintViolationInterface;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -33,7 +34,7 @@ class GroupController extends AbstractFOSRestController {
     public function list(Request $request): array {
         $name = $request->query->get('name');
         $groups = array_map(
-            fn (Group $entity) => GroupOutput::fromEntity($entity),
+            fn (Group $entity) => GroupOutput::fromEntity($entity, $this->getUsersUrls($entity, true), $this->getUsersUrls($entity, false), $this->getRoomsUrls($entity)),
             $this->groupManager->findGroupsByName($name)
         );
 
@@ -45,14 +46,13 @@ class GroupController extends AbstractFOSRestController {
     public function get(int $id): GroupOutput
     {
         $group = $this->findOrFail($id);
-        return GroupOutput::fromEntity($group);
+        return GroupOutput::fromEntity($group, $this->getUsersUrls($group, true), $this->getUsersUrls($group, false), $this->getRoomsUrls($group));
     }
 
     #[Rest\Post('/group', name: 'api_groups_create')]
     #[Rest\Put('/group/{id}', name: 'api_groups_update', requirements: ['id' => '\d+'])]
     #[ParamConverter('groupInput', converter: 'fos_rest.request_body')]
     #[Rest\View]
-    #[IsGranted(new Expression('is_granted("ROLE_SUPER_ADMIN") or is_granted("ROLE_GROUP_MANAGER")'))]
     public function update(?int $id, GroupInput $groupInput, ConstraintViolationListInterface $errors): GroupOutput
     {
         $group = $id !== null ? $this->findOrFail($id) : new Group();
@@ -65,16 +65,132 @@ class GroupController extends AbstractFOSRestController {
 
         $group = $groupInput->toEntity($group, $this->appUserRepository, $this->roomRepository);
         $this->groupManager->saveToDatabase($group);
-        return GroupOutput::fromEntity($group);
+        return GroupOutput::fromEntity($group, $this->getUsersUrls($group, true), $this->getUsersUrls($group, false), $this->getRoomsUrls($group));
     }
 
     #[Rest\Delete('/group/{id}', name: 'api_groups_delete', requirements: ['id' => '\d+'])]
     #[Rest\View(statusCode: 204)]
-    #[IsGranted(new Expression('is_granted("ROLE_SUPER_ADMIN") or is_granted("ROLE_GROUP_MANAGER")'))]
     public function delete(int $id): void
     {
         $group = $this->findOrFail($id);
         $this->groupManager->removeFromDatabase($group);
+    }
+
+    #[Rest\Patch('/group/{id}/user', name: 'api_groups_add_member', requirements: ['id' => '\d+', 'userId' => '\d+'])]
+    #[ParamConverter('appUserInput', converter: 'fos_rest.request_body')]
+    #[Rest\View]
+    public function addMember(int $id, AppUserInput $appUserInput): GroupOutput
+    {
+        $group = $this->findOrFail($id);
+        $user = $this->findOrFailUser($appUserInput->id);
+
+        $group->addMember($user);
+        $this->groupManager->saveToDatabase($group);
+        return GroupOutput::fromEntity($group, $this->getUsersUrls($group, true), $this->getUsersUrls($group, false), $this->getRoomsUrls($group));
+    }
+
+    #[Rest\Delete('/group/{id}/user/{userId}', name: 'api_groups_remove_member', requirements: ['id' => '\d+', 'userId' => '\d+'])]
+    #[Rest\View]
+    public function removeMember(int $id, int $userId): GroupOutput
+    {
+        $group = $this->findOrFail($id);
+        $user = $this->findOrFailUser($userId);
+
+        $group->removeMember($user);
+        $this->groupManager->saveToDatabase($group);
+        return GroupOutput::fromEntity($group, $this->getUsersUrls($group, true), $this->getUsersUrls($group, false), $this->getRoomsUrls($group));
+    }
+
+    #[Rest\Patch('/group/{id}/admin', name: 'api_groups_add_admin', requirements: ['id' => '\d+', 'userId' => '\d+'])]
+    #[ParamConverter('appUserInput', converter: 'fos_rest.request_body')]
+    #[Rest\View]
+    public function addAdmin(int $id, AppUserInput $appUserInput): GroupOutput
+    {
+        $group = $this->findOrFail($id);
+        $user = $this->findOrFailUser($appUserInput->id);
+
+        $group->addAdmin($user);
+        $this->groupManager->saveToDatabase($group);
+        return GroupOutput::fromEntity($group, $this->getUsersUrls($group, true), $this->getUsersUrls($group, false), $this->getRoomsUrls($group));
+    }
+
+    #[Rest\Delete('/group/{id}/admin/{userId}', name: 'api_groups_remove_admin', requirements: ['id' => '\d+', 'userId' => '\d+'])]
+    #[Rest\View]
+    public function removeAdmin(int $id, int $userId): GroupOutput
+    {
+        $group = $this->findOrFail($id);
+        $user = $this->findOrFailUser($userId);
+
+        $group->removeAdmin($user);
+        $this->groupManager->saveToDatabase($group);
+        return GroupOutput::fromEntity($group, $this->getUsersUrls($group, true), $this->getUsersUrls($group, false), $this->getRoomsUrls($group));
+    }
+
+    #[Rest\Patch('/group/{id}/room', name: 'api_groups_add_room', requirements: ['id' => '\d+', 'roomId' => '\d+'])]
+    #[ParamConverter('roomInput', converter: 'fos_rest.request_body')]
+    #[Rest\View]
+    public function addRoom(int $id, RoomInput $roomInput): GroupOutput
+    {
+        $group = $this->findOrFail($id);
+
+        $roomId = $roomInput->id;
+        $room = $this->roomRepository->find($roomId);
+
+        if (!$room) {
+            throw $this->createNotFoundException('Room not found');
+        }
+        $group->addRoom($room);
+        $this->groupManager->saveToDatabase($group);
+        return GroupOutput::fromEntity($group, $this->getUsersUrls($group, true), $this->getUsersUrls($group, false), $this->getRoomsUrls($group));
+    }
+
+    #[Rest\Delete('/group/{id}/room/{roomId}', name: 'api_groups_remove_room', requirements: ['id' => '\d+', 'roomId' => '\d+'])]
+    #[Rest\View]
+    public function removeRoom(int $id, int $roomId): GroupOutput
+    {
+        $group = $this->findOrFail($id);
+        $room = $this->roomRepository->find($roomId);
+        if (!$room) {
+            throw $this->createNotFoundException('Room not found');
+        }
+        $group->removeRoom($room);
+        $this->groupManager->saveToDatabase($group);
+        return GroupOutput::fromEntity($group, $this->getUsersUrls($group, true), $this->getUsersUrls($group, false), $this->getRoomsUrls($group));
+    }
+
+    public function getUsersUrls(Group $group, bool $isMember): array
+    {
+        if ($isMember) {
+            return array_map(
+                fn ($member) => $this->generateUrl('api_app_users_detail', ['id' => $member->getId()]),
+                $group->getMembers()->toArray()
+            );
+        } else {
+            return array_map(
+                fn ($admin) => $this->generateUrl('api_app_users_detail', ['id' => $admin->getId()]),
+                $group->getAdmins()->toArray()
+            );
+
+        }
+    }
+
+    public function getRoomsUrls(Group $group): array
+    {
+        return array_map(
+            fn ($room) => $this->generateUrl('api_rooms_detail', ['id' => $room->getId()]),
+            $group->getRooms()->toArray()
+        );
+    }
+
+    public function findOrFailUser(int $id): AppUser
+    {
+        $user = $this->appUserRepository->find($id);
+
+        if (!$user) {
+            throw $this->createNotFoundException('User not found');
+        }
+
+        return $user;
     }
 
     public function findOrFail(int $id): Group
@@ -87,95 +203,4 @@ class GroupController extends AbstractFOSRestController {
 
         return $group;
     }
-
-    #[Rest\Post('/group/{id}/user/{userId}', name: 'api_groups_add_member', requirements: ['id' => '\d+', 'userId' => '\d+'])]
-    #[Rest\View]
-    #[IsGranted(new Expression('is_granted("ROLE_SUPER_ADMIN") or is_granted("ROLE_GROUP_MANAGER")'))]
-    public function addMember(int $id, int $userId): GroupOutput
-    {
-        $group = $this->findOrFail($id);
-        $user = $this->appUserRepository->find($userId);
-        if (!$user) {
-            throw $this->createNotFoundException('User not found');
-        }
-        $group->addMember($user);
-        $this->groupManager->saveToDatabase($group);
-        return GroupOutput::fromEntity($group);
-    }
-
-    #[Rest\Delete('/group/{id}/user/{userId}', name: 'api_groups_remove_member', requirements: ['id' => '\d+', 'userId' => '\d+'])]
-    #[Rest\View]
-    #[IsGranted(new Expression('is_granted("ROLE_SUPER_ADMIN") or is_granted("ROLE_GROUP_MANAGER")'))]
-    public function removeMember(int $id, int $userId): GroupOutput
-    {
-        $group = $this->findOrFail($id);
-        $user = $this->appUserRepository->find($userId);
-        if (!$user) {
-            throw $this->createNotFoundException('User not found');
-        }
-        $group->removeMember($user);
-        $this->groupManager->saveToDatabase($group);
-        return GroupOutput::fromEntity($group);
-    }
-
-    #[Rest\Post('/group/{id}/admin/{userId}', name: 'api_groups_add_admin', requirements: ['id' => '\d+', 'userId' => '\d+'])]
-    #[Rest\View]
-    #[IsGranted(new Expression('is_granted("ROLE_SUPER_ADMIN") or is_granted("ROLE_GROUP_MANAGER")'))]
-    public function addAdmin(int $id, int $userId): GroupOutput
-    {
-        $group = $this->findOrFail($id);
-        $user = $this->appUserRepository->find($userId);
-        if (!$user) {
-            throw $this->createNotFoundException('User not found');
-        }
-        $group->addAdmin($user);
-        $this->groupManager->saveToDatabase($group);
-        return GroupOutput::fromEntity($group);
-    }
-
-    #[Rest\Delete('/group/{id}/admin/{userId}', name: 'api_groups_remove_admin', requirements: ['id' => '\d+', 'userId' => '\d+'])]
-    #[Rest\View]
-    #[IsGranted(new Expression('is_granted("ROLE_SUPER_ADMIN") or is_granted("ROLE_GROUP_MANAGER")'))]
-    public function removeAdmin(int $id, int $userId): GroupOutput
-    {
-        $group = $this->findOrFail($id);
-        $user = $this->appUserRepository->find($userId);
-        if (!$user) {
-            throw $this->createNotFoundException('User not found');
-        }
-        $group->removeAdmin($user);
-        $this->groupManager->saveToDatabase($group);
-        return GroupOutput::fromEntity($group);
-    }
-
-    #[Rest\Post('/group/{id}/room/{roomId}', name: 'api_groups_add_room', requirements: ['id' => '\d+', 'roomId' => '\d+'])]
-    #[Rest\View]
-    #[IsGranted(new Expression('is_granted("ROLE_SUPER_ADMIN") or is_granted("ROLE_GROUP_MANAGER")'))]
-    public function addRoom(int $id, int $roomId): GroupOutput
-    {
-        $group = $this->findOrFail($id);
-        $room = $this->roomRepository->find($roomId);
-        if (!$room) {
-            throw $this->createNotFoundException('Room not found');
-        }
-        $group->addRoom($room);
-        $this->groupManager->saveToDatabase($group);
-        return GroupOutput::fromEntity($group);
-    }
-
-    #[Rest\Delete('/group/{id}/room/{roomId}', name: 'api_groups_remove_room', requirements: ['id' => '\d+', 'roomId' => '\d+'])]
-    #[Rest\View]
-    #[IsGranted(new Expression('is_granted("ROLE_SUPER_ADMIN") or is_granted("ROLE_GROUP_MANAGER")'))]
-    public function removeRoom(int $id, int $roomId): GroupOutput
-    {
-        $group = $this->findOrFail($id);
-        $room = $this->roomRepository->find($roomId);
-        if (!$room) {
-            throw $this->createNotFoundException('Room not found');
-        }
-        $group->removeRoom($room);
-        $this->groupManager->saveToDatabase($group);
-        return GroupOutput::fromEntity($group);
-    }
-
 }

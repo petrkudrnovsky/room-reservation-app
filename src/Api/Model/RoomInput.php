@@ -13,6 +13,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class RoomInput
 {
+    public ?int $id;
     #[Assert\NotBlank]
     #[Assert\Length(min: 1, max: 250, minMessage: 'Room name must have at least 1 character', maxMessage: 'Room name must have maximum of 250 characters')]
     public ?string $name = null;

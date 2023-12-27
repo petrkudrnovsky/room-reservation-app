@@ -6,6 +6,7 @@ use App\Entity\AppUser;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class AppUserInput {
+    public ?int $id;
     #[Assert\NotBlank]
     public ?string $username;
 

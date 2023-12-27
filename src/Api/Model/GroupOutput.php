@@ -26,25 +26,14 @@ class GroupOutput {
         $this->rooms = $rooms;
     }
 
-    public static function fromEntity(Group $entity): self
+    public static function fromEntity(Group $group, array $membersUrl, array $adminsUrls, array $roomsUrls): self
     {
-        $members = [];
-        foreach ($entity->getMembers() as $member) {
-            $members[] = AppUserOutput::fromEntity($member);
-        }
-        $admins = [];
-        foreach ($entity->getAdmins() as $admin) {
-            $admins[] = AppUserOutput::fromEntity($admin);
-        }
-
-        $rooms = $entity->getRooms()->map(fn (Room $room) => $room->getName())->toArray();
-
         return new self(
-            $entity->getId(),
-            $entity->getName(),
-            $members,
-            $admins,
-            $rooms
+            $group->getId(),
+            $group->getName(),
+            $membersUrl,
+            $adminsUrls,
+            $roomsUrls
         );
     }
 }
