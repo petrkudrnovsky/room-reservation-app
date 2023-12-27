@@ -8,7 +8,9 @@ use App\Repository\AppUserRepository;
 use App\Repository\BuildingRepository;
 use App\Repository\GroupRepository;
 use App\Service\AppUserManager;
+use App\Service\GroupManager;
 use Doctrine\Common\Collections\Collection;
+use Exception;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class RoomInput
@@ -25,13 +27,12 @@ class RoomInput
     public ?array $admins = null;
     public ?int $buildingId = null;
 
-    public function __construct(
-    ) {
-    }
-
+    /**
+     * @throws Exception
+     */
     public function toEntity(
-        ?AppUserRepository $userRepository = null,
-        ?GroupRepository $groupRepository = null,
+        ?AppUserManager $appUserManager = null,
+        ?GroupManager $groupManager = null,
         ?BuildingRepository $buildingRepository = null,
         Room $room = new Room()): Room
     {
@@ -39,36 +40,15 @@ class RoomInput
         $room->setCode($this->code);
         $room->setIsPrivate($this->isPrivate);
         $room->setBuilding($buildingRepository->find($this->buildingId));
+
         $room->clearMembers();
         $room->clearAdmins();
         $room->clearOwningGroups();
 
-        foreach ($this->members as $member) {
-            $user = $userRepository->find($member);
-            if ($user) {
-                $room->addMember($user);
-            } else {
-                throw new \Exception('User not found');
-            }
-        }
-        foreach ($this->admins as $admin) {
-            $user = $userRepository->find($admin);
-            if ($user) {
-                $room->addAdmin($user);
-            } else {
-                throw new \Exception('User not found');
-            }
-        }
+        $appUserManager->addMembers($this->members, null, $room);
+        $appUserManager->addAdmins($this->admins, null, $room);
+        $groupManager->addOwningGroups($this->owningGroups, $room);
 
-        foreach ($this->owningGroups as $groupId) {
-            $group = $groupRepository->find($groupId);
-            if ($group) {
-                $room->addOwningGroup($group);
-            } else {
-                throw new \Exception('Group not found');
-            }
-        }
         return $room;
     }
-
 }

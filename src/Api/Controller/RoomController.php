@@ -5,10 +5,12 @@ namespace App\Api\Controller;
 use App\Api\Model\RoomInput;
 use App\Api\Model\RoomOutput;
 use App\Entity\Room;
-use App\Repository\AppUserRepository;
 use App\Repository\BuildingRepository;
 use App\Repository\GroupRepository;
+use App\Service\AppUserManager;
+use App\Service\GroupManager;
 use App\Service\RoomManager;
+use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Component\HttpFoundation\Request;
 use FOS\RestBundle\Controller\Annotations as Rest;
@@ -21,13 +23,13 @@ class RoomController extends AbstractFOSRestController
 {
     public function __construct(
         private readonly RoomManager $roomManager,
-        private readonly AppUserRepository $userRepository,
-        private readonly GroupRepository $groupRepository,
+        private readonly AppUserManager $userManager,
+        private readonly GroupManager $groupManager,
         private readonly BuildingRepository $buildingRepository,
     ) {}
 
     #[Rest\Get('/room', name: 'api_rooms_list')]
-    #[Rest\View]
+    #[Rest\View(statusCode: 200)]
     public function list(Request $request): array
     {
         $name = $request->query->get('name');
@@ -35,7 +37,7 @@ class RoomController extends AbstractFOSRestController
         $buildingId = $request->query->get('buildingId');
 
         $rooms = array_map(
-            fn (Room $entity) => RoomOutput::fromEntity($entity),
+            fn (Room $entity) => RoomOutput::fromEntity($entity, $this->getUsersUrls($entity, true), $this->getUsersUrls($entity, false), $this->getGroupsUrls($entity)),
             $this->roomManager->findRoomsByFilters($name, $code, $buildingId)
         );
 
@@ -43,7 +45,7 @@ class RoomController extends AbstractFOSRestController
     }
 
     #[Rest\Get('/room/{id}', name: 'api_rooms_detail', requirements: ['id' => '\d+'])]
-    #[Rest\View]
+    #[Rest\View(statusCode: 200)]
     public function detail(int $id): RoomOutput
     {
         $room = $this->roomManager->getRoomById($id);
@@ -52,13 +54,16 @@ class RoomController extends AbstractFOSRestController
             throw $this->createNotFoundException('Room not found');
         }
 
-        return RoomOutput::fromEntity($room);
+        return RoomOutput::fromEntity($room, $this->getUsersUrls($room, true), $this->getUsersUrls($room, false), $this->getGroupsUrls($room));
     }
 
+    /**
+     * @throws Exception
+     */
     #[Rest\Post('/room', name: 'api_rooms_create')]
     #[Rest\Put('/room/{id}', name: 'api_rooms_edit', requirements: ['id' => '\d+'])]
     #[ParamConverter('roomInput', converter: 'fos_rest.request_body')]
-    #[Rest\View]
+    #[Rest\View(statusCode: 201)]
     public function update(?int $id, RoomInput $roomInput, ConstraintViolationListInterface $errors): RoomOutput
     {
         $room = $id !== null ? $this->findOrFail($id) : new Room();
@@ -70,13 +75,13 @@ class RoomController extends AbstractFOSRestController
             )));
         }
 
-        $room = $roomInput->toEntity($this->userRepository, $this->groupRepository, $this->buildingRepository, $room);
+        $room = $roomInput->toEntity($this->userManager, $this->groupManager, $this->buildingRepository, $room);
         $room = $this->roomManager->saveToDatabase($room);
-        return RoomOutput::fromEntity($room);
+        return RoomOutput::fromEntity($room, $this->getUsersUrls($room, true), $this->getUsersUrls($room, false), $this->getGroupsUrls($room));
     }
 
     #[Rest\Delete('/room/{id}', name: 'api_rooms_delete', requirements: ['id' => '\d+'])]
-    #[Rest\View]
+    #[Rest\View(statusCode: 204)]
     public function delete(int $id): void
     {
         $room = $this->findOrFail($id);
@@ -90,5 +95,29 @@ class RoomController extends AbstractFOSRestController
             throw $this->createNotFoundException('Room not found');
         }
         return $room;
+    }
+
+    public function getUsersUrls(Room $room, bool $isMember): array
+    {
+        if ($isMember) {
+            return array_map(
+                fn ($member) => $this->generateUrl('api_app_users_detail', ['id' => $member->getId()]),
+                $room->getMembers()->toArray()
+            );
+        } else {
+            return array_map(
+                fn ($admin) => $this->generateUrl('api_app_users_detail', ['id' => $admin->getId()]),
+                $room->getAdmins()->toArray()
+            );
+
+        }
+    }
+
+    public function getGroupsUrls(Room $room): array
+    {
+        return array_map(
+            fn ($group) => $this->generateUrl('api_groups_detail', ['id' => $group->getId()]),
+            $room->getOwningGroups()->toArray()
+        );
     }
 }

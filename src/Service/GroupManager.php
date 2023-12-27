@@ -3,8 +3,10 @@
 namespace App\Service;
 
 use App\Entity\Group;
+use App\Entity\Room;
 use App\Repository\GroupRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 
 class GroupManager
 {
@@ -36,5 +38,23 @@ class GroupManager
         }
 
         return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function addOwningGroups(array $owningGroups, Room $room): void {
+        foreach ($owningGroups as $groupId) {
+            if (is_numeric($groupId)){
+                $group = $this->groupRepository->find($groupId);
+                if ($group) {
+                    $room->addOwningGroup($group);
+                } else {
+                    throw new Exception('Group not found');
+                }
+            } else {
+                throw new Exception('Group ID must be an integer value');
+            }
+        }
     }
 }

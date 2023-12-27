@@ -86,52 +86,41 @@ class AppUserManager
         return $qb->getQuery()->getResult();
     }
 
-    public function addMembersToGroup(Group $group, array $members): void
+    /**
+     * @throws \Exception
+     */
+    public function addMembers(array $members, ?Group $group = null, ?Room $room = null): void
     {
-        foreach ($members as $member) {
-            $user = $this->userRepository->find($member);
-            if ($user) {
-                $group->addMember($user);
+        foreach ($members as $memberId) {
+            if (is_numeric($memberId)) {
+                $member = $this->userRepository->find($memberId);
+                if ($member) {
+                    $group !== null ? $group->addMember($member) : $room->addMember($member);
+                } else {
+                    throw new \Exception('User not found');
+                }
             } else {
-                throw new \Exception('User not found');
+                throw new \Exception('Member must be an integer value');
             }
         }
     }
 
-    public function addAdminsToGroup(Group $group, array $admins): void
+    /**
+     * @throws \Exception
+     */
+    public function addAdmins(array $admins, ?Group $group = null, ?Room $room = null): void
     {
-        foreach ($admins as $admin) {
-            $user = $this->userRepository->find($admin);
-            if ($user) {
-                $group->addAdmin($user);
+        foreach ($admins as $adminId) {
+            if (is_numeric($adminId)) {
+                $admin = $this->userRepository->find($adminId);
+                if ($admin) {
+                    $group !== null ? $group->addAdmin($admin) : $room->addAdmin($admin);
+                } else {
+                    throw new \Exception('User not found');
+                }
             } else {
-                throw new \Exception('User not found');
+                throw new \Exception('Admin must be an integer value');
             }
         }
     }
-
-    public function addMembersToRoom(Room $room, array $members): void
-    {
-        foreach ($members as $member) {
-            $user = $this->userRepository->find($member);
-            if ($user) {
-                $room->addMember($user);
-            } else {
-                throw new \Exception('User not found');
-            }
-        }
-    }
-
-    public function addAdminsToRoom(Room $room, array $admins): void
-    {
-        foreach ($admins as $admin) {
-            $user = $this->userRepository->find($admin);
-            if ($user) {
-                $room->addAdmin($user);
-            } else {
-                throw new \Exception('User not found');
-            }
-        }
-    }
-
 }

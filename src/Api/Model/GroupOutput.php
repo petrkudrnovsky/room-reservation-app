@@ -26,12 +26,12 @@ class GroupOutput {
         $this->rooms = $rooms;
     }
 
-    public static function fromEntity(Group $group, array $membersUrl, array $adminsUrls, array $roomsUrls): self
+    public static function fromEntity(Group $group, array $membersUrls, array $adminsUrls, array $roomsUrls): self
     {
         return new self(
             $group->getId(),
             $group->getName(),
-            $membersUrl,
+            $membersUrls,
             $adminsUrls,
             $roomsUrls
         );

@@ -2,10 +2,12 @@
 
 namespace App\Service;
 
+use App\Entity\Group;
 use App\Entity\Reservation;
 use App\Entity\Room;
 use App\Repository\RoomRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 
 class RoomManager
 {
@@ -74,5 +76,24 @@ class RoomManager
         }
 
         return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function addRooms(array $rooms, Group $group): void
+    {
+        foreach ($rooms as $roomId) {
+            if (is_numeric($roomId)) {
+                $room = $this->roomRepository->find($roomId);
+                if ($room) {
+                    $group->addRoom($room);
+                } else {
+                    throw new Exception('Room not found');
+                }
+            } else {
+                throw new Exception('Room ID must be an integer value');
+            }
+        }
     }
 }

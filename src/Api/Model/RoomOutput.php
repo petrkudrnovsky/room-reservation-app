@@ -35,29 +35,16 @@ class RoomOutput
         $this->building = $building;
     }
 
-    public static function fromEntity(Room $entity): self
+    public static function fromEntity(Room $entity, array $membersUrls, array $adminsUrls, array $owningGroupsUrls ): self
     {
-        $owningGroups = [];
-        foreach ($entity->getOwningGroups() as $owningGroup) {
-            $owningGroups[] = $owningGroup->getName();
-        }
-        $members = [];
-        foreach ($entity->getMembers() as $member) {
-            $members[] = AppUserOutput::fromEntity($member);
-        }
-        $admins = [];
-        foreach ($entity->getAdmins() as $admin) {
-            $admins[] = AppUserOutput::fromEntity($admin);
-        }
-
         return new self(
             $entity->getId(),
             $entity->getName(),
             $entity->getCode(),
             $entity->isIsPrivate(),
-            $owningGroups,
-            $members,
-            $admins,
+            $owningGroupsUrls,
+            $membersUrls,
+            $adminsUrls,
             $entity->getBuilding()->getName()
         );
     }
