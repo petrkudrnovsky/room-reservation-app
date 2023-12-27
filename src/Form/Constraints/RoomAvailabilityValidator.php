@@ -14,7 +14,7 @@ class RoomAvailabilityValidator extends ConstraintValidator
         private readonly ReservationRepository $reservationRepository,
     ) {}
 
-    public function validate(mixed $value, Constraint $constraint)
+    public function validate(mixed $value, Constraint $constraint): void
     {
         /* @var $value ReservationTypeModel */
         /* @var $constraint RoomAvailability */

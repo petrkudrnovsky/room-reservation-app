@@ -62,6 +62,7 @@ API authentication is done via JWT tokens. To obtain a token, send a POST reques
 }
 ```
 You will receive a token in the response body. To authenticate, add the Authentication header with Bearer token to your request.
+Authorization - Bearer [token]
 
 If you don't have `private.pem` and `public.pem` files in the `config/jwt` directory, you need to generate them. To do so, run the following commands:
 ```bash

@@ -14,6 +14,7 @@ class GroupTypeModel
     public ?string $name = null;
     public ?Collection $members = null;
     public ?Collection $admins = null;
+    public ?Collection $rooms = null;
 
     public function toEntity(?Group $group = null): Group
     {
@@ -34,6 +35,9 @@ class GroupTypeModel
         }
         foreach ($this->admins as $admin) {
             $group->addAdmin($admin);
+        }
+        foreach ($this->rooms as $room) {
+            $group->addRoom($room);
         }
 
         return $group;
