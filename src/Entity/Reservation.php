@@ -40,19 +40,12 @@ class Reservation
     #[ORM\ManyToOne(inversedBy: 'reservations')]
     private ?Room $room = null;
 
-    #[ORM\ManyToOne(inversedBy: 'createdReservations')]
-    private ?AppUser $createdBy = null;
-
     #[ORM\ManyToOne(inversedBy: 'approvedReservations')]
     private ?AppUser $approvedBy = null;
 
-    #[ORM\ManyToMany(targetEntity: AppUser::class, inversedBy: 'memberReservations')]
-    private Collection $members;
-
-    public function __construct()
-    {
-        $this->members = new ArrayCollection();
-    }
+    #[ORM\ManyToOne(inversedBy: 'reservations')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?AppUser $reservedFor = null;
 
     public function getId(): ?int
     {
@@ -114,18 +107,6 @@ class Reservation
         return $this;
     }
 
-    public function getCreatedBy(): ?AppUser
-    {
-        return $this->createdBy;
-    }
-
-    public function setCreatedBy(?AppUser $createdBy): static
-    {
-        $this->createdBy = $createdBy;
-
-        return $this;
-    }
-
     public function getApprovedBy(): ?AppUser
     {
         return $this->approvedBy;
@@ -134,30 +115,6 @@ class Reservation
     public function setApprovedBy(?AppUser $approvedBy): static
     {
         $this->approvedBy = $approvedBy;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, AppUser>
-     */
-    public function getMembers(): Collection
-    {
-        return $this->members;
-    }
-
-    public function addMember(AppUser $member): static
-    {
-        if (!$this->members->contains($member)) {
-            $this->members->add($member);
-        }
-
-        return $this;
-    }
-
-    public function removeMember(AppUser $member): static
-    {
-        $this->members->removeElement($member);
 
         return $this;
     }
@@ -182,6 +139,18 @@ class Reservation
     public function setDescription(?string $description): static
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    public function getReservedFor(): ?AppUser
+    {
+        return $this->reservedFor;
+    }
+
+    public function setReservedFor(?AppUser $reservedFor): static
+    {
+        $this->reservedFor = $reservedFor;
 
         return $this;
     }

@@ -28,6 +28,7 @@ class ReservationController extends AbstractController
     #[Route('/new', name: 'app_room_reservation_new')]
     public function new(Request $request, int $roomId, ReservationManager $reservationManager, RoomManager $roomManager): Response
     {
+        // TO-DO: determine if user is creating a reservation for themselves or for another user (if they have permission)
         $reservationModel = new ReservationTypeModel();
         $reservationModel->room = $roomManager->getRoomById($roomId);
         $form = $this->createForm(ReservationType::class, $reservationModel);
@@ -35,7 +36,8 @@ class ReservationController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $reservation = $reservationModel->toEntity();
-            $reservation = $reservationManager->prepareNewReservation($reservation, $this->getUser());
+            // TO-DO: determine if user is creating a reservation for themselves or for another user
+            $reservation = $reservationManager->prepareNewReservation($reservation);
             $reservationManager->saveToDatabase($reservation);
 
             $this->addFlash('success', 'Reservation created.');
@@ -101,6 +103,7 @@ class ReservationController extends AbstractController
                 return $this->redirectToRoute('app_room_show', ['id' => $reservation->getRoom()->getId()]);
             }
             $reservation->setStatus(Reservation::STATUS_APPROVED);
+            $reservation->setApprovedBy($this->getUser());
             $reservationManager->saveToDatabase($reservation);
             $this->addFlash('success', 'Reservation approved.');
         }

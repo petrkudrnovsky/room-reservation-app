@@ -108,6 +108,8 @@
                 {{ include('app_user/_delete_form.html.twig') }}
             {% endif %}
         </div>
+
+        {{ include('reservation/_list.html.twig', {'reservations': app_user.reservations}) }}
     </div>
     {% include 'components/_footer.html.twig' %}
 {% endblock %}
