@@ -107,7 +107,7 @@ class GroupController extends AbstractFOSRestController {
         $this->groupManager->removeFromDatabase($group);
     }
 
-    #[Rest\Patch('/group/{id}/user', name: 'api_groups_add_member', requirements: ['id' => '\d+', 'userId' => '\d+'])]
+    #[Rest\Patch('/group/{id}/user', name: 'api_groups_add_member', requirements: ['id' => '\d+'])]
     #[ParamConverter('appUserInput', converter: 'fos_rest.request_body')]
     #[Rest\View(statusCode: 200)]
     public function addMember(int $id, AppUserInput $appUserInput): GroupOutput
@@ -144,7 +144,7 @@ class GroupController extends AbstractFOSRestController {
         return GroupOutput::fromEntity($group, $this->getUsersUrls($group, true), $this->getUsersUrls($group, false), $this->getRoomsUrls($group));
     }
 
-    #[Rest\Patch('/group/{id}/admin', name: 'api_groups_add_admin', requirements: ['id' => '\d+', 'userId' => '\d+'])]
+    #[Rest\Patch('/group/{id}/admin', name: 'api_groups_add_admin', requirements: ['id' => '\d+'])]
     #[ParamConverter('appUserInput', converter: 'fos_rest.request_body')]
     #[Rest\View(statusCode: 200)]
     public function addAdmin(int $id, AppUserInput $appUserInput): GroupOutput
@@ -181,7 +181,7 @@ class GroupController extends AbstractFOSRestController {
         return GroupOutput::fromEntity($group, $this->getUsersUrls($group, true), $this->getUsersUrls($group, false), $this->getRoomsUrls($group));
     }
 
-    #[Rest\Patch('/group/{id}/room', name: 'api_groups_add_room', requirements: ['id' => '\d+', 'roomId' => '\d+'])]
+    #[Rest\Patch('/group/{id}/room', name: 'api_groups_add_room', requirements: ['id' => '\d+'])]
     #[ParamConverter('roomInput', converter: 'fos_rest.request_body')]
     #[Rest\View(statusCode: 200)]
     public function addRoom(int $id, RoomInput $roomInput): GroupOutput

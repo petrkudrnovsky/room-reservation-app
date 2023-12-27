@@ -2,8 +2,8 @@
 
 namespace App\Service;
 
+use App\Entity\AppUser;
 use App\Entity\Group;
-use App\Entity\Reservation;
 use App\Entity\Room;
 use App\Repository\RoomRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -100,7 +100,7 @@ class RoomManager
     /**
      * @throws Exception
      */
-    public function addUserRooms(?array $memberRooms, \App\Entity\AppUser $appUser, bool $false)
+    public function addUserRooms(?array $memberRooms, AppUser $appUser, bool $false): void
     {
         foreach ($memberRooms as $roomId) {
             $room = $this->roomRepository->find($roomId);
@@ -116,7 +116,7 @@ class RoomManager
         }
     }
 
-    public function findById(?int $room)
+    public function findById(?int $room): ?Room
     {
         return $this->roomRepository->find($room);
     }
