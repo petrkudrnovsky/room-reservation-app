@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\AppUser;
 use App\Entity\Group;
 use App\Form\GroupType;
 use App\Form\Model\GroupTypeModel;
@@ -12,15 +13,27 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/group')]
 class GroupController extends AbstractController
 {
     #[Route('/', name: 'app_group_index')]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function index(GroupRepository $groupRepository): Response
     {
+        /** @var AppUser $currentUser */
+        $currentUser = $this->getUser();
+        $allGroups = null;
+
+        if($this->isGranted('ROLE_SUPER_ADMIN')) {
+            $allGroups = $groupRepository->findAll();
+        }
+
         return $this->render('group/index.html.twig', [
-            'groups' => $groupRepository->findAll(),
+            'memberGroups' => $currentUser->getMemberGroups(),
+            'adminGroups' => $currentUser->getAdminGroups(),
+            'allGroups' => $allGroups,
         ]);
     }
 
