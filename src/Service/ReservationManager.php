@@ -28,13 +28,9 @@ class ReservationManager
         $this->em->flush();
     }
 
-    public function prepareNewReservation(Reservation $reservation, UserInterface $currentUser): Reservation
+    public function prepareNewReservation(Reservation $reservation): Reservation
     {
         $reservation->setStatus(Reservation::STATUS_PENDING);
-        if($currentUser instanceof AppUser) {
-            $reservation->setCreatedBy($currentUser);
-            $reservation->addMember($currentUser);
-        }
         return $reservation;
     }
 }

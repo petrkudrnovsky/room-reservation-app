@@ -54,14 +54,11 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\ManyToMany(targetEntity: Room::class, mappedBy: 'admins')]
     private Collection $adminRooms;
 
-    #[ORM\OneToMany(mappedBy: 'createdBy', targetEntity: Reservation::class)]
-    private Collection $createdReservations;
-
     #[ORM\OneToMany(mappedBy: 'approvedBy', targetEntity: Reservation::class)]
     private Collection $approvedReservations;
 
-    #[ORM\ManyToMany(targetEntity: Reservation::class, mappedBy: 'members')]
-    private Collection $memberReservations;
+    #[ORM\OneToMany(mappedBy: 'reservedFor', targetEntity: Reservation::class)]
+    private Collection $reservations;
 
     public function __construct()
     {
@@ -69,9 +66,8 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
         $this->adminGroups = new ArrayCollection();
         $this->memberRooms = new ArrayCollection();
         $this->adminRooms = new ArrayCollection();
-        $this->createdReservations = new ArrayCollection();
         $this->approvedReservations = new ArrayCollection();
-        $this->memberReservations = new ArrayCollection();
+        $this->reservations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -321,36 +317,6 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @return Collection<int, Reservation>
      */
-    public function getCreatedReservations(): Collection
-    {
-        return $this->createdReservations;
-    }
-
-    public function addCreatedReservation(Reservation $createdReservation): static
-    {
-        if (!$this->createdReservations->contains($createdReservation)) {
-            $this->createdReservations->add($createdReservation);
-            $createdReservation->setCreatedBy($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCreatedReservation(Reservation $createdReservation): static
-    {
-        if ($this->createdReservations->removeElement($createdReservation)) {
-            // set the owning side to null (unless already changed)
-            if ($createdReservation->getCreatedBy() === $this) {
-                $createdReservation->setCreatedBy(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Reservation>
-     */
     public function getApprovedReservations(): Collection
     {
         return $this->approvedReservations;
@@ -381,25 +347,28 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @return Collection<int, Reservation>
      */
-    public function getMemberReservations(): Collection
+    public function getReservations(): Collection
     {
-        return $this->memberReservations;
+        return $this->reservations;
     }
 
-    public function addMemberReservation(Reservation $memberReservation): static
+    public function addReservation(Reservation $reservation): static
     {
-        if (!$this->memberReservations->contains($memberReservation)) {
-            $this->memberReservations->add($memberReservation);
-            $memberReservation->addMember($this);
+        if (!$this->reservations->contains($reservation)) {
+            $this->reservations->add($reservation);
+            $reservation->setReservedFor($this);
         }
 
         return $this;
     }
 
-    public function removeMemberReservation(Reservation $memberReservation): static
+    public function removeReservation(Reservation $reservation): static
     {
-        if ($this->memberReservations->removeElement($memberReservation)) {
-            $memberReservation->removeMember($this);
+        if ($this->reservations->removeElement($reservation)) {
+            // set the owning side to null (unless already changed)
+            if ($reservation->getReservedFor() === $this) {
+                $reservation->setReservedFor(null);
+            }
         }
 
         return $this;

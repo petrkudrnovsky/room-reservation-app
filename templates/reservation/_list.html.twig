@@ -7,6 +7,7 @@
         <th>Start</th>
         <th>End</th>
         <th>Status</th>
+        <th>Reserved For</th>
         <th>actions</th>
     </tr>
     </thead>
@@ -19,6 +20,7 @@
             <td>{{ reservation.startDatetime ? reservation.startDatetime|date('d. m. Y H:i:s') : '' }}</td>
             <td>{{ reservation.endDatetime ? reservation.endDatetime|date('d. m. Y H:i:s') : '' }}</td>
             <td>{{ reservation.status }}</td>
+            <td>{{ reservation.reservedFor.username }}</td>
             <td>
                 <a href="{{ path('app_room_reservation_show', {'id': reservation.id, 'roomId': reservation.room.id}) }}">show</a>
                 <a href="{{ path('app_room_reservation_edit', {'id': reservation.id, 'roomId': reservation.room.id}) }}">edit</a>
