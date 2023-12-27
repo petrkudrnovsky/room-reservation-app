@@ -115,4 +115,9 @@ class RoomManager
             }
         }
     }
+
+    public function findById(?int $room)
+    {
+        return $this->roomRepository->find($room);
+    }
 }

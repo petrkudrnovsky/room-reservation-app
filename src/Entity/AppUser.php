@@ -20,7 +20,6 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Groups(['reservation:read'])]
     private ?string $username = null;
 
     /**

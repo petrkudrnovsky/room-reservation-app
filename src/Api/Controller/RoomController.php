@@ -77,7 +77,11 @@ class RoomController extends AbstractFOSRestController
 
         $room = $roomInput->toEntity($this->userManager, $this->groupManager, $this->buildingRepository, $room);
         $room = $this->roomManager->saveToDatabase($room);
-        return RoomOutput::fromEntity($room, $this->getUsersUrls($room, true), $this->getUsersUrls($room, false), $this->getGroupsUrls($room));
+        return RoomOutput::fromEntity(
+            $room,
+            $this->getUsersUrls($room, true),
+            $this->getUsersUrls($room, false),
+            $this->getGroupsUrls($room));
     }
 
     #[Rest\Delete('/room/{id}', name: 'api_rooms_delete', requirements: ['id' => '\d+'])]

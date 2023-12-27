@@ -123,4 +123,28 @@ class AppUserManager
             }
         }
     }
+
+    public function addApprovedReservation(?string $approvedBy, \App\Entity\Reservation $reservation)
+    {
+        if ($approvedBy) {
+            $appUser = $this->userRepository->find($approvedBy);
+            if ($appUser) {
+                $reservation->setApprovedBy($appUser);
+            } else {
+                throw new \Exception('User not found');
+            }
+        }
+    }
+
+    public function addReservedReservation(?string $reservedFor, \App\Entity\Reservation $reservation)
+    {
+        if ($reservedFor) {
+            $appUser = $this->userRepository->find($reservedFor);
+            if ($appUser) {
+                $reservation->setReservedFor($appUser);
+            } else {
+                throw new \Exception('User not found');
+            }
+        }
+    }
 }
