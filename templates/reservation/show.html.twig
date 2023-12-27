@@ -38,22 +38,12 @@
                     <td><a href="{{ path('app_room_show', {'id': reservation.room.id}) }}">{{ reservation.room.codeName }} - {{ reservation.room.name }}</a></td>
                 </tr>
                 <tr>
-                    <th>CreatedBy</th>
-                    <td>{{ reservation.createdBy.username }}</td>
+                    <th>ReservedFor</th>
+                    <td>{{ reservation.reservedFor.username }}</td>
                 </tr>
                 <tr>
                     <th>ApprovedBy</th>
                     <td>{{ reservation.approvedBy ? reservation.approvedBy.username : 'Not approved' }}</td>
-                </tr>
-                <tr>
-                    <th>Members</th>
-                    <td>
-                        <ul>
-                            {% for member in reservation.members %}
-                                <li>{{ member.username }}</li>
-                            {% endfor %}
-                        </ul>
-                    </td>
                 </tr>
             </tbody>
         </table>

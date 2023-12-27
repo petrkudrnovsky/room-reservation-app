@@ -2,6 +2,7 @@
 
 namespace App\Form\Model;
 
+use App\Entity\AppUser;
 use App\Entity\Reservation;
 use App\Entity\Room;
 use App\Form\Constraints\RoomAvailability;
@@ -23,7 +24,7 @@ class ReservationTypeModel
     public ?\DateTime $endDatetime = null;
     #[Assert\NotBlank]
     public ?Room $room = null;
-    public ?Collection $members = null;
+    public ?AppUser $reservedFor = null;
 
     public function toEntity(?Reservation $reservation = null): Reservation
     {
@@ -35,13 +36,7 @@ class ReservationTypeModel
         $reservation->setStartDatetime($this->startDatetime);
         $reservation->setEndDatetime($this->endDatetime);
         $reservation->setRoom($this->room);
-
-        foreach ($reservation->getMembers() as $member) {
-            $reservation->removeMember($member);
-        }
-        foreach ($this->members as $member) {
-            $reservation->addMember($member);
-        }
+        $reservation->setReservedFor($this->reservedFor);
 
         return $reservation;
     }
@@ -54,7 +49,7 @@ class ReservationTypeModel
         $model->startDatetime = $reservation->getStartDatetime();
         $model->endDatetime = $reservation->getEndDatetime();
         $model->room = $reservation->getRoom();
-        $model->members = new ArrayCollection(iterator_to_array($reservation->getMembers()));
+        $model->reservedFor = $reservation->getReservedFor();
 
         return $model;
     }

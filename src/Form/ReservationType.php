@@ -36,13 +36,10 @@ class ReservationType extends AbstractType
                     },
                 ]);
             }
-            $builder->add('members', EntityType::class, [
-                'class' => AppUser::class,
-                'choice_label' => 'username',
-                'multiple' => true,
-                'expanded' => false,
-                'required' => false,
-            ])
+        $builder->add('reservedFor', EntityType::class, [
+            'class' => AppUser::class,
+            'choice_label' => 'username',
+        ])
         ;
     }
 
