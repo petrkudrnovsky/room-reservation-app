@@ -57,4 +57,23 @@ class GroupManager
             }
         }
     }
+
+    /**
+     * @throws Exception
+     */
+    public function addUserGroups(?array $memberGroups, \App\Entity\AppUser $appUser, bool $isAdmin): void
+    {
+        foreach ($memberGroups as $groupId) {
+            $group = $this->groupRepository->find($groupId);
+            if ($group) {
+                if ($isAdmin) {
+                    $appUser->addAdminGroup($group);
+                } else {
+                    $appUser->addMemberGroup($group);
+                }
+            } else {
+                throw new Exception('Group not found');
+            }
+        }
+    }
 }

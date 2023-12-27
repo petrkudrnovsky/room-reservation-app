@@ -14,6 +14,12 @@ class AppUserOutput {
     public ?string $secondName;
     public ?string $email;
     public ?string $phone;
+    public ?array $memberGroups = null;
+    public ?array $adminGroups = null;
+    public ?array $memberRooms = null;
+    public ?array $adminRooms = null;
+    public ?array $approvedReservations = null;
+    public ?array $reservations = null;
 
     public function __construct(
         int $id,
@@ -23,6 +29,12 @@ class AppUserOutput {
         ?string $secondName,
         ?string $email,
         ?string $phone,
+        ?array $memberGroups = null,
+        ?array $adminGroups = null,
+        ?array $memberRooms = null,
+        ?array $adminRooms = null,
+        ?array $approvedReservations = null,
+        ?array $reservations = null
     ) {
         $this->id = $id;
         $this->username = $username;
@@ -31,19 +43,39 @@ class AppUserOutput {
         $this->secondName = $secondName;
         $this->email = $email;
         $this->phone = $phone;
+        $this->memberGroups = $memberGroups;
+        $this->adminGroups = $adminGroups;
+        $this->memberRooms = $memberRooms;
+        $this->adminRooms = $adminRooms;
+        $this->approvedReservations = $approvedReservations;
+        $this->reservations = $reservations;
     }
 
 
-    public static function fromEntity(AppUser $entity): self
+    public static function fromEntity(
+        AppUser $appUser,
+        array $memberGroupsUrls,
+        array $adminGroupsUrls,
+        array $memberRoomsUrls,
+        array $adminRoomsUrls,
+        array $approvedReservationsUrls,
+        array $reservationsUrls
+    ): self
     {
         return new self(
-            $entity->getId(),
-            $entity->getUsername(),
-            $entity->getRoles(),
-            $entity->getFirstName(),
-            $entity->getSecondName(),
-            $entity->getEmail(),
-            $entity->getPhone()
+            $appUser->getId(),
+            $appUser->getUsername(),
+            $appUser->getRoles(),
+            $appUser->getFirstName(),
+            $appUser->getSecondName(),
+            $appUser->getEmail(),
+            $appUser->getPhone(),
+            $memberGroupsUrls,
+            $adminGroupsUrls,
+            $memberRoomsUrls,
+            $adminRoomsUrls,
+            $approvedReservationsUrls,
+            $reservationsUrls
         );
     }
 }

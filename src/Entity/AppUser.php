@@ -375,4 +375,34 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
+    public function clearMemberGroups(): void
+    {
+        $this->memberGroups->clear();
+    }
+
+    public function clearAdminGroups(): void
+    {
+        $this->adminGroups->clear();
+    }
+
+    public function clearMemberRooms(): void
+    {
+        $this->memberRooms->clear();
+    }
+
+    public function clearAdminRooms(): void
+    {
+        $this->adminRooms->clear();
+    }
+
+    public function clearApprovedReservations(): void
+    {
+        $this->approvedReservations->clear();
+    }
+
+    public function clearReservations(): void
+    {
+        $this->reservations->clear();
+    }
 }

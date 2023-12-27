@@ -6,6 +6,7 @@ use App\Entity\AppUser;
 use App\Entity\Reservation;
 use App\Repository\ReservationRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class ReservationManager
@@ -56,5 +57,28 @@ class ReservationManager
         }
 
         return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function addReservations(?array $approvedReservations, AppUser $appUser, bool $isApproved): void
+    {
+        foreach ($approvedReservations as $reservationId) {
+            if (is_numeric($reservationId)){
+                $reservation = $this->reservationRepository->find($reservationId);
+                if ($reservation) {
+                    if ($isApproved) {
+                        $reservation->setApprovedBy($appUser);
+                    } else {
+                        $reservation->setReservedFor($appUser);
+                    }
+                } else {
+                    throw new Exception('Reservation not found');
+                }
+            } else {
+                throw new Exception('Reservation ID must be an integer value');
+            }
+        }
     }
 }

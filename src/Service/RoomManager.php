@@ -96,4 +96,23 @@ class RoomManager
             }
         }
     }
+
+    /**
+     * @throws Exception
+     */
+    public function addUserRooms(?array $memberRooms, \App\Entity\AppUser $appUser, bool $false)
+    {
+        foreach ($memberRooms as $roomId) {
+            $room = $this->roomRepository->find($roomId);
+            if ($room) {
+                if ($false) {
+                    $appUser->addAdminRoom($room);
+                } else {
+                    $appUser->addMemberRoom($room);
+                }
+            } else {
+                throw new Exception('Room not found');
+            }
+        }
+    }
 }
