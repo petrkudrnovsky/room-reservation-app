@@ -25,14 +25,17 @@ class GroupType extends AbstractType
                 'multiple' => true,
                 'expanded' => false,
                 'required' => false,
-            ])
-            ->add('admins', EntityType::class, [
-                'class' => AppUser::class,
-                'choice_label' => 'username',
-                'multiple' => true,
-                'expanded' => false,
-                'required' => false,
             ]);
+        if($options['is_super_admin']) {
+            $builder
+                ->add('admins', EntityType::class, [
+                    'class' => AppUser::class,
+                    'choice_label' => 'username',
+                    'multiple' => true,
+                    'expanded' => false,
+                    'required' => false,
+                ]);
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -40,6 +43,7 @@ class GroupType extends AbstractType
         $resolver->setDefaults([
             'data_class' => GroupTypeModel::class,
             'choice_label' => 'username',
+            'is_super_admin' => false,
         ]);
     }
 }

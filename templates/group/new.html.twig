@@ -9,7 +9,9 @@
 
         {{ include('group/_form.html.twig') }}
 
-        <a href="{{ path('app_group_index') }}">back to list</a>
+        {% if is_granted('group_index_view') %}
+            <a href="{{ path('app_group_index') }}">back to list</a>
+        {% endif %}
     </div>
     {% include 'components/_footer.html.twig' %}
 {% endblock %}

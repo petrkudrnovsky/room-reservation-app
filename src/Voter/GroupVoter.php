@@ -38,8 +38,6 @@ class GroupVoter extends Voter
             return $this->canCreate($currentUser);
         }
 
-        return true;
-
         /** @var Group $accessedGroup */
         $accessedGroup = $subject;
         return match($attribute) {
@@ -58,10 +56,15 @@ class GroupVoter extends Voter
 
     private function canViewDetail(AppUser $currentUser, Group $accessedGroup): bool
     {
-        /*$userGroups = $currentUser->getMemberGroups()->toArray();
-        $userGroups = array_merge($userGroups, $currentUser->getAdminGroups()->toArray());
-        return in_array('ROLE_SUPER_ADMIN', $currentUser->getRoles());*/
-        return true;
+        if(in_array('ROLE_SUPER_ADMIN', $currentUser->getRoles())) {
+            return true;
+        }
+        $memberGroups = $currentUser->getMemberGroups();
+        $adminGroups = $currentUser->getAdminGroups();
+        if($memberGroups->contains($accessedGroup) || $adminGroups->contains($accessedGroup)) {
+            return true;
+        }
+        return false;
     }
 
     private function canCreate(AppUser $currentUser): bool
@@ -71,7 +74,14 @@ class GroupVoter extends Voter
 
     private function canEdit(AppUser $currentUser, Group $accessedGroup): bool
     {
-        return in_array('ROLE_SUPER_ADMIN', $currentUser->getRoles());
+        if(in_array('ROLE_SUPER_ADMIN', $currentUser->getRoles())) {
+            return true;
+        }
+        $adminGroups = $currentUser->getAdminGroups();
+        if($adminGroups->contains($accessedGroup)) {
+            return true;
+        }
+        return false;
     }
 
     private function canDelete(AppUser $currentUser): bool
