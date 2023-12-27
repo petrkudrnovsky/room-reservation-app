@@ -39,6 +39,32 @@
                                 </li>
                             {% endfor %}
                         </ul>
+                        <hr>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Admins</th>
+                    <td>
+                        <ul>
+                            {% for admin in room.admins %}
+                                <li>
+                                    <a href="{{ path('app_user_show', {'id': admin.id}) }}">{{ admin.username }}</a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        <hr>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Groups</th>
+                    <td>
+                        <ul>
+                            {% for group in room.owningGroups %}
+                                <li>
+                                    <a href="{{ path('app_group_show', {'id': group.id}) }}">{{ group.name }}</a>
+                                </li>
+                            {% endfor %}
+                        </ul>
                     </td>
                 </tr>
             </tbody>
@@ -46,11 +72,15 @@
 
         <a href="{{ path('app_room_reservation_new', {'roomId': room.id}) }}">reserve this room</a>
 
-        <a href="{{ path('app_room_index') }}">back to list</a>
-
-        <a href="{{ path('app_room_edit', {'id': room.id}) }}">edit</a>
-
-        {{ include('room/_delete_form.html.twig') }}
+        {% if is_granted('room_index_view') %}
+            <a href="{{ path('app_room_index') }}">back to list</a>
+        {% endif %}
+        {% if is_granted('room_edit', room) %}
+            <a href="{{ path('app_room_edit', {'id': room.id}) }}">edit</a>
+        {% endif %}
+        {% if is_granted('room_delete', room) %}
+            {{ include('room/_delete_form.html.twig') }}
+        {% endif %}
 
         <h2>Approved reservations for this room</h2>
         {{ include('reservation/_list.html.twig', {reservations: approvedReservations}) }}

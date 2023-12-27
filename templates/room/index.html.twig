@@ -7,37 +7,25 @@
     <div class="content-wrapper">
         <h1>Room index</h1>
 
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Id</th>
-                    <th>Name</th>
-                    <th>Code</th>
-                    <th>IsPrivate</th>
-                    <th>actions</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for room in rooms %}
-                <tr>
-                    <td>{{ room.id }}</td>
-                    <td>{{ room.name }}</td>
-                    <td>{{ room.codeName }}</td>
-                    <td>{{ room.isPrivate ? 'Yes' : 'No' }}</td>
-                    <td>
-                        <a href="{{ path('app_room_show', {'id': room.id}) }}">show</a>
-                        <a href="{{ path('app_room_edit', {'id': room.id}) }}">edit</a>
-                    </td>
-                </tr>
-            {% else %}
-                <tr>
-                    <td colspan="5">no records found</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+        <h2>Public rooms</h2>
+        {{ include('room/_list.html.twig', {'rooms': publicRooms}) }}
 
-        <a href="{{ path('app_room_new') }}">Create new</a>
+        {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+            <h2>I'm member of these rooms</h2>
+            {{ include('room/_list.html.twig', {'rooms': memberRooms}) }}
+
+            <h2>I'm admin of these rooms</h2>
+            {{ include('room/_list.html.twig', {'rooms': adminRooms}) }}
+
+            {% if allRooms != null and is_granted('ROLE_SUPER_ADMIN') %}
+                <h2>All rooms</h2>
+                {{ include('room/_list.html.twig', {'rooms': allRooms}) }}
+            {% endif %}
+
+            {% if is_granted('room_create') %}
+                <a href="{{ path('app_room_new') }}">Create new</a>
+            {% endif %}
+        {% endif %}
     </div>
     {% include 'components/_footer.html.twig' %}
 {% endblock %}

@@ -26,39 +26,48 @@ class RoomType extends AbstractType
             ])
             ->add('isPrivate', CheckboxType::class, [
                 'label' => 'Private room',
+                'required' => false,
             ])
             ->add('building', EntityType::class, [
                 'class' => Building::class,
                 'choice_label' => 'name',
-            ])
-            ->add('owningGroups', EntityType::class, [
-                'class' => Group::class,
-                'choice_label' => 'name',
-                'multiple' => true,
-                'expanded' => false,
-                'required' => false,
-            ])
-            ->add('members', EntityType::class, [
+            ]);
+        if($options['can_edit_members'] || $options['is_super_admin']) {
+            $builder->add('members', EntityType::class, [
                 'class' => AppUser::class,
                 'choice_label' => 'username',
                 'multiple' => true,
                 'expanded' => false,
                 'required' => false,
-            ])
-            ->add('admins', EntityType::class, [
+            ]);
+        }
+        if($options['can_edit_admins'] || $options['is_super_admin']) {
+            $builder->add('admins', EntityType::class, [
                 'class' => AppUser::class,
                 'choice_label' => 'username',
                 'multiple' => true,
                 'expanded' => false,
                 'required' => false,
-            ])
-        ;
+            ]);
+        }
+        if($options['is_super_admin']) {
+           $builder->add('owningGroups', EntityType::class, [
+               'class' => Group::class,
+               'choice_label' => 'name',
+               'multiple' => true,
+               'expanded' => false,
+               'required' => false,
+           ]);
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => RoomTypeModel::class,
+            'is_super_admin' => false,
+            'can_edit_members' => false,
+            'can_edit_admins' => false,
         ]);
     }
 }

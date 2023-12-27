@@ -12,8 +12,12 @@
         <h2>Reservations for this room</h2>
         {{ include('reservation/_list.html.twig', {reservations: reservations}) }}
 
-        <a href="{{ path('app_room_show', {'id': room.id}) }}">back to room detail</a>
-        <a href="{{ path('app_room_index') }}">back to list</a>
+        {% if is_granted('room_detail_view', room) %}
+            <a href="{{ path('app_room_show', {'id': room.id}) }}">back to room detail</a>
+        {% endif %}
+        {% if is_granted('room_index_view') %}
+            <a href="{{ path('app_room_index') }}">back to list</a>
+        {% endif %}
     </div>
     {% include 'components/_footer.html.twig' %}
 {% endblock %}
