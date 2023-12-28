@@ -10,7 +10,7 @@
         <h2>My reservations</h2>
         {{ include('reservation/_list.html.twig', { reservations: userReservations }) }}
 
-        {% if allReservations == null and is_granted('room_can_view_full_reservations', room) %}
+        {% if allReservations != null and is_granted('room_can_view_full_reservations', room) %}
             <h2>All reservations</h2>
             {{ include('reservation/_list.html.twig', { reservations: allReservations }) }}
         {% endif %}

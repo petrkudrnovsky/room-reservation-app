@@ -47,8 +47,13 @@ class ReservationController extends AbstractController
     {
         $reservationModel = new ReservationTypeModel();
         $reservationModel->room = $roomManager->getRoomById($roomId);
+
         $this->denyAccessUnlessGranted(ReservationVoter::CREATE, $reservationModel->room);
-        $form = $this->createForm(ReservationType::class, $reservationModel);
+
+        /** @var AppUser $currentUser */
+        $currentUser = $this->getUser();
+        $reservationModel->reservedFor = $currentUser;
+        $form = $this->createForm(ReservationType::class, $reservationModel, ['can_edit_reservedFor' => $this->isGranted(RoomVoter::HAS_FULL_ACCESS_TO_ROOM, $reservationModel->room)]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -82,7 +87,8 @@ class ReservationController extends AbstractController
     public function edit(Request $request, Reservation $reservation, ReservationManager $reservationManager): Response
     {
         $reservationModel = ReservationTypeModel::fromEntity($reservation);
-        $form = $this->createForm(ReservationType::class, $reservationModel);
+        $form = $this->createForm(ReservationType::class, $reservationModel, ['can_edit_reservedFor' => $this->isGranted(RoomVoter::HAS_FULL_ACCESS_TO_ROOM, $reservation->getRoom())]);
+
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -118,6 +124,7 @@ class ReservationController extends AbstractController
                 $reservation->getRoom()->getId(),
                 $reservation->getStartDatetime(),
                 $reservation->getEndDatetime(),
+                null
             );
             if(count($overlappingReservations) > 0) {
                 $this->addFlash('error', 'Cannot approve reservation because it overlaps with another reservation.');

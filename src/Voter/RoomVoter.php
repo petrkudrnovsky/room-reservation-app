@@ -20,6 +20,7 @@ class RoomVoter extends Voter
     const EDIT_ADMINS = 'room_edit_admins';
     const CAN_VIEW_FULL_RESERVATIONS = 'room_can_view_full_reservations';
     const CAN_VIEW_PENDING_RESERVATIONS = 'room_can_view_pending_reservations';
+    const HAS_FULL_ACCESS_TO_ROOM = 'room_has_full_access_to_room';
 
     public function __construct(
         private RoomManager $roomManager
@@ -27,7 +28,7 @@ class RoomVoter extends Voter
 
     protected function supports(string $attribute, mixed $subject): bool
     {
-        return in_array($attribute, [self::VIEW_INDEX, self::VIEW_DETAIL, self::CREATE, self::EDIT, self::DELETE, self::EDIT_MEMBERS, self::EDIT_ADMINS, self::CAN_VIEW_FULL_RESERVATIONS, self::CAN_VIEW_PENDING_RESERVATIONS]);
+        return in_array($attribute, [self::VIEW_INDEX, self::VIEW_DETAIL, self::CREATE, self::EDIT, self::DELETE, self::EDIT_MEMBERS, self::EDIT_ADMINS, self::CAN_VIEW_FULL_RESERVATIONS, self::CAN_VIEW_PENDING_RESERVATIONS, self::HAS_FULL_ACCESS_TO_ROOM]);
     }
 
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
@@ -36,17 +37,18 @@ class RoomVoter extends Voter
             return true;
         }
 
+        // room index is visible to all users
+        if($attribute === self::VIEW_INDEX) {
+            return true;
+        }
+
         $currentUser = $token->getUser();
         if(!$currentUser instanceof AppUser) {
             return false;
         }
 
-        if(!($subject instanceof Room) && $attribute !== self::VIEW_INDEX && $attribute !== self::CREATE) {
+        if(!($subject instanceof Room) && $attribute !== self::CREATE) {
             return false;
-        }
-
-        if($attribute === self::VIEW_INDEX) {
-            return $this->canViewIndex($currentUser);
         }
         
         if($attribute === self::CREATE) {
@@ -63,13 +65,9 @@ class RoomVoter extends Voter
             self::EDIT_ADMINS => $this->canEditAdmins($currentUser, $accessedRoom),
             self::CAN_VIEW_FULL_RESERVATIONS => $this->canViewFullReservations($currentUser, $accessedRoom),
             self::CAN_VIEW_PENDING_RESERVATIONS => $this->canViewPendingReservations($currentUser, $accessedRoom),
+            self::HAS_FULL_ACCESS_TO_ROOM => $this->hasFullAccessToRoom($currentUser, $accessedRoom),
             default => throw new \LogicException('This is not valid attribute for this Voter')
         };
-    }
-
-    private function canViewIndex(AppUser $currentUser): bool
-    {
-        return in_array('ROLE_USER', $currentUser->getRoles());
     }
 
     private function canCreate(AppUser $currentUser): bool
@@ -205,6 +203,25 @@ class RoomVoter extends Voter
         if($pendingReservations->count() > 0) {
             foreach($pendingReservations as $pendingReservation) {
                 if($pendingReservation->getReservedFor() === $currentUser) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private function hasFullAccessToRoom(AppUser $currentUser, Room $accessedRoom): bool
+    {
+        if(in_array('ROLE_SUPER_ADMIN', $currentUser->getRoles()) ||
+            $accessedRoom->getAdmins()->contains($currentUser)) {
+            return true;
+        }
+
+        $owningGroups = $accessedRoom->getOwningGroups();
+        if($owningGroups->count() > 0) {
+            foreach($owningGroups as $owningGroup) {
+                if($currentUser->getAdminGroups()->contains($owningGroup)) {
                     return true;
                 }
             }

@@ -27,6 +27,7 @@ class RoomAvailabilityValidator extends ConstraintValidator
             $value->room->getId(),
             $value->startDatetime,
             $value->endDatetime,
+            $value->reservationId
         );
 
         if(count($overlappingReservations) > 0) {

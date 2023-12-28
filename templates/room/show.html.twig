@@ -10,10 +10,6 @@
         <table class="table">
             <tbody>
                 <tr>
-                    <th>Id</th>
-                    <td>{{ room.id }}</td>
-                </tr>
-                <tr>
                     <th>Name</th>
                     <td>{{ room.name }}</td>
                 </tr>
@@ -29,44 +25,46 @@
                     <th>IsPrivate</th>
                     <td>{{ room.isPrivate ? 'Yes' : 'No' }}</td>
                 </tr>
-                <tr>
-                    <th>Members</th>
-                    <td>
-                        <ul>
-                            {% for member in room.members %}
-                                <li>
-                                    <a href="{{ path('app_user_show', {'id': member.id}) }}">{{ member.username }}</a>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                        <hr>
-                    </td>
-                </tr>
-                <tr>
-                    <th>Admins</th>
-                    <td>
-                        <ul>
-                            {% for admin in room.admins %}
-                                <li>
-                                    <a href="{{ path('app_user_show', {'id': admin.id}) }}">{{ admin.username }}</a>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                        <hr>
-                    </td>
-                </tr>
-                <tr>
-                    <th>Groups</th>
-                    <td>
-                        <ul>
-                            {% for group in room.owningGroups %}
-                                <li>
-                                    <a href="{{ path('app_group_show', {'id': group.id}) }}">{{ group.name }}</a>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    </td>
-                </tr>
+                {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+                    <tr>
+                        <th>Members</th>
+                        <td>
+                            <ul>
+                                {% for member in room.members %}
+                                    <li>
+                                        <a href="{{ path('app_user_show', {'id': member.id}) }}">{{ member.username }}</a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                            <hr>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Admins</th>
+                        <td>
+                            <ul>
+                                {% for admin in room.admins %}
+                                    <li>
+                                        <a href="{{ path('app_user_show', {'id': admin.id}) }}">{{ admin.username }}</a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                            <hr>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Groups</th>
+                        <td>
+                            <ul>
+                                {% for group in room.owningGroups %}
+                                    <li>
+                                        <a href="{{ path('app_group_show', {'id': group.id}) }}">{{ group.name }}</a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                    </tr>
+                {% endif %}
             </tbody>
         </table>
 

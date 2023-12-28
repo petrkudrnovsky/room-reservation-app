@@ -19,7 +19,6 @@ class ReservationVoter extends Voter
     const CAN_APPROVE = 'reservation_can_approve';
     const CAN_REJECT = 'reservation_can_reject';
 
-
     protected function supports(string $attribute, mixed $subject): bool
     {
         return in_array($attribute, [self::VIEW_INDEX_ALL, self::VIEW_INDEX, self::VIEW_DETAIL, self::CREATE, self::EDIT, self::DELETE, self::CAN_APPROVE, self::CAN_REJECT]);
@@ -115,10 +114,13 @@ class ReservationVoter extends Voter
 
     private function canEdit(AppUser $currentUser, Reservation $accessedReservation): bool
     {
+        // only pending reservations can be edited by the user that are reserved for
+        if($accessedReservation->getStatus() === Reservation::STATUS_PENDING && $accessedReservation->getReservedFor() === $currentUser) {
+            return true;
+        }
         if(
             in_array('ROLE_SUPER_ADMIN', $currentUser->getRoles()) ||
-            $accessedReservation->getRoom()->getAdmins()->contains($currentUser) ||
-            $accessedReservation->getReservedFor() === $currentUser
+            $accessedReservation->getRoom()->getAdmins()->contains($currentUser)
         ) {
             return true;
         }
