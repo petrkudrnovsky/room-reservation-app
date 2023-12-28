@@ -1,6 +1,5 @@
 # Pendrej Reservations App
-
-TBD
+Welcome to Pendrej Reservations, the ultimate solution for effortlessly managing room reservations in your building complex! With our intuitive app, booking and organizing rooms becomes a seamless experience, ensuring that every space is utilized efficiently. Whether you're coordinating meeting rooms in a corporate office or managing spaces in a hospitality venue, Pendrej Reservations brings simplicity and sophistication to your fingertips. Dive into a world where every reservation is just a click away, and managing your building's rooms is a breeze. Embrace the future of space management with Pendrej Reservations today!
 
 ### How to set-up the project
 

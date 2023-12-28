@@ -9,10 +9,7 @@
 
         <table class="table">
             <tbody>
-                <tr>
-                    <th>Id</th>
-                    <td>{{ reservation.id }}</td>
-                </tr>
+            {% if is_granted('reservation_detail_view', reservation) %}
                 <tr>
                     <th>Title</th>
                     <td>{{ reservation.title }}</td>
@@ -21,6 +18,7 @@
                     <th>Description</th>
                     <td>{{ reservation.description }}</td>
                 </tr>
+            {% endif %}
                 <tr>
                     <th>Start</th>
                     <td>{{ reservation.startDatetime ? reservation.startDatetime|date('Y-m-d H:i:s') : '' }}</td>
@@ -30,12 +28,13 @@
                     <td>{{ reservation.endDatetime ? reservation.endDatetime|date('Y-m-d H:i:s') : '' }}</td>
                 </tr>
                 <tr>
-                    <th>Status</th>
-                    <td>{{ reservation.status }}</td>
-                </tr>
-                <tr>
                     <th>Room</th>
                     <td><a href="{{ path('app_room_show', {'id': reservation.room.id}) }}">{{ reservation.room.codeName }} - {{ reservation.room.name }}</a></td>
+                </tr>
+            {% if is_granted('reservation_detail_view', reservation) %}
+                <tr>
+                    <th>Status</th>
+                    <td>{{ reservation.status }}</td>
                 </tr>
                 <tr>
                     <th>ReservedFor</th>
@@ -45,14 +44,19 @@
                     <th>ApprovedBy</th>
                     <td>{{ reservation.approvedBy ? reservation.approvedBy.username : 'Not approved' }}</td>
                 </tr>
+            {% endif %}
             </tbody>
         </table>
 
-        <a href="{{ path('app_room_reservation_index', {'roomId': reservation.room.id}) }}">back to list</a>
-
-        <a href="{{ path('app_room_reservation_edit', {'id': reservation.id, 'roomId': reservation.room.id}) }}">edit</a>
-
-        {{ include('reservation/_delete_form.html.twig') }}
+        {% if is_granted('room_detail_view', reservation.room) %}
+            <a href="{{ path('app_room_reservation_index', {'roomId': reservation.room.id}) }}">back to list</a>
+        {% endif %}
+        {% if is_granted('reservation_edit', reservation) %}
+            <a href="{{ path('app_room_reservation_edit', {'id': reservation.id, 'roomId': reservation.room.id}) }}">edit</a>
+        {% endif %}
+        {% if is_granted('reservation_delete', reservation) %}
+            {{ include('reservation/_delete_form.html.twig') }}
+        {% endif %}
     </div>
     {% include 'components/_footer.html.twig' %}
 {% endblock %}

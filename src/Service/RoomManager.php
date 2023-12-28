@@ -8,6 +8,7 @@ use App\Entity\Room;
 use App\Repository\RoomRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class RoomManager
 {
@@ -31,7 +32,23 @@ class RoomManager
 
     public function getRoomById(int $id): ?Room
     {
-        return $this->roomRepository->find($id);
+        $room = $this->roomRepository->find($id);
+        if(!$room) {
+            throw new NotFoundHttpException('Room not found');
+        }
+        return $room;
+    }
+
+    public function hasUserCurrentOrFutureReservations(Room $room, AppUser $user): bool
+    {
+        $reservations = $room->getReservations();
+        $today = new \DateTime();
+        foreach ($reservations as $reservation) {
+            if ($reservation->getEndDatetime() >= $today && $reservation->getReservedFor() === $user) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

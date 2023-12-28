@@ -11,8 +11,12 @@
 
         <a href="{{ path('app_room_reservation_index', {'roomId': reservation.room.id}) }}">back to list</a>
 
-        <h2>Approved reservations for this room</h2>
-        {{ include('reservation/_list.html.twig', {reservations: approvedReservations}) }}
+        <h2>Reservations for this room</h2>
+        {% if is_granted('room_can_view_full_reservations', reservation.room) %}
+            {{ include('reservation/_list.html.twig', {reservations: approvedReservations}) }}
+        {% else %}
+            {{ include('reservation/_list-limited.html.twig', {reservations: approvedReservations}) }}
+        {% endif %}
     </div>
     {% include 'components/_footer.html.twig' %}
 {% endblock %}
