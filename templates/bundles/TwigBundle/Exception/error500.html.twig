@@ -1,0 +1,10 @@
+{% extends 'baseError.html.twig' %}
+
+{% block error_content %}
+    <span class="error-page__code">500</span>
+    <h1 class="error-page__title">Internal Server Error</h1>
+    <p class="error-page__text">
+        An internal server error occurred. Please try again later.<br>
+        Contact the administrator if the problem persists.
+    </p>
+{% endblock %}
