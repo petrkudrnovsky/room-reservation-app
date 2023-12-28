@@ -137,4 +137,51 @@ class RoomManager
     {
         return $this->roomRepository->find($room);
     }
+
+
+//    public function hasAccessToRoom(Room $room): bool
+//    {
+//        if ($this->isOccupied($room)) {
+//            return false;
+//        }
+//        return true;
+//    }
+//
+//    public function isOccupied(Room $room): bool
+//    {
+//        $reservations = $room->getReservations();
+//        $today = new \DateTime();
+//        foreach ($reservations as $reservation) {
+//            if ($reservation->getEndDatetime() >= $today) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
+
+    public function hasApprovedReservation(Room $room, AppUser $user): bool
+    {
+        $reservations = $room->getReservations();
+        foreach ($reservations as $reservation) {
+            if ($reservation->getStatus() === 'approved' && $reservation->getReservedFor() === $user) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function isRoomFree(Room $room): bool
+    {
+        $reservations = $room->getReservations();
+        if ($reservations->count() === 0) {
+            return true;
+        }
+        $today = new \DateTime();
+        foreach ($reservations as $reservation) {
+            if ($reservation->getEndDatetime() >= $today) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

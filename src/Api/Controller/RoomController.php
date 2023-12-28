@@ -4,6 +4,8 @@ namespace App\Api\Controller;
 
 use App\Api\Model\RoomInput;
 use App\Api\Model\RoomOutput;
+use App\Entity\AppUser;
+use App\Entity\Reservation;
 use App\Entity\Room;
 use App\Repository\BuildingRepository;
 use App\Repository\GroupRepository;
@@ -40,7 +42,12 @@ class RoomController extends AbstractFOSRestController
         $buildingId = $request->query->get('buildingId');
 
         $rooms = array_map(
-            fn (Room $entity) => RoomOutput::fromEntity($entity, $this->getUsersUrls($entity, true), $this->getUsersUrls($entity, false), $this->getGroupsUrls($entity)),
+            fn (Room $entity) => RoomOutput::fromEntity(
+                $entity,
+                $this->getUsersUrls($entity, true),
+                $this->getUsersUrls($entity, false),
+                $this->getGroupsUrls($entity),
+                $this->getReservationsUrls($entity)),
             $this->roomManager->findRoomsByFilters($name, $code, $buildingId)
         );
 
@@ -58,7 +65,13 @@ class RoomController extends AbstractFOSRestController
             throw $this->createNotFoundException('Room not found');
         }
 
-        return RoomOutput::fromEntity($room, $this->getUsersUrls($room, true), $this->getUsersUrls($room, false), $this->getGroupsUrls($room));
+        return RoomOutput::fromEntity(
+            $room,
+            $this->getUsersUrls($room, true),
+            $this->getUsersUrls($room, false),
+            $this->getGroupsUrls($room),
+            $this->getReservationsUrls($room)
+        );
     }
 
     /**
@@ -91,7 +104,9 @@ class RoomController extends AbstractFOSRestController
             $room,
             $this->getUsersUrls($room, true),
             $this->getUsersUrls($room, false),
-            $this->getGroupsUrls($room));
+            $this->getGroupsUrls($room),
+            $this->getReservationsUrls($room)
+        );
     }
 
     #[Rest\Delete('/room/{id}', name: 'api_rooms_delete', requirements: ['id' => '\d+'])]
@@ -103,7 +118,24 @@ class RoomController extends AbstractFOSRestController
         $this->roomManager->deleteFromDatabase($room);
     }
 
-    public function findOrFail(int $id): Room
+    // ověření zda uživatel má v tuto chvíli přístup do místnosti (je neobsazená, je jejím uživatelem, má schválenou rezervaci)
+    #[Rest\Get('/room/{id}/access', name: 'api_rooms_access', requirements: ['id' => '\d+'])]
+    #[Rest\View(statusCode: 200)]
+    public function hasAccess(int $id): bool
+    {
+        $room = $this->findOrFail($id);
+        /** @var AppUser $user */
+        $user = $this->getUser();
+        if ($this->isGranted(RoomVoter::HAS_FULL_ACCESS_TO_ROOM, $room)
+            || $this->roomManager->isRoomFree($room)
+            || $this->roomManager->hasApprovedReservation($room, $user)
+        ) {
+            return true;
+        }
+        return false;
+    }
+
+    private function findOrFail(int $id): Room
     {
         $room = $this->roomManager->getRoomById($id);
         if (!$room) {
@@ -112,7 +144,7 @@ class RoomController extends AbstractFOSRestController
         return $room;
     }
 
-    public function getUsersUrls(Room $room, bool $isMember): array
+    private function getUsersUrls(Room $room, bool $isMember): array
     {
         if ($isMember) {
             return array_map(
@@ -128,11 +160,19 @@ class RoomController extends AbstractFOSRestController
         }
     }
 
-    public function getGroupsUrls(Room $room): array
+    private function getGroupsUrls(Room $room): array
     {
         return array_map(
             fn ($group) => $this->generateUrl('api_groups_detail', ['id' => $group->getId()]),
             $room->getOwningGroups()->toArray()
+        );
+    }
+
+    private function getReservationsUrls(Room $room): array
+    {
+        return array_map(
+            fn ($reservation) => $this->generateUrl('api_reservations_detail', ['id' => $reservation->getId()]),
+            $room->getReservations()->toArray()
         );
     }
 }

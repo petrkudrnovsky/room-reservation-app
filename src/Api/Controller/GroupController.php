@@ -218,7 +218,7 @@ class GroupController extends AbstractFOSRestController {
         return GroupOutput::fromEntity($group, $this->getUsersUrls($group, true), $this->getUsersUrls($group, false), $this->getRoomsUrls($group));
     }
 
-    public function getUsersUrls(Group $group, bool $isMember): array
+    private function getUsersUrls(Group $group, bool $isMember): array
     {
         if ($isMember) {
             return array_map(
@@ -234,7 +234,7 @@ class GroupController extends AbstractFOSRestController {
         }
     }
 
-    public function getRoomsUrls(Group $group): array
+    private function getRoomsUrls(Group $group): array
     {
         return array_map(
             fn ($room) => $this->generateUrl('api_rooms_detail', ['id' => $room->getId()]),
@@ -242,7 +242,7 @@ class GroupController extends AbstractFOSRestController {
         );
     }
 
-    public function findOrFailUser(int $id): AppUser
+    private function findOrFailUser(int $id): AppUser
     {
         $user = $this->appUserRepository->find($id);
 
@@ -253,7 +253,7 @@ class GroupController extends AbstractFOSRestController {
         return $user;
     }
 
-    public function findOrFail(int $id): Group
+    private function findOrFail(int $id): Group
     {
         $group = $this->groupRepository->find($id);
 
