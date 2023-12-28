@@ -6,8 +6,11 @@
     --space-m: 1rem;
     --space-l: 2rem;
     --space-xl: 3rem;
+    --space-xxl: 4rem;
 
     --font-size: 16px;
+    --font-size-m: 18px;
+    --font-size-l: 20px;
     --font-family: "Open Sans", sans-serif;
     --font-weight: 1.2;
 
