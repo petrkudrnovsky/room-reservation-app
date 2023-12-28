@@ -35,6 +35,13 @@ class ReservationManager
         return $reservation;
     }
 
+    public function getReservationsForUser(AppUser $user): array
+    {
+        $userReservations = null;
+        $reservationRepository->findReservationsByUser($currentUser, $userReservations, $userVisitingReservations);
+
+    }
+
     public function findById(int $id): ?Reservation
     {
         return $this->reservationRepository->find($id);

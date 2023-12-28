@@ -1,26 +1,16 @@
 <table class="table">
     <thead>
     <tr>
-        <th>Title</th>
-        <th>Description</th>
         <th>Start</th>
         <th>End</th>
-        <th>Room</th>
-        <th>Status</th>
-        <th>Reserved For</th>
         <th>actions</th>
     </tr>
     </thead>
     <tbody>
     {% for reservation in reservations %}
         <tr>
-            <td>{{ reservation.title }}</td>
-            <td>{{ reservation.description|default('') }}</td>
             <td>{{ reservation.startDatetime ? reservation.startDatetime|date('d. m. Y H:i:s') : '' }}</td>
             <td>{{ reservation.endDatetime ? reservation.endDatetime|date('d. m. Y H:i:s') : '' }}</td>
-            <td>{{ reservation.room.codeName }}</td>
-            <td>{{ reservation.status }}</td>
-            <td>{{ reservation.reservedFor.username }}</td>
             <td>
                 {% if is_granted('room_detail_view', reservation.room) %}
                     <a href="{{ path('app_room_reservation_show', {'id': reservation.id, 'roomId': reservation.room.id}) }}">show</a>

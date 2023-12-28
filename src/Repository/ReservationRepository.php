@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\AppUser;
 use App\Entity\Reservation;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -32,9 +33,31 @@ class ReservationRepository extends ServiceEntityRepository
         ;
     }
 
-    public function findOverlappingReservations(int $roomId, \DateTime $start, \DateTime $end): array
+    public function findReservationsByUser(AppUser $user): array
     {
         return $this->createQueryBuilder('r')
+            ->andWhere('r.reservedFor = :user')
+            ->setParameter('user', $user)
+            ->orderBy('r.startDatetime', 'ASC')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
+    public function findVisitingReservationsByUser(AppUser $user): array
+    {
+        return $this->createQueryBuilder('r')
+            ->andWhere(':user MEMBER OF r.visitors')
+            ->setParameter('user', $user)
+            ->orderBy('r.startDatetime', 'ASC')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
+    public function findOverlappingReservations(int $roomId, \DateTime $start, \DateTime $end, ?int $reservationId): array
+    {
+        $qb = $this->createQueryBuilder('r')
             ->andWhere('r.room = :roomId')
             ->andWhere('r.status = :status')
             ->andWhere('r.startDatetime < :endDatetime')
@@ -42,10 +65,14 @@ class ReservationRepository extends ServiceEntityRepository
             ->setParameter('roomId', $roomId)
             ->setParameter('status', Reservation::STATUS_APPROVED)
             ->setParameter('startDatetime', $start)
-            ->setParameter('endDatetime', $end)
-            ->getQuery()
-            ->getResult()
-        ;
+            ->setParameter('endDatetime', $end);
+
+        if($reservationId) {
+            $qb->andWhere('r.id != :reservationId')
+                ->setParameter('reservationId', $reservationId);
+        }
+
+        return $qb->getQuery()->getResult();
     }
 
 //    /**

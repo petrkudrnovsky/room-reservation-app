@@ -14,6 +14,7 @@ use Symfony\Component\Validator\Mapping\ClassMetadata;
 
 class ReservationTypeModel
 {
+    public ?int $reservationId = null;
     #[Assert\NotBlank]
     public ?string $title = null;
     public ?string $description = null;
@@ -25,6 +26,7 @@ class ReservationTypeModel
     #[Assert\NotBlank]
     public ?Room $room = null;
     public ?AppUser $reservedFor = null;
+    public ?Collection $visitors;
 
     public function toEntity(?Reservation $reservation = null): Reservation
     {
@@ -38,6 +40,13 @@ class ReservationTypeModel
         $reservation->setRoom($this->room);
         $reservation->setReservedFor($this->reservedFor);
 
+        foreach ($reservation->getVisitors() as $visitor) {
+            $reservation->removeVisitor($visitor);
+        }
+        foreach ($this->visitors as $visitor) {
+            $reservation->addVisitor($visitor);
+        }
+
         return $reservation;
     }
 
@@ -50,6 +59,8 @@ class ReservationTypeModel
         $model->endDatetime = $reservation->getEndDatetime();
         $model->room = $reservation->getRoom();
         $model->reservedFor = $reservation->getReservedFor();
+        $model->visitors = new ArrayCollection(iterator_to_array($reservation->getVisitors()));
+        $model->reservationId = $reservation->getId(); // just for edit form validation (overlapping reservations)
 
         return $model;
     }

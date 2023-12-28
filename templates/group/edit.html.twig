@@ -9,9 +9,12 @@
 
         {{ include('group/_form.html.twig', {'button_label': 'Update'}) }}
 
-        <a href="{{ path('app_group_index') }}">back to list</a>
-
-        {{ include('group/_delete_form.html.twig') }}
+        {% if is_granted('group_index_view') %}
+            <a href="{{ path('app_group_index') }}">back to list</a>
+        {% endif %}
+        {% if is_granted('group_delete') %}
+            {{ include('group/_delete_form.html.twig') }}
+        {% endif %}
     </div>
     {% include 'components/_footer.html.twig' %}
 {% endblock %}

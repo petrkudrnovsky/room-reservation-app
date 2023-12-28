@@ -61,6 +61,9 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'reservedFor', targetEntity: Reservation::class)]
     private Collection $reservations;
 
+    #[ORM\ManyToMany(targetEntity: Reservation::class, mappedBy: 'visitors')]
+    private Collection $visitReservations;
+
     public function __construct()
     {
         $this->memberGroups = new ArrayCollection();
@@ -69,6 +72,7 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
         $this->adminRooms = new ArrayCollection();
         $this->approvedReservations = new ArrayCollection();
         $this->reservations = new ArrayCollection();
+        $this->visitReservations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -403,5 +407,32 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
     public function clearReservations(): void
     {
         $this->reservations->clear();
+    }
+
+    /**
+     * @return Collection<int, Reservation>
+     */
+    public function getVisitReservations(): Collection
+    {
+        return $this->visitReservations;
+    }
+
+    public function addVisitReservation(Reservation $visitReservation): static
+    {
+        if (!$this->visitReservations->contains($visitReservation)) {
+            $this->visitReservations->add($visitReservation);
+            $visitReservation->addVisitor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeVisitReservation(Reservation $visitReservation): static
+    {
+        if ($this->visitReservations->removeElement($visitReservation)) {
+            $visitReservation->removeVisitor($this);
+        }
+
+        return $this;
     }
 }

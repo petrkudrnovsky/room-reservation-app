@@ -10,10 +10,6 @@
         <table class="table">
             <tbody>
                 <tr>
-                    <th>Id</th>
-                    <td>{{ room.id }}</td>
-                </tr>
-                <tr>
                     <th>Name</th>
                     <td>{{ room.name }}</td>
                 </tr>
@@ -29,34 +25,74 @@
                     <th>IsPrivate</th>
                     <td>{{ room.isPrivate ? 'Yes' : 'No' }}</td>
                 </tr>
-                <tr>
-                    <th>Members</th>
-                    <td>
-                        <ul>
-                            {% for member in room.members %}
-                                <li>
-                                    <a href="{{ path('app_user_show', {'id': member.id}) }}">{{ member.username }}</a>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    </td>
-                </tr>
+                {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+                    <tr>
+                        <th>Members</th>
+                        <td>
+                            <ul>
+                                {% for member in room.members %}
+                                    <li>
+                                        <a href="{{ path('app_user_show', {'id': member.id}) }}">{{ member.username }}</a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                            <hr>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Admins</th>
+                        <td>
+                            <ul>
+                                {% for admin in room.admins %}
+                                    <li>
+                                        <a href="{{ path('app_user_show', {'id': admin.id}) }}">{{ admin.username }}</a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                            <hr>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Groups</th>
+                        <td>
+                            <ul>
+                                {% for group in room.owningGroups %}
+                                    <li>
+                                        <a href="{{ path('app_group_show', {'id': group.id}) }}">{{ group.name }}</a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                    </tr>
+                {% endif %}
             </tbody>
         </table>
 
-        <a href="{{ path('app_room_reservation_new', {'roomId': room.id}) }}">reserve this room</a>
+        {% if is_granted('reservation_create', room) %}
+            <a href="{{ path('app_room_reservation_new', {'roomId': room.id}) }}">reserve this room</a>
+        {% endif %}
 
-        <a href="{{ path('app_room_index') }}">back to list</a>
-
-        <a href="{{ path('app_room_edit', {'id': room.id}) }}">edit</a>
-
-        {{ include('room/_delete_form.html.twig') }}
+        {% if is_granted('room_index_view') %}
+            <a href="{{ path('app_room_index') }}">back to list</a>
+        {% endif %}
+        {% if is_granted('room_edit', room) %}
+            <a href="{{ path('app_room_edit', {'id': room.id}) }}">edit</a>
+        {% endif %}
+        {% if is_granted('room_delete', room) %}
+            {{ include('room/_delete_form.html.twig') }}
+        {% endif %}
 
         <h2>Approved reservations for this room</h2>
-        {{ include('reservation/_list.html.twig', {reservations: approvedReservations}) }}
+        {% if is_granted('room_can_view_full_reservations', room) %}
+            {{ include('reservation/_list.html.twig', {reservations: approvedReservations}) }}
+        {% else %}
+            {{ include('reservation/_list-limited.html.twig', {reservations: approvedReservations}) }}
+        {% endif %}
 
-        <h2>Pending reservations for this room</h2>
-        {{ include('reservation/_list.html.twig', {reservations: pendingReservations}) }}
+        {% if is_granted('room_can_view_pending_reservations', room) %}
+            <h2>Pending reservations for this room</h2>
+            {{ include('reservation/_list.html.twig', {reservations: pendingReservations}) }}
+        {% endif %}
     </div>
     {% include 'components/_footer.html.twig' %}
 {% endblock %}

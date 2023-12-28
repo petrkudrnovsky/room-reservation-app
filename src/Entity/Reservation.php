@@ -46,6 +46,14 @@ class Reservation
     #[ORM\JoinColumn(nullable: false)]
     private ?AppUser $reservedFor = null;
 
+    #[ORM\ManyToMany(targetEntity: AppUser::class, inversedBy: 'visitReservations')]
+    private Collection $visitors;
+
+    public function __construct()
+    {
+        $this->visitors = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -150,6 +158,30 @@ class Reservation
     public function setReservedFor(?AppUser $reservedFor): static
     {
         $this->reservedFor = $reservedFor;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, AppUser>
+     */
+    public function getVisitors(): Collection
+    {
+        return $this->visitors;
+    }
+
+    public function addVisitor(AppUser $visitor): static
+    {
+        if (!$this->visitors->contains($visitor)) {
+            $this->visitors->add($visitor);
+        }
+
+        return $this;
+    }
+
+    public function removeVisitor(AppUser $visitor): static
+    {
+        $this->visitors->removeElement($visitor);
 
         return $this;
     }

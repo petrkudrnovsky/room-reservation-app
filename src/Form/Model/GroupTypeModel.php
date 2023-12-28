@@ -36,6 +36,10 @@ class GroupTypeModel
         foreach ($this->admins as $admin) {
             $group->addAdmin($admin);
         }
+
+        foreach ($group->getRooms() as $room) {
+            $group->removeRoom($room);
+        }
         foreach ($this->rooms as $room) {
             $group->addRoom($room);
         }
@@ -49,6 +53,7 @@ class GroupTypeModel
         $model->name = $group->getName();
         $model->members = new ArrayCollection(iterator_to_array($group->getMembers()));
         $model->admins = new ArrayCollection(iterator_to_array($group->getAdmins()));
+        $model->rooms = new ArrayCollection(iterator_to_array($group->getRooms()));
 
         return $model;
     }
