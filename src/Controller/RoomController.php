@@ -9,6 +9,7 @@ use App\Form\Model\RoomTypeModel;
 use App\Form\RoomType;
 use App\Repository\RoomRepository;
 use App\Service\RoomManager;
+use App\Voter\ReservationVoter;
 use App\Voter\RoomVoter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -71,10 +72,22 @@ class RoomController extends AbstractController
     #[IsGranted(RoomVoter::VIEW_DETAIL, 'room')]
     public function show(Room $room, RoomManager $roomManager): Response
     {
+        $pendingReservations = null;
+        /** @var AppUser $currentUser */
+        $currentUser = $this->getUser();
+        if($this->isGranted(RoomVoter::CAN_VIEW_FULL_RESERVATIONS, $room)) {
+            $pendingReservations = $roomManager->getOrderedReservations($room, Reservation::STATUS_PENDING);
+        }
+        else {
+            /** @var Reservation[] $pendingReservations */
+            $pendingReservations = $roomManager->getOrderedReservations($room, Reservation::STATUS_PENDING);
+            $pendingReservations = array_filter($pendingReservations, fn(Reservation $reservation) => $reservation->getReservedFor() === $currentUser);
+        }
+
         return $this->render('room/show.html.twig', [
             'room' => $room,
             'approvedReservations' => $roomManager->getOrderedReservations($room, Reservation::STATUS_APPROVED),
-            'pendingReservations' => $roomManager->getOrderedReservations($room, Reservation::STATUS_PENDING),
+            'pendingReservations' => $pendingReservations,
         ]);
     }
 

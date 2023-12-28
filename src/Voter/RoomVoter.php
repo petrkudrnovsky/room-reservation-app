@@ -5,6 +5,7 @@ namespace App\Voter;
 use App\Entity\AppUser;
 use App\Entity\Reservation;
 use App\Entity\Room;
+use App\Service\RoomManager;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
@@ -19,6 +20,10 @@ class RoomVoter extends Voter
     const EDIT_ADMINS = 'room_edit_admins';
     const CAN_VIEW_FULL_RESERVATIONS = 'room_can_view_full_reservations';
     const CAN_VIEW_PENDING_RESERVATIONS = 'room_can_view_pending_reservations';
+
+    public function __construct(
+        private RoomManager $roomManager
+    ) {}
 
     protected function supports(string $attribute, mixed $subject): bool
     {
@@ -78,7 +83,8 @@ class RoomVoter extends Voter
             in_array('ROLE_SUPER_ADMIN', $currentUser->getRoles()) ||
             $accessedRoom->isIsPrivate() === false ||
             $accessedRoom->getAdmins()->contains($currentUser) ||
-            $accessedRoom->getMembers()->contains($currentUser)
+            $accessedRoom->getMembers()->contains($currentUser) ||
+            $this->roomManager->hasUserCurrentOrFutureReservations($accessedRoom, $currentUser)
             ) {
             return true;
         }

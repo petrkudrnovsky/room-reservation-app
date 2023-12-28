@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\AppUser;
 use App\Entity\Reservation;
 use App\Form\Model\ReservationTypeModel;
 use App\Form\ReservationType;
@@ -26,8 +27,16 @@ class ReservationController extends AbstractController
         $room = $roomManager->getRoomById($roomId);
         $this->denyAccessUnlessGranted(RoomVoter::VIEW_DETAIL, $room);
 
+        /** @var AppUser $currentUser */
+        $currentUser = $this->getUser();
+        $allReservations = null;
+        if($this->isGranted(RoomVoter::CAN_VIEW_FULL_RESERVATIONS, $room)) {
+            $allReservations = $reservationRepository->findReservationsByRoomId($roomId);
+        }
+
         return $this->render('reservation/index.html.twig', [
-            'reservations' => $reservationRepository->findReservationsByRoomId($roomId),
+            'allReservations' => $allReservations,
+            'userReservations' => $currentUser->getReservations()->filter(fn(Reservation $reservation) => $reservation->getRoom() === $room),
             'room' => $room,
         ]);
     }

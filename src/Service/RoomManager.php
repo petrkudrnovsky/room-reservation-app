@@ -39,6 +39,18 @@ class RoomManager
         return $room;
     }
 
+    public function hasUserCurrentOrFutureReservations(Room $room, AppUser $user): bool
+    {
+        $reservations = $room->getReservations();
+        $today = new \DateTime();
+        foreach ($reservations as $reservation) {
+            if ($reservation->getEndDatetime() >= $today && $reservation->getReservedFor() === $user) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * @param Room $room
      * @return Room[]

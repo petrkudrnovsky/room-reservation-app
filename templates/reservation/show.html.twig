@@ -51,7 +51,7 @@
         {% if is_granted('room_detail_view', reservation.room) %}
             <a href="{{ path('app_room_reservation_index', {'roomId': reservation.room.id}) }}">back to list</a>
         {% endif %}
-        {% if is_granted('reservation_edit') %}
+        {% if is_granted('reservation_edit', reservation) %}
             <a href="{{ path('app_room_reservation_edit', {'id': reservation.id, 'roomId': reservation.room.id}) }}">edit</a>
         {% endif %}
         {% if is_granted('reservation_delete', reservation) %}
