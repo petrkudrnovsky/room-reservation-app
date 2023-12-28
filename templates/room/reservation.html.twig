@@ -10,7 +10,11 @@
         {{ include('reservation/_form.html.twig') }}
 
         <h2>Reservations for this room</h2>
-        {{ include('reservation/_list.html.twig', {reservations: reservations}) }}
+        {% if is_granted('room_can_view_full_reservations', room) %}
+            {{ include('reservation/_list.html.twig', {reservations: approvedReservations}) }}
+        {% else %}
+            {{ include('reservation/_list-limited.html.twig', {reservations: approvedReservations}) }}
+        {% endif %}
 
         {% if is_granted('room_detail_view', room) %}
             <a href="{{ path('app_room_show', {'id': room.id}) }}">back to room detail</a>

@@ -8,6 +8,7 @@ use App\Entity\Room;
 use App\Repository\RoomRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class RoomManager
 {
@@ -31,7 +32,11 @@ class RoomManager
 
     public function getRoomById(int $id): ?Room
     {
-        return $this->roomRepository->find($id);
+        $room = $this->roomRepository->find($id);
+        if(!$room) {
+            throw new NotFoundHttpException('Room not found');
+        }
+        return $room;
     }
 
     /**

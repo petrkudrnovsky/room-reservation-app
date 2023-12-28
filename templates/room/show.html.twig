@@ -83,10 +83,16 @@
         {% endif %}
 
         <h2>Approved reservations for this room</h2>
-        {{ include('reservation/_list.html.twig', {reservations: approvedReservations}) }}
+        {% if is_granted('room_can_view_full_reservations', room) %}
+            {{ include('reservation/_list.html.twig', {reservations: approvedReservations}) }}
+        {% else %}
+            {{ include('reservation/_list-limited.html.twig', {reservations: approvedReservations}) }}
+        {% endif %}
 
-        <h2>Pending reservations for this room</h2>
-        {{ include('reservation/_list.html.twig', {reservations: pendingReservations}) }}
+        {% if is_granted('room_can_view_pending_reservations', room) %}
+            <h2>Pending reservations for this room</h2>
+            {{ include('reservation/_list.html.twig', {reservations: pendingReservations}) }}
+        {% endif %}
     </div>
     {% include 'components/_footer.html.twig' %}
 {% endblock %}

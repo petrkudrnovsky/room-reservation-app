@@ -3,6 +3,7 @@
 namespace App\Voter;
 
 use App\Entity\AppUser;
+use App\Entity\Reservation;
 use App\Entity\Room;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
@@ -16,10 +17,12 @@ class RoomVoter extends Voter
     const DELETE = 'room_delete';
     const EDIT_MEMBERS = 'room_edit_members';
     const EDIT_ADMINS = 'room_edit_admins';
+    const CAN_VIEW_FULL_RESERVATIONS = 'room_can_view_full_reservations';
+    const CAN_VIEW_PENDING_RESERVATIONS = 'room_can_view_pending_reservations';
 
     protected function supports(string $attribute, mixed $subject): bool
     {
-        return in_array($attribute, [self::VIEW_INDEX, self::VIEW_DETAIL, self::CREATE, self::EDIT, self::DELETE, self::EDIT_MEMBERS, self::EDIT_ADMINS]);
+        return in_array($attribute, [self::VIEW_INDEX, self::VIEW_DETAIL, self::CREATE, self::EDIT, self::DELETE, self::EDIT_MEMBERS, self::EDIT_ADMINS, self::CAN_VIEW_FULL_RESERVATIONS, self::CAN_VIEW_PENDING_RESERVATIONS]);
     }
 
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
@@ -53,6 +56,8 @@ class RoomVoter extends Voter
             self::DELETE => $this->canDelete($currentUser),
             self::EDIT_MEMBERS => $this->canEditMembers($currentUser, $accessedRoom),
             self::EDIT_ADMINS => $this->canEditAdmins($currentUser, $accessedRoom),
+            self::CAN_VIEW_FULL_RESERVATIONS => $this->canViewFullReservations($currentUser, $accessedRoom),
+            self::CAN_VIEW_PENDING_RESERVATIONS => $this->canViewPendingReservations($currentUser, $accessedRoom),
             default => throw new \LogicException('This is not valid attribute for this Voter')
         };
     }
@@ -145,6 +150,55 @@ class RoomVoter extends Voter
         if($owningGroups->count() > 0) {
             foreach($owningGroups as $owningGroup) {
                 if($currentUser->getAdminGroups()->contains($owningGroup)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private function canViewFullReservations(AppUser $currentUser, Room $accessedRoom): bool
+    {
+        if(in_array('ROLE_SUPER_ADMIN', $currentUser->getRoles()) ||
+            $accessedRoom->getAdmins()->contains($currentUser)) {
+            return true;
+        }
+
+        $owningGroups = $accessedRoom->getOwningGroups();
+        if($owningGroups->count() > 0) {
+            foreach($owningGroups as $owningGroup) {
+                if($currentUser->getAdminGroups()->contains($owningGroup)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private function canViewPendingReservations(AppUser $currentUser, Room $accessedRoom): bool
+    {
+        if(in_array('ROLE_SUPER_ADMIN', $currentUser->getRoles()) ||
+            $accessedRoom->getAdmins()->contains($currentUser)) {
+            return true;
+        }
+
+        $owningGroups = $accessedRoom->getOwningGroups();
+        if($owningGroups->count() > 0) {
+            foreach($owningGroups as $owningGroup) {
+                if($currentUser->getAdminGroups()->contains($owningGroup)) {
+                    return true;
+                }
+            }
+        }
+
+        $pendingReservations = $accessedRoom->getReservations()->filter(function($reservation) {
+            return $reservation->getStatus() === Reservation::STATUS_PENDING;
+        });
+        if($pendingReservations->count() > 0) {
+            foreach($pendingReservations as $pendingReservation) {
+                if($pendingReservation->getReservedFor() === $currentUser) {
                     return true;
                 }
             }
