@@ -10,6 +10,7 @@ use App\Repository\GroupRepository;
 use App\Service\AppUserManager;
 use App\Service\GroupManager;
 use App\Service\RoomManager;
+use App\Voter\RoomVoter;
 use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Component\HttpFoundation\Request;
@@ -33,6 +34,7 @@ class RoomController extends AbstractFOSRestController
 
     public function list(Request $request): array
     {
+        $this->denyAccessUnlessGranted(RoomVoter::VIEW_INDEX);
         $name = $request->query->get('name');
         $code = $request->query->get('code');
         $buildingId = $request->query->get('buildingId');
@@ -50,6 +52,7 @@ class RoomController extends AbstractFOSRestController
     public function detail(int $id): RoomOutput
     {
         $room = $this->roomManager->getRoomById($id);
+        $this->denyAccessUnlessGranted(RoomVoter::VIEW_DETAIL, $room);
 
         if (!$room) {
             throw $this->createNotFoundException('Room not found');
@@ -67,7 +70,13 @@ class RoomController extends AbstractFOSRestController
     #[Rest\View(statusCode: 201)]
     public function update(?int $id, RoomInput $roomInput, ConstraintViolationListInterface $errors): RoomOutput
     {
-        $room = $id !== null ? $this->findOrFail($id) : new Room();
+        if ($id !== null) {
+            $room = $this->findOrFail($id);
+            $this->denyAccessUnlessGranted(RoomVoter::EDIT, $room);
+        } else {
+            $room = new Room();
+            $this->denyAccessUnlessGranted(RoomVoter::CREATE);
+        }
 
         if ($errors->count() > 0) {
             throw new HttpException(400, message: \implode("\n", \array_map(
@@ -89,6 +98,7 @@ class RoomController extends AbstractFOSRestController
     #[Rest\View(statusCode: 204)]
     public function delete(int $id): void
     {
+        $this->denyAccessUnlessGranted(RoomVoter::DELETE);
         $room = $this->findOrFail($id);
         $this->roomManager->deleteFromDatabase($room);
     }

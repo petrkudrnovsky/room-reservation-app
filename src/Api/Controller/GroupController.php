@@ -14,6 +14,7 @@ use App\Repository\RoomRepository;
 use App\Service\AppUserManager;
 use App\Service\GroupManager;
 use App\Service\RoomManager;
+use App\Voter\GroupVoter;
 use Exception;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
@@ -38,7 +39,7 @@ class GroupController extends AbstractFOSRestController {
     #[Rest\Get('/group', name: 'api_groups_list')]
     #[Rest\View(statusCode: 200)]
     public function list(Request $request): array {
-        $this->denyAccessUnlessGranted('ROLE_USER');
+        $this->denyAccessUnlessGranted(GroupVoter::VIEW_INDEX);
         $name = $request->query->get('name');
 
         $groups = array_map(
@@ -51,10 +52,10 @@ class GroupController extends AbstractFOSRestController {
 
     #[Rest\Get('/group/{id}', name: 'api_groups_detail', requirements: ['id' => '\d+'])]
     #[Rest\View(statusCode: 200)]
-    public function get(int $id): GroupOutput
+    public function detail(int $id): GroupOutput
     {
-        $this->denyAccessUnlessGranted('ROLE_USER');
         $group = $this->findOrFail($id);
+        $this->denyAccessUnlessGranted(GroupVoter::VIEW_DETAIL, $group);
         return GroupOutput::fromEntity($group, $this->getUsersUrls($group, true), $this->getUsersUrls($group, false), $this->getRoomsUrls($group));
     }
 
@@ -68,15 +69,11 @@ class GroupController extends AbstractFOSRestController {
     public function update(?int $id, GroupInput $groupInput, ConstraintViolationListInterface $errors): GroupOutput
     {
         if ($id === null) {
-            $this->denyAccessUnlessGranted('ROLE_SUPER_ADMIN');
+            $this->denyAccessUnlessGranted(GroupVoter::CREATE);
             $group = new Group();
         } else {
             $group = $this->findOrFail($id);
-            if (!$this->isGroupAdmin($this->appUserRepository->find($this->getUser()->getId()), $group) &&
-                !$this->isGranted('ROLE_SUPER_ADMIN'))
-            {
-                throw new HttpException(403, message: 'You are not an admin of this group or a super admin to perform this action!');
-            }
+            $this->denyAccessUnlessGranted(GroupVoter::EDIT, $group);
         }
 
         if ($errors->count() > 0) {
@@ -95,14 +92,7 @@ class GroupController extends AbstractFOSRestController {
     #[Rest\View(statusCode: 204)]
     public function delete(int $id): void
     {
-        $group = $this->findOrFail($id);
-
-        if (!$this->isGroupAdmin($this->appUserRepository->find($this->getUser()->getId()), $group) &&
-            !$this->isGranted('ROLE_SUPER_ADMIN'))
-        {
-            throw new HttpException(403, message: 'You are not an admin of this group or a super admin to perform this action!');
-        }
-
+        $this->denyAccessUnlessGranted(GroupVoter::DELETE);
         $group = $this->findOrFail($id);
         $this->groupManager->removeFromDatabase($group);
     }

@@ -69,9 +69,9 @@ class ReservationManager
     /**
      * @throws Exception
      */
-    public function addReservations(?array $approvedReservations, AppUser $appUser, bool $isApproved): void
+    public function addReservations(?array $reservations, AppUser $appUser, bool $isApproved): void
     {
-        foreach ($approvedReservations as $reservationId) {
+        foreach ($reservations as $reservationId) {
             if (is_numeric($reservationId)){
                 $reservation = $this->reservationRepository->find($reservationId);
                 if ($reservation) {
