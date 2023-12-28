@@ -3,6 +3,8 @@
 namespace App\Service;
 
 use App\Entity\AppUser;
+use App\Entity\Group;
+use App\Entity\Room;
 use App\Repository\AppUserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -84,4 +86,65 @@ class AppUserManager
         return $qb->getQuery()->getResult();
     }
 
+    /**
+     * @throws \Exception
+     */
+    public function addMembers(array $members, ?Group $group = null, ?Room $room = null): void
+    {
+        foreach ($members as $memberId) {
+            if (is_numeric($memberId)) {
+                $member = $this->userRepository->find($memberId);
+                if ($member) {
+                    $group !== null ? $group->addMember($member) : $room->addMember($member);
+                } else {
+                    throw new \Exception('User not found');
+                }
+            } else {
+                throw new \Exception('Member must be an integer value');
+            }
+        }
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function addAdmins(array $admins, ?Group $group = null, ?Room $room = null): void
+    {
+        foreach ($admins as $adminId) {
+            if (is_numeric($adminId)) {
+                $admin = $this->userRepository->find($adminId);
+                if ($admin) {
+                    $group !== null ? $group->addAdmin($admin) : $room->addAdmin($admin);
+                } else {
+                    throw new \Exception('User not found');
+                }
+            } else {
+                throw new \Exception('Admin must be an integer value');
+            }
+        }
+    }
+
+    public function addApprovedReservation(?string $approvedBy, \App\Entity\Reservation $reservation)
+    {
+        if ($approvedBy) {
+            $appUser = $this->userRepository->find($approvedBy);
+            if ($appUser) {
+                $reservation->setApprovedBy($appUser);
+            } else {
+                throw new \Exception('User not found');
+            }
+        }
+    }
+
+    public function addReservedReservation(?string $reservedFor, \App\Entity\Reservation $reservation)
+    {
+        if ($reservedFor) {
+            $appUser = $this->userRepository->find($reservedFor);
+            if ($appUser) {
+                $reservation->setReservedFor($appUser);
+            } else {
+                throw new \Exception('User not found');
+            }
+        }
+    }
 }

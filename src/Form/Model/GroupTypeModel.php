@@ -14,6 +14,7 @@ class GroupTypeModel
     public ?string $name = null;
     public ?Collection $members = null;
     public ?Collection $admins = null;
+    public ?Collection $rooms = null;
 
     public function toEntity(?Group $group = null): Group
     {
@@ -36,6 +37,13 @@ class GroupTypeModel
             $group->addAdmin($admin);
         }
 
+        foreach ($group->getRooms() as $room) {
+            $group->removeRoom($room);
+        }
+        foreach ($this->rooms as $room) {
+            $group->addRoom($room);
+        }
+
         return $group;
     }
 
@@ -45,6 +53,7 @@ class GroupTypeModel
         $model->name = $group->getName();
         $model->members = new ArrayCollection(iterator_to_array($group->getMembers()));
         $model->admins = new ArrayCollection(iterator_to_array($group->getAdmins()));
+        $model->rooms = new ArrayCollection(iterator_to_array($group->getRooms()));
 
         return $model;
     }

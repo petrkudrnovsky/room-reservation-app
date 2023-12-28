@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use DateTime;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: AppUserRepository::class)]
 class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
@@ -372,5 +373,35 @@ class AppUser implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         return $this;
+    }
+
+    public function clearMemberGroups(): void
+    {
+        $this->memberGroups->clear();
+    }
+
+    public function clearAdminGroups(): void
+    {
+        $this->adminGroups->clear();
+    }
+
+    public function clearMemberRooms(): void
+    {
+        $this->memberRooms->clear();
+    }
+
+    public function clearAdminRooms(): void
+    {
+        $this->adminRooms->clear();
+    }
+
+    public function clearApprovedReservations(): void
+    {
+        $this->approvedReservations->clear();
+    }
+
+    public function clearReservations(): void
+    {
+        $this->reservations->clear();
     }
 }
