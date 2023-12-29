@@ -9,6 +9,7 @@ use App\Repository\BuildingRepository;
 use App\Repository\GroupRepository;
 use App\Service\AppUserManager;
 use App\Service\GroupManager;
+use App\Service\ReservationManager;
 use Doctrine\Common\Collections\Collection;
 use Exception;
 use Symfony\Component\Validator\Constraints as Assert;

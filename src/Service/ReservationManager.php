@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\AppUser;
 use App\Entity\Reservation;
+use App\Entity\Room;
 use App\Repository\ReservationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -69,9 +70,9 @@ class ReservationManager
     /**
      * @throws Exception
      */
-    public function addReservations(?array $approvedReservations, AppUser $appUser, bool $isApproved): void
+    public function addReservations(?array $reservations, AppUser $appUser, bool $isApproved): void
     {
-        foreach ($approvedReservations as $reservationId) {
+        foreach ($reservations as $reservationId) {
             if (is_numeric($reservationId)){
                 $reservation = $this->reservationRepository->find($reservationId);
                 if ($reservation) {
@@ -80,6 +81,22 @@ class ReservationManager
                     } else {
                         $reservation->setReservedFor($appUser);
                     }
+                } else {
+                    throw new Exception('Reservation not found');
+                }
+            } else {
+                throw new Exception('Reservation ID must be an integer value');
+            }
+        }
+    }
+
+    public function addReservationsToRoom(?array $reservations, Room $room): void
+    {
+        foreach ($reservations as $reservationId) {
+            if (is_numeric($reservationId)){
+                $reservation = $this->reservationRepository->find($reservationId);
+                if ($reservation) {
+                    $room->addReservation($reservation);
                 } else {
                     throw new Exception('Reservation not found');
                 }
