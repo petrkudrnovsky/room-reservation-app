@@ -18,10 +18,8 @@ use Exception;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
-use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\ConstraintViolationInterface;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -33,10 +31,8 @@ class AppUserController extends AbstractFOSRestController {
         private readonly GroupManager $groupManager,
         private readonly RoomManager $roomManager,
         private readonly ReservationManager $reservationManager,
-        UserPasswordHasherInterface $passwordHasher
-    ) {
-        $this->passwordHasher = $passwordHasher;
-    }
+        private UserPasswordHasherInterface $passwordHasher
+    ) {}
 
     #[Rest\Get('/user', name: 'api_app_users_list')]
     #[Rest\View]
@@ -141,6 +137,12 @@ class AppUserController extends AbstractFOSRestController {
                 fn (ConstraintViolationInterface $constraintViolation) => $constraintViolation->getMessage(),
                 array(...$errors)
             )));
+        }
+
+        if($appUserInput->memberRooms !== null || $appUserInput->adminRooms !== null ||
+            $appUserInput->memberGroups !== null || $appUserInput->adminGroups !== null ||
+            $appUserInput->approvedReservations !== null || $appUserInput->reservations !== null) {
+            throw new HttpException(400, message: 'You cannot set rooms, groups or reservations when registering');
         }
 
         $appUser = $appUserInput->toEntity($appUser);

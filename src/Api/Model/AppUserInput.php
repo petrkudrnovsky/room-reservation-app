@@ -15,9 +15,11 @@ class AppUserInput {
     public ?string $username;
     public array $roles = [];
     public ?string $password;
+    #[Assert\NotBlank]
     public ?string $firstName;
+    #[Assert\NotBlank]
     public ?string $secondName;
-    #[Assert\Email(message: 'Email musí byť platný')]
+    #[Assert\Email(message: 'Email is not valid')]
     public ?string $email = null;
     public ?string $phone = null;
     public ?array $memberGroups = null;
