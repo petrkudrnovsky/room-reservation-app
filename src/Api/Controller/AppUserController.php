@@ -168,7 +168,7 @@ class AppUserController extends AbstractFOSRestController {
         return $appUser;
     }
 
-    public function getGroupsUrls(AppUser $appUser, bool $isAdmin): array
+    private function getGroupsUrls(AppUser $appUser, bool $isAdmin): array
     {
         $groups = $isAdmin ? $appUser->getAdminGroups() : $appUser->getMemberGroups();
         return array_map(
@@ -177,7 +177,7 @@ class AppUserController extends AbstractFOSRestController {
         );
     }
 
-    public function getRoomsUrls(AppUser $appUser, bool $isAdmin): array
+    private function getRoomsUrls(AppUser $appUser, bool $isAdmin): array
     {
         $rooms = $isAdmin ? $appUser->getAdminRooms() : $appUser->getMemberRooms();
         return array_map(
@@ -186,7 +186,7 @@ class AppUserController extends AbstractFOSRestController {
         );
     }
 
-    public function getReservationsUrls(AppUser $appUser, bool $isApproved): array
+    private function getReservationsUrls(AppUser $appUser, bool $isApproved): array
     {
         $reservations = $isApproved ? $appUser->getApprovedReservations() : $appUser->getReservations();
         return array_map(

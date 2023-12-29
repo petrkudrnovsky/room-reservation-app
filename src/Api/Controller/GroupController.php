@@ -14,6 +14,7 @@ use App\Repository\RoomRepository;
 use App\Service\AppUserManager;
 use App\Service\GroupManager;
 use App\Service\RoomManager;
+use App\Voter\GroupVoter;
 use Exception;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
@@ -38,7 +39,7 @@ class GroupController extends AbstractFOSRestController {
     #[Rest\Get('/group', name: 'api_groups_list')]
     #[Rest\View(statusCode: 200)]
     public function list(Request $request): array {
-        $this->denyAccessUnlessGranted('ROLE_USER');
+        $this->denyAccessUnlessGranted(GroupVoter::VIEW_INDEX);
         $name = $request->query->get('name');
 
         $groups = array_map(
@@ -51,10 +52,10 @@ class GroupController extends AbstractFOSRestController {
 
     #[Rest\Get('/group/{id}', name: 'api_groups_detail', requirements: ['id' => '\d+'])]
     #[Rest\View(statusCode: 200)]
-    public function get(int $id): GroupOutput
+    public function detail(int $id): GroupOutput
     {
-        $this->denyAccessUnlessGranted('ROLE_USER');
         $group = $this->findOrFail($id);
+        $this->denyAccessUnlessGranted(GroupVoter::VIEW_DETAIL, $group);
         return GroupOutput::fromEntity($group, $this->getUsersUrls($group, true), $this->getUsersUrls($group, false), $this->getRoomsUrls($group));
     }
 
@@ -68,15 +69,11 @@ class GroupController extends AbstractFOSRestController {
     public function update(?int $id, GroupInput $groupInput, ConstraintViolationListInterface $errors): GroupOutput
     {
         if ($id === null) {
-            $this->denyAccessUnlessGranted('ROLE_SUPER_ADMIN');
+            $this->denyAccessUnlessGranted(GroupVoter::CREATE);
             $group = new Group();
         } else {
             $group = $this->findOrFail($id);
-            if (!$this->isGroupAdmin($this->appUserRepository->find($this->getUser()->getId()), $group) &&
-                !$this->isGranted('ROLE_SUPER_ADMIN'))
-            {
-                throw new HttpException(403, message: 'You are not an admin of this group or a super admin to perform this action!');
-            }
+            $this->denyAccessUnlessGranted(GroupVoter::EDIT, $group);
         }
 
         if ($errors->count() > 0) {
@@ -95,14 +92,7 @@ class GroupController extends AbstractFOSRestController {
     #[Rest\View(statusCode: 204)]
     public function delete(int $id): void
     {
-        $group = $this->findOrFail($id);
-
-        if (!$this->isGroupAdmin($this->appUserRepository->find($this->getUser()->getId()), $group) &&
-            !$this->isGranted('ROLE_SUPER_ADMIN'))
-        {
-            throw new HttpException(403, message: 'You are not an admin of this group or a super admin to perform this action!');
-        }
-
+        $this->denyAccessUnlessGranted(GroupVoter::DELETE);
         $group = $this->findOrFail($id);
         $this->groupManager->removeFromDatabase($group);
     }
@@ -228,7 +218,7 @@ class GroupController extends AbstractFOSRestController {
         return GroupOutput::fromEntity($group, $this->getUsersUrls($group, true), $this->getUsersUrls($group, false), $this->getRoomsUrls($group));
     }
 
-    public function getUsersUrls(Group $group, bool $isMember): array
+    private function getUsersUrls(Group $group, bool $isMember): array
     {
         if ($isMember) {
             return array_map(
@@ -244,7 +234,7 @@ class GroupController extends AbstractFOSRestController {
         }
     }
 
-    public function getRoomsUrls(Group $group): array
+    private function getRoomsUrls(Group $group): array
     {
         return array_map(
             fn ($room) => $this->generateUrl('api_rooms_detail', ['id' => $room->getId()]),
@@ -252,7 +242,7 @@ class GroupController extends AbstractFOSRestController {
         );
     }
 
-    public function findOrFailUser(int $id): AppUser
+    private function findOrFailUser(int $id): AppUser
     {
         $user = $this->appUserRepository->find($id);
 
@@ -263,7 +253,7 @@ class GroupController extends AbstractFOSRestController {
         return $user;
     }
 
-    public function findOrFail(int $id): Group
+    private function findOrFail(int $id): Group
     {
         $group = $this->groupRepository->find($id);
 

@@ -43,7 +43,10 @@ class GroupManager
     /**
      * @throws Exception
      */
-    public function addOwningGroups(array $owningGroups, Room $room): void {
+    public function addOwningGroups(?array $owningGroups, Room $room): void {
+        if (!$owningGroups) {
+            return;
+        }
         foreach ($owningGroups as $groupId) {
             if (is_numeric($groupId)){
                 $group = $this->groupRepository->find($groupId);

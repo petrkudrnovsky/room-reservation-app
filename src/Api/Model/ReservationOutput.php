@@ -15,6 +15,7 @@ class ReservationOutput
     public ?string $roomUrl;
     public ?string $approvedByUrl;
     public ?string $reservedForUrl;
+    public ?array $visitorsUrls;
 
     public function __construct(
         int $id,
@@ -26,6 +27,7 @@ class ReservationOutput
         ?string $roomUrl,
         ?string $approvedByUrl,
         ?string $reservedForUrl,
+        ?array $visitorsUrls
     )
     {
         $this->id = $id;
@@ -37,6 +39,7 @@ class ReservationOutput
         $this->roomUrl = $roomUrl;
         $this->approvedByUrl = $approvedByUrl;
         $this->reservedForUrl = $reservedForUrl;
+        $this->visitorsUrls = $visitorsUrls;
     }
 
     public static function fromEntity(
@@ -44,6 +47,7 @@ class ReservationOutput
         ?string $roomUrl,
         ?string $approvedByUrl,
         ?string $reservedForUrl,
+        ?array $visitorsUrls
     ): self
     {
         return new self(
@@ -56,6 +60,7 @@ class ReservationOutput
             $roomUrl,
             $approvedByUrl,
             $reservedForUrl,
+            $visitorsUrls
         );
     }
 

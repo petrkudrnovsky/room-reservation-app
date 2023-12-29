@@ -235,4 +235,9 @@ class Room
     {
         $this->admins->clear();
     }
+
+    public function clearReservations(): void
+    {
+        $this->reservations->clear();
+    }
 }

@@ -17,6 +17,7 @@ class ReservationInput
     public ?int $room = null;
     public ?int $approvedBy = null;
     public ?int $reservedFor = null;
+    public ?array $visitorsUrls = null;
 
     /**
      * @throws Exception

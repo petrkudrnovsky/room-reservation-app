@@ -13,6 +13,7 @@ class RoomOutput
     public array $owningGroups;
     public array $members;
     public array $admins;
+    public array $reservations;
     public string $building;
 
     public function __construct(
@@ -23,6 +24,7 @@ class RoomOutput
         array $owningGroups,
         array $members,
         array $admins,
+        array $reservations,
         string $building
     ) {
         $this->id = $id;
@@ -32,10 +34,16 @@ class RoomOutput
         $this->owningGroups = $owningGroups;
         $this->members = $members;
         $this->admins = $admins;
+        $this->reservations = $reservations;
         $this->building = $building;
     }
 
-    public static function fromEntity(Room $entity, array $membersUrls, array $adminsUrls, array $owningGroupsUrls ): self
+    public static function fromEntity(
+        Room $entity,
+        array $membersUrls,
+        array $adminsUrls,
+        array $owningGroupsUrls,
+        array $reservationUrls ): self
     {
         return new self(
             $entity->getId(),
@@ -45,6 +53,7 @@ class RoomOutput
             $owningGroupsUrls,
             $membersUrls,
             $adminsUrls,
+            $reservationUrls,
             $entity->getBuilding()->getName()
         );
     }
