@@ -71,9 +71,15 @@ class RoomManager
         return $orderedReservations;
     }
 
-    public function findRoomsByFilters(?string $name, ?string $code, ?int $buildingId): array
+    public function findRoomsByFilters(?string $name, ?string $code, ?string $buildingCode, $filter): array
     {
         $qb = $this->roomRepository->createQueryBuilder('a');
+
+        foreach ($filter as $key => $value) {
+            if ($value) {
+                $filter[$key] = explode(',', $value);
+            }
+        }
 
         if ($name) {
             $pattern = '%' . strtolower($name) . '%';
@@ -87,9 +93,28 @@ class RoomManager
                 ->setParameter('pattern', $pattern);
         }
 
-        if ($buildingId) {
-            $qb->andWhere('a.building = :buildingId')
-                ->setParameter('buildingId', $buildingId);
+        if ($buildingCode) {
+            $qb->innerJoin('a.building', 'b')
+                ->andWhere('b.code = :buildingCode')
+                ->setParameter('buildingCode', $buildingCode);
+        }
+
+        if ($filter['owningGroups']) {
+            $qb->innerJoin('a.owningGroups', 'og')
+                ->andWhere('og.id IN (:owningGroups)')
+                ->setParameter('owningGroups', $filter['owningGroups']);
+        }
+
+        if ($filter['members']) {
+            $qb->innerJoin('a.members', 'm')
+                ->andWhere('m.id IN (:members)')
+                ->setParameter('members', $filter['members']);
+        }
+
+        if ($filter['admins']) {
+            $qb->innerJoin('a.admins', 'ad')
+                ->andWhere('ad.id IN (:admins)')
+                ->setParameter('admins', $filter['admins']);
         }
 
         return $qb->getQuery()->getResult();

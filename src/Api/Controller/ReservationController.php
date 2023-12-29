@@ -33,8 +33,14 @@ class ReservationController extends AbstractFOSRestController
     public function list(Request $request): array
     {
         $this->denyAccessUnlessGranted(ReservationVoter::VIEW_INDEX_ALL);
-        $title = $request->query->get('title');
-        $description = $request->query->get('description');
+
+        $filter = [
+            'title' => $request->query->get('title'),
+            'status' => $request->query->get('status'),
+            'room' => $request->query->get('room'),
+            'reservedFor' => $request->query->get('reserved_for'),
+            'visitors' => $request->query->get('visitors'),
+        ];
 
         $reservations = array_map(
             fn (Reservation $entity) => ReservationOutput::fromEntity(
@@ -44,7 +50,7 @@ class ReservationController extends AbstractFOSRestController
                 $this->generateUrlIfNotNull($entity->getReservedFor(), 'api_app_users_detail'),
                 $this->getVisitorsUrls($entity),
             ),
-            $this->reservationManager->findReservationsByFilters($title, $description)
+            $this->reservationManager->findReservationsByFilters($filter)
         );
 
         return ['reservations' => $reservations];

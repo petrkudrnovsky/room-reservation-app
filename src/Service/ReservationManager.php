@@ -6,6 +6,7 @@ use App\Entity\AppUser;
 use App\Entity\Reservation;
 use App\Entity\Room;
 use App\Repository\ReservationRepository;
+use App\Repository\RoomRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -36,32 +37,48 @@ class ReservationManager
         return $reservation;
     }
 
-    public function getReservationsForUser(AppUser $user): array
-    {
-        $userReservations = null;
-        $reservationRepository->findReservationsByUser($currentUser, $userReservations, $userVisitingReservations);
-
-    }
+//    public function getReservationsForUser(AppUser $user): array
+//    {
+//        $userReservations = null;
+//        $reservationRepository->findReservationsByUser($currentUser, $userReservations, $userVisitingReservations);
+//
+//    }
 
     public function findById(int $id): ?Reservation
     {
         return $this->reservationRepository->find($id);
     }
 
-    public function findReservationsByFilters(?string $title, ?string $description): array
+    public function findReservationsByFilters($filter): array
     {
         $qb = $this->reservationRepository->createQueryBuilder('a');
+        $filter['visitors'] = $filter['visitors'] ? explode(',', $filter['visitors']) : [];
 
-        if ($description) {
-            $pattern = '%' . strtolower($description) . '%';
-            $qb->andWhere('LOWER(a.description) LIKE :pattern')
-                ->setParameter('pattern', $pattern);
+        if ($filter['title']) {
+            $pattern = '%' . strtolower($filter['title']) . '%';
+            $qb->andWhere('LOWER(a.title) LIKE :titlePattern')
+                ->setParameter('titlePattern', $pattern);
         }
 
-        if ($title) {
-            $pattern = '%' . strtolower($title) . '%';
-            $qb->andWhere('LOWER(a.title) LIKE :pattern')
-                ->setParameter('pattern', $pattern);
+        if ($filter['status']) {
+            $qb->andWhere('a.status = :status')
+                ->setParameter('status', $filter['status']);
+        }
+
+        if ($filter['room']) {
+            $qb->andWhere('a.room = :room')
+                ->setParameter('room', $filter['room']);
+        }
+
+        if ($filter['reservedFor']) {
+            $qb->andWhere('a.reservedFor = :reservedFor')
+                ->setParameter('reservedFor', $filter['reservedFor']);
+        }
+
+        if ($filter['visitors']) {
+            $qb->innerJoin('a.visitors', 'v')
+                ->andWhere('v.id IN (:visitors)')
+                ->setParameter('visitors', $filter['visitors']);
         }
 
         return $qb->getQuery()->getResult();
