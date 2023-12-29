@@ -8,7 +8,7 @@ class ReservationOutput
 {
     public int $id;
     public string $title;
-    public string $description;
+    public ?string $description;
     public \DateTime $startDatetime;
     public \DateTime $endDatetime;
     public string $status;
@@ -20,7 +20,7 @@ class ReservationOutput
     public function __construct(
         int $id,
         string $title,
-        string $description,
+        ?string $description,
         \DateTime $startDatetime,
         \DateTime $endDatetime,
         string $status,

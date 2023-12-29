@@ -95,7 +95,8 @@ class ReservationVoter extends Voter
         if(
             in_array('ROLE_SUPER_ADMIN', $currentUser->getRoles()) ||
             $accessedReservation->getRoom()->getAdmins()->contains($currentUser) ||
-            $accessedReservation->getReservedFor() === $currentUser
+            $accessedReservation->getReservedFor() === $currentUser ||
+            $accessedReservation->getVisitors()->contains($currentUser)
         ) {
             return true;
         }
