@@ -18,6 +18,7 @@ body {
 
 .content-wrapper {
     flex-grow: 1;
+    padding: var(--space-l);
 }
 
 h1 {
@@ -80,7 +81,7 @@ nav {
 
 .form-button {
     padding: var(--space-s) var(--space-xl);
-    margin: var(--space-m) 0;
+    margin-right: var(--space-s);
     border: none;
     border-radius: var(--space-xs);
     font-size: var(--font-size);
@@ -94,20 +95,28 @@ nav {
 }
 
 .form-button__delete {
-    background-color: var(--color-danger);
+    background-color: var(--color-error);
+    border: 1px solid var(--color-error);
     color: var(--color-tertiary);
 }
 
-/* Modifier: hover state of button */
+.form-button__success {
+    background-color: var(--color-success);
+    border: 1px solid var(--color-success);
+    color: var(--color-tertiary);
+}
+
+.form-button__success:hover {
+    background-color: var(--color-light-success);
+}
+
 .form-button__confirm:hover {
     background-color: var(--color-white);
     color: var(--color-primary);
 }
 
 .form-button__delete:hover {
-    background-color: var(--color-white);
-    color: var(--color-danger);
-    border: 1px solid var(--color-danger);
+    background-color: var(--color-light-error);
 }
 
 /* Element: button wrapper within login-form */
@@ -215,14 +224,6 @@ footer p, footer a {
     margin-right: var(--space-s);
 }
 
-.user__profile {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin: 0 auto;
-    padding: var(--space-m);
-}
-
 .flash {
     display: block;
     position: fixed;
@@ -250,6 +251,27 @@ footer p, footer a {
 
 .flash__info {
     background-color: var(--color-info);
+}
+
+.action-link {
+    display: inline-block;
+    padding: 7px var(--space-xl);
+    background-color: var(--color-primary);
+    margin-right: var(--space-s);
+    color: var(--color-tertiary);
+    text-align: center;
+    border-radius: var(--space-xs);
+    text-decoration: none;
+}
+
+.action-link:hover {
+    background-color: var(--color-secondary);
+}
+
+.actions {
+    display: flex;
+    align-items: flex-start;
+    margin-top: var(--space-m);
 }
 
 

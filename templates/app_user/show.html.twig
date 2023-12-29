@@ -4,112 +4,104 @@
 
 {% block body %}
     {% include 'components/_header.html.twig' %}
-    <div class="content-wrapper user__profile">
-        <div class="user__profile">
-            <h1>User: {{ app_user.firstName }} {{ app_user.secondName }}</h1>
 
-            <table class="table">
-                <tbody>
-                    <tr>
-                        <th>Username</th>
-                        <td>{{ app_user.username }}</td>
-                    </tr>
-                    <tr>
-                        <th>Roles</th>
-                        <td>{{ app_user.roles ? app_user.roles|json_encode : '' }}</td>
-                    </tr>
-                    <tr>
-                        <th>First name</th>
-                        <td>{{ app_user.firstName }}</td>
-                    </tr>
-                    <tr>
-                        <th>Second name</th>
-                        <td>{{ app_user.secondName }}</td>
-                    </tr>
-                    <tr>
-                        <th>Email</th>
-                        <td>{{ app_user.email }}</td>
-                    </tr>
-                    <tr>
-                        <th>Phone</th>
-                        <td>{{ app_user.phone }}</td>
-                    </tr>
-                    <tr>
-                        <th>Member of these rooms:</th>
-                        <td>
-                            <ul>
-                                {% for room in app_user.memberRooms %}
-                                    <li>
-                                        <a href="{{ path('app_room_show', {'id': room.id}) }}">{{ room.codeName }}</a>
-                                    </li>
-                                {% else %}
-                                    <li>No rooms found</li>
-                                {% endfor %}
-                                <hr>
-                            </ul>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Admin of these rooms:</th>
-                        <td>
-                            <ul>
-                                {% for room in app_user.adminRooms %}
-                                    <li>
-                                        <a href="{{ path('app_room_show', {'id': room.id}) }}">{{ room.codeName }}</a>
-                                    </li>
-                                {% else %}
-                                    <li>No rooms found</li>
-                                {% endfor %}
-                                <hr>
-                            </ul>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Member of these groups:</th>
-                        <td>
-                            <ul>
-                                {% for group in app_user.memberGroups %}
-                                    <li>
-                                        <a href="{{ path('app_group_show', {'id': group.id}) }}">{{ group.name }}</a>
-                                    </li>
-                                {% else %}
-                                    <li>No groups found</li>
-                                {% endfor %}
-                                <hr>
-                            </ul>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Admin of these groups:</th>
-                        <td>
-                            <ul>
-                                {% for group in app_user.adminGroups %}
-                                    <li>
-                                        <a href="{{ path('app_group_show', {'id': group.id}) }}">{{ group.name }}</a>
-                                    </li>
-                                {% else %}
-                                    <li>No groups found</li>
-                                {% endfor %}
-                            </ul>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+    <main class="content-wrapper user__profile">
+        <section class="user-info">
+            <h2>User: {{ app_user.firstName }} {{ app_user.secondName }}</h2>
+            <div class="info-item">
+                <span>Username:</span>
+                <span>{{ app_user.username }}</span>
+            </div>
+            <div class="info-item">
+                <span>Roles:</span>
+                <div>
+                    {% for role in app_user.roles %}
+                        <span class="badge badge-{{ role }}">{{ role }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="info-item">
+                <span>First name:</span>
+                <span>{{ app_user.firstName }}</span>
+            </div>
+            <div class="info-item">
+                <span>Second name:</span>
+                <span>{{ app_user.secondName }}</span>
+            </div>
+            <div class="info-item">
+                <span>Email:</span>
+                <span>{{ app_user.email }}</span>
+            </div>
+            <div class="info-item">
+                <span>Phone:</span>
+                <span>{{ app_user.phone }}</span>
+            </div>
+            <aside class="user-rooms">
+                <div class="tag-item">
+                    <span>Member of these rooms:</span>
+                    <ul>
+                        {% for room in app_user.memberRooms %}
+                            <li>
+                                <a href="{{ path('app_room_show', {'id': room.id}) }}">{{ room.codeName }}</a>
+                            </li>
+                        {% else %}
+                            <li>No rooms found</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="tag-item">
+                    <span>Admin of these rooms:</span>
+                    <ul>
+                        {% for room in app_user.adminRooms %}
+                            <li>
+                                <a href="{{ path('app_room_show', {'id': room.id}) }}">{{ room.codeName }}</a>
+                            </li>
+                        {% else %}
+                            <li>No rooms found</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="tag-item">
+                    <span>Member of these groups:</span>
+                    <ul>
+                        {% for group in app_user.memberGroups %}
+                            <li>
+                                <a href="{{ path('app_group_show', {'id': group.id}) }}">{{ group.name }}</a>
+                            </li>
+                        {% else %}
+                            <li>No groups found</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="tag-item">
+                    <span>Admin of these groups:</span>
+                    <ul>
+                        {% for group in app_user.adminGroups %}
+                            <li>
+                                <a href="{{ path('app_group_show', {'id': group.id}) }}">{{ group.name }}</a>
+                            </li>
+                        {% else %}
+                            <li>No groups found</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </aside>
+            <div class="actions">
+                {% if is_granted('app_index_view', app_user) %}
+                    <a href="{{ path('app_user_index') }}" class="action-link">Back to list</a>
+                {% endif %}
+                {% if is_granted('user_edit', app_user) %}
+                    <a href="{{ path('app_user_edit', {'id': app_user.id}) }}" class="action-link">Edit</a>
+                {% endif %}
+                {% if is_granted('user_delete', app_user) %}
+                    {{ include('app_user/_delete_form.html.twig') }}
+                {% endif %}
+            </div>
+        </section>
+        <div class="reservations">
+            <h2>Reservations</h2>
+            {{ include('reservation/_list.html.twig', {'reservations': app_user.reservations}) }}
         </div>
-
-        <div class="form__button-wrapper">
-            {% if is_granted('app_index_view', app_user) %}
-                <a href="{{ path('app_user_index') }}">back to list</a>
-            {% endif %}
-            {% if is_granted('user_edit', app_user) %}
-                <a href="{{ path('app_user_edit', {'id': app_user.id}) }}">edit</a>
-            {% endif %}
-            {% if is_granted('user_delete', app_user) %}
-                {{ include('app_user/_delete_form.html.twig') }}
-            {% endif %}
-        </div>
-
-        {{ include('reservation/_list.html.twig', {'reservations': app_user.reservations}) }}
-    </div>
+    </main>
     {% include 'components/_footer.html.twig' %}
 {% endblock %}

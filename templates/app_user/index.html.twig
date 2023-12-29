@@ -15,7 +15,11 @@
                         </a>
                     </strong>
                     <span class="user-list__text">Username: {{ app_user.username }}</span>
-                    <span class="user-list__text">Role: {{ app_user.roles ? app_user.roles|json_encode : '' }}</span>
+                    <div>
+                        {% for role in app_user.roles %}
+                            <span class="badge badge-{{ role }}">{{ role }}</span>
+                        {% endfor %}
+                    </div>
                     <div class="user-list__item--actions">
                         <a href="{{ path('app_user_edit', {'id': app_user.id}) }}" class="user-list__edit-link">Edit</a>
                         <a href="{{ path('app_user_show', {'id': app_user.id}) }}" class="user-list__detail-link">Detail</a>
