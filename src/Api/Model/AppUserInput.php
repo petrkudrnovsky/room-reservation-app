@@ -11,13 +11,14 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class AppUserInput {
     public ?int $id;
-    #[Assert\NotBlank]
+    #[Assert\NotBlank(message: 'Username cannot be blank')]
     public ?string $username;
     public array $roles = [];
+    #[Assert\NotBlank(message: 'Password cannot be blank')]
     public ?string $password;
-    #[Assert\NotBlank]
+    #[Assert\NotBlank(message: 'First name cannot be blank')]
     public ?string $firstName;
-    #[Assert\NotBlank]
+    #[Assert\NotBlank(message: 'Second name cannot be blank')]
     public ?string $secondName;
     #[Assert\Email(message: 'Email is not valid')]
     public ?string $email = null;

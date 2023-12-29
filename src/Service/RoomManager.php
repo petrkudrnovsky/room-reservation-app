@@ -119,6 +119,9 @@ class RoomManager
      */
     public function addUserRooms(?array $memberRooms, AppUser $appUser, bool $false): void
     {
+        if (!$memberRooms) {
+            return;
+        }
         foreach ($memberRooms as $roomId) {
             $room = $this->roomRepository->find($roomId);
             if ($room) {

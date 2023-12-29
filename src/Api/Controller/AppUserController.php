@@ -91,7 +91,11 @@ class AppUserController extends AbstractFOSRestController {
     public function update(?int $id, AppUserInput $appUserInput, ConstraintViolationListInterface $errors): AppUserOutput
     {
         $appUser = $id !== null ? $this->findOrFail($id) : new AppUser();
-        $this->denyAccessUnlessGranted(UserVoter::EDIT, $appUser);
+        if($id === null) {
+            $this->denyAccessUnlessGranted(UserVoter::CREATE);
+        } else {
+            $this->denyAccessUnlessGranted(UserVoter::EDIT, $appUser);
+        }
 
         if ($errors->count() > 0) {
             throw new HttpException(400, message: \implode("\n", \array_map(
@@ -139,13 +143,17 @@ class AppUserController extends AbstractFOSRestController {
             )));
         }
 
+        if ($appUserInput->password === null) {
+            throw new HttpException(400, message: 'Password is required');
+        }
+
         if($appUserInput->memberRooms !== null || $appUserInput->adminRooms !== null ||
             $appUserInput->memberGroups !== null || $appUserInput->adminGroups !== null ||
             $appUserInput->approvedReservations !== null || $appUserInput->reservations !== null) {
             throw new HttpException(400, message: 'You cannot set rooms, groups or reservations when registering');
         }
 
-        $appUser = $appUserInput->toEntity($appUser);
+        $appUser = $appUserInput->toEntity($appUser, $this->groupManager, $this->roomManager, $this->reservationManager);
         $appUser->setRoles(['ROLE_USER']);
         $hashedPassword = $this->passwordHasher->hashPassword($appUser, $appUserInput->getPlainPassword());
         $appUser->setPassword($hashedPassword);

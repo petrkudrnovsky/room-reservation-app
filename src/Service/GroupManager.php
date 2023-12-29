@@ -67,6 +67,9 @@ class GroupManager
      */
     public function addUserGroups(?array $memberGroups, AppUser $appUser, bool $isAdmin): void
     {
+        if (!$memberGroups) {
+            return;
+        }
         foreach ($memberGroups as $groupId) {
             $group = $this->groupRepository->find($groupId);
             if ($group) {
