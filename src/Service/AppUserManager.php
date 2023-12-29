@@ -161,4 +161,10 @@ class AppUserManager
             }
         }
     }
+
+    public function isUniqueUsername(string $username): bool
+    {
+        $appUser = $this->userRepository->findOneBy(array('username' => $username));
+        return $appUser === null;
+    }
 }
