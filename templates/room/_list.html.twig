@@ -15,6 +15,7 @@
             <td>{{ room.name }}</td>
             <td>{{ room.codeName }}</td>
             <td>{{ room.isPrivate ? 'Yes' : 'No' }}</td>
+            <td>{{ room.isLocked ? 'Yes' : 'No' }}</td>
             <td>
                 {% if is_granted('room_detail_view', room) %}
                     <a href="{{ path('app_room_show', {'id': room.id}) }}">show</a>
