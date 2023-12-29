@@ -8,6 +8,7 @@ use App\Api\Model\GroupOutput;
 use App\Api\Model\RoomInput;
 use App\Entity\AppUser;
 use App\Entity\Group;
+use App\Entity\Room;
 use App\Repository\AppUserRepository;
 use App\Repository\GroupRepository;
 use App\Repository\RoomRepository;
@@ -105,7 +106,9 @@ class GroupController extends AbstractFOSRestController {
         $group = $this->findOrFail($id);
         $user = $this->findOrFailUser($appUserInput->id);
 
-        if (!$this->isGroupAdmin($this->appUserRepository->find($this->getUser()->getId()), $group) &&
+        /** @var AppUser $currentUser */
+        $currentUser = $this->getUser();
+        if (!$this->isGroupAdmin($this->appUserRepository->find($currentUser->getId()), $group) &&
             !$this->isGranted('ROLE_SUPER_ADMIN'))
         {
             throw new HttpException(403, message: 'You are not an admin of this group or a super admin to perform this action!');
@@ -123,10 +126,16 @@ class GroupController extends AbstractFOSRestController {
         $group = $this->findOrFail($id);
         $user = $this->findOrFailUser($userId);
 
-        if (!$this->isGroupAdmin($this->appUserRepository->find($this->getUser()->getId()), $group) &&
+        /** @var AppUser $currentUser */
+        $currentUser = $this->getUser();
+        if (!$this->isGroupAdmin($this->appUserRepository->find($currentUser->getId()), $group) &&
             !$this->isGranted('ROLE_SUPER_ADMIN'))
         {
             throw new HttpException(403, message: 'You are not an admin of this group or a super admin to perform this action!');
+        }
+
+        if(!$group->getMembers()->contains($user)) {
+            throw new HttpException(400, message: 'This user is not a member of this group!');
         }
 
         $group->removeMember($user);
@@ -142,10 +151,9 @@ class GroupController extends AbstractFOSRestController {
         $group = $this->findOrFail($id);
         $user = $this->findOrFailUser($appUserInput->id);
 
-        if (!$this->isGroupAdmin($this->appUserRepository->find($this->getUser()->getId()), $group) &&
-            !$this->isGranted('ROLE_SUPER_ADMIN'))
+        if (!$this->isGranted('ROLE_SUPER_ADMIN'))
         {
-            throw new HttpException(403, message: 'You are not an admin of this group or a super admin to perform this action!');
+            throw new HttpException(403, message: 'You are not a super admin to perform this action!');
         }
 
         $group->addAdmin($user);
@@ -160,10 +168,13 @@ class GroupController extends AbstractFOSRestController {
         $group = $this->findOrFail($id);
         $user = $this->findOrFailUser($userId);
 
-        if (!$this->isGroupAdmin($this->appUserRepository->find($this->getUser()->getId()), $group) &&
-            !$this->isGranted('ROLE_SUPER_ADMIN'))
+        if (!$this->isGranted('ROLE_SUPER_ADMIN'))
         {
-            throw new HttpException(403, message: 'You are not an admin of this group or a super admin to perform this action!');
+            throw new HttpException(403, message: 'You are not a super admin to perform this action!');
+        }
+
+        if(!$group->getAdmins()->contains($user)) {
+            throw new HttpException(400, message: 'This user is not an admin of this group!');
         }
 
         $group->removeAdmin($user);
@@ -179,16 +190,14 @@ class GroupController extends AbstractFOSRestController {
         $group = $this->findOrFail($id);
 
         $roomId = $roomInput->id;
-        $room = $this->roomRepository->find($roomId);
+        $room = $this->findOrFailRoom($roomId);
 
-        if (!$this->isGroupAdmin($this->appUserRepository->find($this->getUser()->getId()), $group) &&
+        /** @var AppUser $currentUser */
+        $currentUser = $this->getUser();
+        if (!$this->isGroupAdmin($this->appUserRepository->find($currentUser->getId()), $group) &&
             !$this->isGranted('ROLE_SUPER_ADMIN'))
         {
             throw new HttpException(403, message: 'You are not an admin of this group or a super admin to perform this action!');
-        }
-
-        if (!$room) {
-            throw $this->createNotFoundException('Room not found');
         }
 
         $group->addRoom($room);
@@ -201,16 +210,18 @@ class GroupController extends AbstractFOSRestController {
     public function removeRoom(int $id, int $roomId): GroupOutput
     {
         $group = $this->findOrFail($id);
-        $room = $this->roomRepository->find($roomId);
+        $room = $this->findOrFailRoom($roomId);
 
-        if (!$this->isGroupAdmin($this->appUserRepository->find($this->getUser()->getId()), $group) &&
+        /** @var AppUser $currentUser */
+        $currentUser = $this->getUser();
+        if (!$this->isGroupAdmin($this->appUserRepository->find($currentUser->getId()), $group) &&
             !$this->isGranted('ROLE_SUPER_ADMIN'))
         {
             throw new HttpException(403, message: 'You are not an admin of this group or a super admin to perform this action!');
         }
 
-        if (!$room) {
-            throw $this->createNotFoundException('Room not found');
+        if(!$group->getRooms()->contains($room)) {
+            throw new HttpException(400, message: 'This room is not part of this group!');
         }
 
         $group->removeRoom($room);
@@ -251,6 +262,17 @@ class GroupController extends AbstractFOSRestController {
         }
 
         return $user;
+    }
+
+    private function findOrFailRoom(int $id): Room
+    {
+        $room = $this->roomRepository->find($id);
+
+        if (!$room) {
+            throw $this->createNotFoundException('Room not found');
+        }
+
+        return $room;
     }
 
     private function findOrFail(int $id): Group
