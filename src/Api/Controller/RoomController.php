@@ -55,7 +55,7 @@ class RoomController extends AbstractFOSRestController
 
         // restrict rooms to those that are accessible by current user, public or have an approved reservation for current user
         $roomsOutput = array_filter(
-            $this->roomManager->findRoomsByFilters($name, $code, $buildingId),
+            $this->roomManager->findRoomsByFilters($name, $code, $buildingCode, $filter),
             fn (Room $room) => $this->isGranted(RoomVoter::VIEW_DETAIL, $room)
                 || $room->isIsPrivate() === false
                 || $this->roomManager->hasApprovedReservation($room, $currentUser)
