@@ -39,17 +39,25 @@ class GroupController extends AbstractFOSRestController {
 
     #[Rest\Get('/group', name: 'api_groups_list')]
     #[Rest\View(statusCode: 200)]
-    public function list(Request $request): array {
+    public function list(Request $request): array
+    {
         $this->denyAccessUnlessGranted(GroupVoter::VIEW_INDEX);
+
         $name = $request->query->get('name');
+        $filters = [
+            'members' => $request->query->get('members'),
+            'admins' => $request->query->get('admins'),
+            'rooms' => $request->query->get('rooms'),
+        ];
 
         $groups = array_map(
-            fn (Group $entity) => GroupOutput::fromEntity($entity, $this->getUsersUrls($entity, true), $this->getUsersUrls($entity, false), $this->getRoomsUrls($entity)),
-            $this->groupManager->findGroupsByName($name)
+            fn(Group $entity) => GroupOutput::fromEntity($entity, $this->getUsersUrls($entity, true), $this->getUsersUrls($entity, false), $this->getRoomsUrls($entity)),
+            $this->groupManager->findGroupsByFilters($name, $filters)
         );
 
         return ['groups' => $groups];
     }
+
 
     #[Rest\Get('/group/{id}', name: 'api_groups_detail', requirements: ['id' => '\d+'])]
     #[Rest\View(statusCode: 200)]

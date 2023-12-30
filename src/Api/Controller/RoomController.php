@@ -40,9 +40,15 @@ class RoomController extends AbstractFOSRestController
     public function list(Request $request): array
     {
         $this->denyAccessUnlessGranted(RoomVoter::VIEW_INDEX);
+
         $name = $request->query->get('name');
         $code = $request->query->get('code');
-        $buildingId = $request->query->get('buildingId');
+        $buildingCode = $request->query->get('building_code');
+        $filter = [
+            'owningGroups' => $request->query->get('owning_groups'),
+            'members' => $request->query->get('members'),
+            'admins' => $request->query->get('admins'),
+        ];
 
         /** @var AppUser $currentUser */
         $currentUser = $this->getUser();
@@ -62,7 +68,7 @@ class RoomController extends AbstractFOSRestController
                 $this->getUsersUrls($entity, false),
                 $this->getGroupsUrls($entity),
                 $this->getReservationsUrls($entity)),
-            $roomsOutput
+            $this->roomManager->findRoomsByFilters($name, $code, $buildingCode, $filter)
         );
 
         return ['rooms' => $rooms];
