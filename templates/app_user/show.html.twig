@@ -3,9 +3,10 @@
 {% block title %}AppUser{% endblock %}
 
 {% block body %}
-    {% include 'components/_header.html.twig' %}
-
-    <main class="content-wrapper user__profile">
+    {% if is_granted('app_index_view', app_user) %}
+        <a href="{{ path('app_user_index') }}" class="back-link">Back to list</a>
+    {% endif %}
+    <main class="user__profile">
         <section class="user-info">
             <h2>User: {{ app_user.firstName }} {{ app_user.secondName }}</h2>
             <div class="info-item">
@@ -87,9 +88,6 @@
                 </div>
             </aside>
             <div class="actions">
-                {% if is_granted('app_index_view', app_user) %}
-                    <a href="{{ path('app_user_index') }}" class="action-link">Back to list</a>
-                {% endif %}
                 {% if is_granted('user_edit', app_user) %}
                     <a href="{{ path('app_user_edit', {'id': app_user.id}) }}" class="action-link">Edit</a>
                 {% endif %}
@@ -99,9 +97,8 @@
             </div>
         </section>
         <div class="reservations">
-            <h2>Reservations</h2>
+            <h2>My reservations</h2>
             {{ include('reservation/_list.html.twig', {'reservations': app_user.reservations}) }}
         </div>
     </main>
-    {% include 'components/_footer.html.twig' %}
 {% endblock %}

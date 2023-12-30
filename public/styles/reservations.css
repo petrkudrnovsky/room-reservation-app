@@ -21,7 +21,6 @@
 
 .reservation-info {
     display: flex;
-    flex-wrap: wrap;
     gap: var(--space-s);
     border-top: 1px solid var(--color-white);
     padding-top: var(--space-s);
@@ -37,6 +36,8 @@
     display: flex;
     gap: var(--space-s);
     padding-top: var(--space-s);
+    flex-wrap: wrap;
+    justify-content: flex-start;
 }
 
 .reservation-info {

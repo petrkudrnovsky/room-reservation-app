@@ -3,18 +3,14 @@
 {% block title %}Edit Reservation{% endblock %}
 
 {% block body %}
-    {% include 'components/_header.html.twig' %}
-    <div class="content-wrapper">
-        <h1>Edit Reservation (room {{ reservation.room.codeName }})</h1>
+    {% if is_granted('room_detail_view', reservation.room) %}
+        <a href="{{ path('app_room_reservation_index', {'roomId': reservation.room.id}) }}" class="back-link">back to list</a>
+    {% endif %}
+    <h1>Edit Reservation (room {{ reservation.room.codeName }})</h1>
 
-        {{ include('reservation/_form.html.twig', {'button_label': 'Update'}) }}
+    {{ include('reservation/_form.html.twig', {'button_label': 'Update'}) }}
 
-        {% if is_granted('room_detail_view', reservation.room) %}
-            <a href="{{ path('app_room_reservation_index', {'roomId': reservation.room.id}) }}">back to list</a>
-        {% endif %}
-        {% if is_granted('room_delete', reservation) %}
-            {{ include('reservation/_delete_form.html.twig') }}
-        {% endif %}
-    </div>
-    {% include 'components/_footer.html.twig' %}
+    {% if is_granted('room_delete', reservation) %}
+        {{ include('reservation/_delete_form.html.twig') }}
+    {% endif %}
 {% endblock %}

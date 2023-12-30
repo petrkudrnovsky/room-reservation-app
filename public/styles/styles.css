@@ -3,6 +3,7 @@
 * {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
 
 body {
@@ -12,13 +13,15 @@ body {
     background-color: var(--color-white);
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: flex-start;
     min-height: 100vh;
 }
 
 .content-wrapper {
     flex-grow: 1;
-    padding: var(--space-l);
+    padding: var(--space-m);
+    background-color: var(--color-white);
+    margin-left: 240px;
 }
 
 h1 {
@@ -27,12 +30,20 @@ h1 {
     text-align: center;
 }
 
-nav {
+.app-header {
+    height: 60px;
+}
+
+.app-header > nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: var(--space-m);
     background-color: var(--color-primary);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
 }
 
 .nav__item {
@@ -43,6 +54,72 @@ nav {
 .nav__item:hover {
     text-decoration: underline;
 }
+
+.sidebar {
+    width: 240px;
+    background-color: var(--color-secondary);
+    padding: var(--space-m);
+    height: 100vh;
+    position: fixed;
+    bottom: 0;
+    overflow-y: auto;
+    top: 53px;
+}
+
+.sidebar-nav {
+    list-style-type: none;
+    background-color: var(--color-secondary);
+    padding: 0;
+    margin: 0;
+}
+
+.menu-icon {
+    list-style: none;
+    padding-left: 0;
+}
+
+.menu-icon > li {
+    padding: var(--space-xs) var(--space-xs);
+}
+
+.menu-icon > li:hover {
+    background-color: var(--color-primary);
+}
+
+.menu-icon > li > a {
+    display: inline-block;
+    width: 100%;
+    text-decoration: none;
+    color: var(--color-tertiary);
+}
+
+.menu-icon > li[class^="icon-"] > a:before {
+    display: inline-block;
+    margin-right: var(--space-s);
+    width: 1em;
+    vertical-align: text-bottom;
+}
+
+.menu-icon > li.icon-user > a:before {
+    content: var(--icon-user);
+}
+
+.menu-icon > li.icon-group > a:before {
+    content: var(--icon-group);
+}
+
+.menu-icon > li.icon-reservation > a:before {
+    content: var(--icon-calendar);
+}
+
+.menu-icon > li.icon-room > a:before {
+    content: var(--icon-doors);
+}
+
+.menu-icon > li.icon-building > a:before {
+    content: var(--icon-building);
+}
+
 
 /* Block: login-form */
 .form {
@@ -197,7 +274,7 @@ footer p, footer a {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-top: var(--space-m);
+    margin-top: var(--space-xs);
 }
 
 .user-list__item--actions a {
@@ -222,6 +299,10 @@ footer p, footer a {
 .user-list__plus {
     font-size: var(--space-l);
     margin-right: var(--space-s);
+}
+
+.user-list__item > div:first-of-type {
+    margin-top: var(--space-s);
 }
 
 .flash {
@@ -257,11 +338,11 @@ footer p, footer a {
     display: inline-block;
     padding: 7px var(--space-xl);
     background-color: var(--color-primary);
-    margin-right: var(--space-s);
     color: var(--color-tertiary);
     text-align: center;
     border-radius: var(--space-xs);
     text-decoration: none;
+    margin-right: var(--space-s);
 }
 
 .action-link:hover {
@@ -270,11 +351,23 @@ footer p, footer a {
 
 .actions {
     display: flex;
-    align-items: flex-start;
-    margin-top: var(--space-m);
+    gap: var(--space-s);
+    padding-top: var(--space-s);
+    flex-wrap: wrap;
+    justify-content: flex-start;
 }
 
+.back-link {
+    text-decoration: none;
+    color: var(--color-black);
+}
 
+.back-link:hover {
+    text-decoration: underline;
+}
 
-
-
+.back-link::before {
+    content: var(--icon-arrow-back);
+    margin-right: var(--space-s);
+    vertical-align: -2px;
+}

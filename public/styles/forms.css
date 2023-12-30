@@ -1,0 +1,72 @@
+@import "helper.css";
+
+/* Basic form styling */
+.form-control {
+    width: 100%;
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 16px;
+    color: #333;
+}
+
+/* Label styling */
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+}
+
+/* Textarea */
+.description-textarea {
+    height: 120px;
+    resize: vertical;
+}
+
+/* Datetime input */
+.datetime-input {
+    cursor: pointer;
+}
+
+/* Multiple select - visitors */
+.select {
+    height: auto;
+    min-height: 40px;
+}
+
+.checkbox {
+    width: 20px;
+}
+
+/* Focus state for inputs */
+.form-control:focus {
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Hover state for inputs */
+.form-control:hover {
+    border-color: #a8a8a8;
+}
+
+
+.form-buttons-container {
+    display: flex;
+    align-items: center; /* This will vertically align buttons if they have different heights */
+    gap: 20px; /* This will create a 20px gap between the buttons */
+}
+
+/* You might also want to target the buttons directly to give them a uniform style */
+.form-buttons-container button,
+.form-buttons-container input[type="submit"] {
+    padding: 10px 15px;
+    font-size: 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}

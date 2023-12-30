@@ -3,88 +3,87 @@
 {% block title %}Room{% endblock %}
 
 {% block body %}
-    {% include 'components/_header.html.twig' %}
-    <div class="content-wrapper">
-        <h1>Room</h1>
-
-        <table class="table">
-            <tbody>
-                <tr>
-                    <th>Name</th>
-                    <td>{{ room.name }}</td>
-                </tr>
-                <tr>
-                    <th>Code</th>
-                    <td>{{ room.codeName }}</td>
-                </tr>
-                <tr>
-                    <th>Building</th>
-                    <td>{{ room.building.name }}</td>
-                </tr>
-                <tr>
-                    <th>IsPrivate</th>
-                    <td>{{ room.isPrivate ? 'Yes' : 'No' }}</td>
-                </tr>
-                <tr>
-                    <th>IsLocked</th>
-                    <td>{{ room.isLocked ? 'Yes' : 'No' }}</td>
-                </tr>
-                {% if is_granted('IS_AUTHENTICATED_FULLY') %}
-                    <tr>
-                        <th>Members</th>
-                        <td>
-                            <ul>
-                                {% for member in room.members %}
-                                    <li>
-                                        <a href="{{ path('app_user_show', {'id': member.id}) }}">{{ member.username }}</a>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                            <hr>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Admins</th>
-                        <td>
-                            <ul>
-                                {% for admin in room.admins %}
-                                    <li>
-                                        <a href="{{ path('app_user_show', {'id': admin.id}) }}">{{ admin.username }}</a>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                            <hr>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Groups</th>
-                        <td>
-                            <ul>
-                                {% for group in room.owningGroups %}
-                                    <li>
-                                        <a href="{{ path('app_group_show', {'id': group.id}) }}">{{ group.name }}</a>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        </td>
-                    </tr>
+    {% if is_granted('room_index_view') %}
+        <a href="{{ path('app_room_index') }}" class="back-link">back to list</a>
+    {% endif %}
+    <main>
+        <section class="user-info">
+            <h1>Room: {{ room.name }}</h1>
+            <div class="info-item">
+                <span>Name:</span>
+                <span>{{ room.name }}</span>
+            </div>
+            <div class="info-item">
+                <span>Code:</span>
+                <span>{{ room.codeName }}</span>
+            </div>
+            <div class="info-item">
+                <span>Building:</span>
+                <span>{{ room.building.name }}</span>
+            </div>
+            <div class="info-item">
+                <span>IsPrivate:</span>
+                <span>{{ room.isPrivate ? 'Yes' : 'No' }}</span>
+            </div>
+            <div class="info-item">
+                <span>IsLocked:</span>
+                <span>{{ room.isLocked ? 'Yes' : 'No' }}</span>
+            </div>
+            {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+            <aside class="user-rooms">
+                <div class="tag-item">
+                    <span>Members:</span>
+                    <ul>
+                        {% for member in room.members %}
+                            <li>
+                                <a href="{{ path('app_user_show', {'id': member.id}) }}">{{ member.username }}</a>
+                            </li>
+                        {% endfor %}
+                        {% if room.members|length == 0 %}
+                            <li>None</li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="tag-item">
+                    <span>Admins:</span>
+                    <ul>
+                        {% for admin in room.admins %}
+                            <li>
+                                <a href="{{ path('app_user_show', {'id': admin.id}) }}">{{ admin.username }}</a>
+                            </li>
+                        {% endfor %}
+                        {% if room.admins|length == 0 %}
+                            <li>None</li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="tag-item">
+                    <span>Groups:</span>
+                    <ul>
+                        {% for group in room.owningGroups %}
+                            <li>
+                                <a href="{{ path('app_group_show', {'id': group.id}) }}">{{ group.name }}</a>
+                            </li>
+                        {% endfor %}
+                        {% if room.owningGroups|length == 0 %}
+                            <li>None</li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </aside>
+            {% endif %}
+            <div class="actions">
+                {% if is_granted('reservation_create', room) %}
+                    <a href="{{ path('app_room_reservation_new', {'roomId': room.id}) }}" class="action-link">Reserve this room</a>
                 {% endif %}
-            </tbody>
-        </table>
-
-        {% if is_granted('reservation_create', room) %}
-            <a href="{{ path('app_room_reservation_new', {'roomId': room.id}) }}">reserve this room</a>
-        {% endif %}
-
-        {% if is_granted('room_index_view') %}
-            <a href="{{ path('app_room_index') }}">back to list</a>
-        {% endif %}
-        {% if is_granted('room_edit', room) %}
-            <a href="{{ path('app_room_edit', {'id': room.id}) }}">edit</a>
-        {% endif %}
-        {% if is_granted('room_delete', room) %}
-            {{ include('room/_delete_form.html.twig') }}
-        {% endif %}
+                {% if is_granted('room_edit', room) %}
+                    <a href="{{ path('app_room_edit', {'id': room.id}) }}" class="action-link">Edit</a>
+                {% endif %}
+                {% if is_granted('room_delete', room) %}
+                    {{ include('room/_delete_form.html.twig') }}
+                {% endif %}
+            </div>
+        </section>
 
         <h2>Approved reservations for this room</h2>
         {% if is_granted('room_can_view_full_reservations', room) %}
@@ -97,6 +96,5 @@
             <h2>Pending reservations for this room</h2>
             {{ include('reservation/_list.html.twig', {reservations: pendingReservations}) }}
         {% endif %}
-    </div>
-    {% include 'components/_footer.html.twig' %}
+    </main>
 {% endblock %}

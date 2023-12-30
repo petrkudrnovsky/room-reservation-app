@@ -3,60 +3,52 @@
 {% block title %}Group{% endblock %}
 
 {% block body %}
-    {% include 'components/_header.html.twig' %}
-    <div class="content-wrapper">
-        <h1>Group</h1>
-
-        <table class="table">
-            <tbody>
-                <tr>
-                    <th>Name</th>
-                    <td>{{ group.name }}</td>
-                </tr>
-                <tr>
-                    <th>Members</th>
-                    <td>
-                        <ul>
-                            {% for member in group.members %}
-                                <li>{{ member.username }}</li>
-                            {% endfor %}
-                        </ul>
-                        <hr>
-                    </td>
-                </tr>
-                <tr>
-                    <th>Admins</th>
-                    <td>
-                        <ul>
-                            {% for admin in group.admins %}
-                                <li>{{ admin.username }}</li>
-                            {% endfor %}
-                        </ul>
-                        <hr>
-                    </td>
-                </tr>
-                <tr>
-                    <th>Rooms</th>
-                    <td>
-                        <ul>
-                            {% for room in group.rooms %}
-                                <li>{{ room.name }}</li>
-                            {% endfor %}
-                        </ul>
-                        <hr>
-                    </td>
-            </tbody>
-        </table>
-
-        {% if is_granted('group_index_view') %}
-            <a href="{{ path('app_group_index') }}">back to list</a>
-        {% endif %}
-        {% if is_granted('group_edit', group) %}
-            <a href="{{ path('app_group_edit', {'id': group.id}) }}">edit</a>
-        {% endif %}
-        {% if is_granted('group_delete', group) %}
-            {{ include('group/_delete_form.html.twig') }}
-        {% endif %}
-    </div>
-    {% include 'components/_footer.html.twig' %}
+    {% if is_granted('group_index_view') %}
+        <a href="{{ path('app_group_index') }}" class="back-link">back to list</a>
+    {% endif %}
+    <main class="user__profile">
+        <section class="user-info">
+            <h2>Group: {{ group.name }}</h2>
+            <aside class="user-rooms">
+                <div class="tag-item">
+                    <span>Members</span>
+                    <ul>
+                        {% for member in group.members %}
+                            <li>
+                                <a href="{{ path('app_user_show', {'id': member.id}) }}">{{ member.username }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="tag-item">
+                    <span>Admins</span>
+                    <ul>
+                        {% for admin in group.admins %}
+                            <li>
+                                <a href="{{ path('app_user_show', {'id': admin.id}) }}">{{ admin.username }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="tag-item">
+                    <span>Rooms</span>
+                    <ul>
+                        {% for room in group.rooms %}
+                            <li>
+                                <a href="{{ path('app_room_show', {'id': room.id}) }}">{{ room.name }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </aside>
+            <div class="actions">
+                {% if is_granted('group_edit', group) %}
+                    <a href="{{ path('app_group_edit', {'id': group.id}) }}" class="action-link">edit</a>
+                {% endif %}
+                {% if is_granted('group_delete', group) %}
+                    {{ include('group/_delete_form.html.twig') }}
+                {% endif %}
+            </div>
+        </section>
+    </main>
 {% endblock %}

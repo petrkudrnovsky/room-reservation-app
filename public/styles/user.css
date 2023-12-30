@@ -9,20 +9,29 @@ h2 {
     display: grid;
     grid-template-columns: 1fr 2fr;
     gap: var(--space-xl);
-    padding: var(--space-xl);
 }
 
 .info-item {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 2fr 2fr;
     gap: var(--space-l);
+    background-color: var(--color-tertiary);
+    margin-bottom: 1rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+span {
+    margin-bottom: var(--space-xs);
+    font-size: 18px;
+    font-weight: bold;
 }
 
 .info-item > span:first-of-type,
 .tag-item > span:first-of-type {
     font-size: var(--font-size-l);
     font-weight: bold;
-    margin-bottom: var(--space-xs);
 }
 
 .reservations {

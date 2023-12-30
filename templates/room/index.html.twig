@@ -3,29 +3,25 @@
 {% block title %}Room index{% endblock %}
 
 {% block body %}
-    {% include 'components/_header.html.twig' %}
-    <div class="content-wrapper">
-        <h1>Room index</h1>
+    <h1>Rooms</h1>
 
-        <h2>Public rooms</h2>
-        {{ include('room/_list.html.twig', {'rooms': publicRooms}) }}
+    <h2>Public rooms</h2>
+    {{ include('room/_list.html.twig', {'rooms': publicRooms}) }}
 
-        {% if is_granted('IS_AUTHENTICATED_FULLY') %}
-            <h2>I'm member of these rooms</h2>
-            {{ include('room/_list.html.twig', {'rooms': memberRooms}) }}
+    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+        <h2>I'm member of these rooms</h2>
+        {{ include('room/_list.html.twig', {'rooms': memberRooms}) }}
 
-            <h2>I'm admin of these rooms</h2>
-            {{ include('room/_list.html.twig', {'rooms': adminRooms}) }}
+        <h2>I'm admin of these rooms</h2>
+        {{ include('room/_list.html.twig', {'rooms': adminRooms}) }}
 
-            {% if allRooms != null and is_granted('ROLE_SUPER_ADMIN') %}
-                <h2>All rooms</h2>
-                {{ include('room/_list.html.twig', {'rooms': allRooms}) }}
-            {% endif %}
-
-            {% if is_granted('room_create') %}
-                <a href="{{ path('app_room_new') }}">Create new</a>
-            {% endif %}
+        {% if allRooms != null and is_granted('ROLE_SUPER_ADMIN') %}
+            <h2>All rooms</h2>
+            {{ include('room/_list.html.twig', {'rooms': allRooms}) }}
         {% endif %}
-    </div>
-    {% include 'components/_footer.html.twig' %}
+
+        {% if is_granted('room_create') %}
+            <a href="{{ path('app_room_new') }}">Create new</a>
+        {% endif %}
+    {% endif %}
 {% endblock %}

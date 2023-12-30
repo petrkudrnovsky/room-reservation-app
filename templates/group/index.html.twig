@@ -3,23 +3,19 @@
 {% block title %}Group index{% endblock %}
 
 {% block body %}
-    {% include 'components/_header.html.twig' %}
-    <div class="content-wrapper">
-        <h1>Group index</h1>
-        <h2>I'm member here:</h2>
-        {{ include('group/_list.html.twig', {'groups': memberGroups}) }}
+    <h1>Groups</h1>
+    <h2>I'm member here:</h2>
+    {{ include('group/_list.html.twig', {'groups': memberGroups}) }}
 
-        <h2>I'm admin here:</h2>
-        {{ include('group/_list.html.twig', {'groups': adminGroups}) }}
+    <h2>I'm admin here:</h2>
+    {{ include('group/_list.html.twig', {'groups': adminGroups}) }}
 
-        {% if allGroups != null and is_granted('ROLE_SUPER_ADMIN') %}
-        <h2>All groups</h2>
-            {{ include('group/_list.html.twig', {'groups': allGroups}) }}
-        {% endif %}
+    {% if allGroups != null and is_granted('ROLE_SUPER_ADMIN') %}
+    <h2>All groups</h2>
+        {{ include('group/_list.html.twig', {'groups': allGroups}) }}
+    {% endif %}
 
-        {% if is_granted('group_create') %}
-            <a href="{{ path('app_group_new') }}">Create new</a>
-        {% endif %}
-    </div>
-    {% include 'components/_footer.html.twig' %}
+    {% if is_granted('group_create') %}
+        <a href="{{ path('app_group_new') }}" class="action-link">Create new</a>
+    {% endif %}
 {% endblock %}
