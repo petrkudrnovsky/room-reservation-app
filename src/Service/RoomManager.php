@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\AppUser;
 use App\Entity\Group;
+use App\Entity\Reservation;
 use App\Entity\Room;
 use App\Repository\RoomRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -144,6 +145,9 @@ class RoomManager
      */
     public function addUserRooms(?array $memberRooms, AppUser $appUser, bool $false): void
     {
+        if (!$memberRooms) {
+            return;
+        }
         foreach ($memberRooms as $roomId) {
             $room = $this->roomRepository->find($roomId);
             if ($room) {
@@ -188,11 +192,35 @@ class RoomManager
     {
         $reservations = $room->getReservations();
         foreach ($reservations as $reservation) {
-            if ($reservation->getStatus() === 'approved' && $reservation->getReservedFor() === $user) {
+            if ($reservation->getStatus() === Reservation::STATUS_APPROVED && $reservation->getReservedFor() === $user) {
                 return true;
             }
         }
         return false;
+    }
+
+    public function unlockRoom(Room $room): void
+    {
+        $room->setIsLocked(false);
+        $this->em->flush();
+    }
+
+    public function lockRoom(Room $room): void
+    {
+        $room->setIsLocked(true);
+        $this->em->flush();
+    }
+
+    public function getOngoingReservation(Room $room): ?Reservation
+    {
+        $reservations = $room->getReservations();
+        $today = new \DateTime();
+        foreach ($reservations as $reservation) {
+            if ($reservation->getEndDatetime() >= $today && $reservation->getStatus() === Reservation::STATUS_APPROVED && $reservation->getStartDatetime() <= $today) {
+                return $reservation;
+            }
+        }
+        return null;
     }
 
     public function isRoomFree(Room $room): bool
@@ -203,7 +231,7 @@ class RoomManager
         }
         $today = new \DateTime();
         foreach ($reservations as $reservation) {
-            if ($reservation->getEndDatetime() >= $today) {
+            if ($reservation->getEndDatetime() >= $today && $reservation->getStatus() === Reservation::STATUS_APPROVED && $reservation->getStartDatetime() <= $today) {
                 return true;
             }
         }

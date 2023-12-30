@@ -43,6 +43,9 @@ class Room
     #[ORM\JoinColumn(nullable: false)]
     private ?Building $building = null;
 
+    #[ORM\Column]
+    private ?bool $isLocked = true;
+
     public function __construct()
     {
         $this->owningGroups = new ArrayCollection();
@@ -239,5 +242,17 @@ class Room
     public function clearReservations(): void
     {
         $this->reservations->clear();
+    }
+
+    public function isIsLocked(): ?bool
+    {
+        return $this->isLocked;
+    }
+
+    public function setIsLocked(bool $isLocked): static
+    {
+        $this->isLocked = $isLocked;
+
+        return $this;
     }
 }

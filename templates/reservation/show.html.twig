@@ -44,6 +44,16 @@
                     <th>ApprovedBy</th>
                     <td>{{ reservation.approvedBy ? reservation.approvedBy.username : 'Not approved' }}</td>
                 </tr>
+                <tr>
+                    <th>Visitors</th>
+                    <td>
+                        <ul>
+                            {% for visitor in reservation.visitors %}
+                                <li>{{ visitor.username }}</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                </tr>
             {% endif %}
             </tbody>
         </table>

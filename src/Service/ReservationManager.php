@@ -37,12 +37,21 @@ class ReservationManager
         return $reservation;
     }
 
+<<<<<<< 63847c2d26c7e34576c2161cf6746cd2cdbbbe6f
 //    public function getReservationsForUser(AppUser $user): array
 //    {
 //        $userReservations = null;
 //        $reservationRepository->findReservationsByUser($currentUser, $userReservations, $userVisitingReservations);
 //
 //    }
+=======
+    /*public function getReservationsForUser(AppUser $user): array
+    {
+        $userReservations = null;
+        $reservationRepository->findReservationsByUser($currentUser, $userReservations, $userVisitingReservations);
+
+    }*/
+>>>>>>> 72ae51c5950ae344cf7bea0a035252b6dec022ef
 
     public function findById(int $id): ?Reservation
     {
@@ -89,6 +98,9 @@ class ReservationManager
      */
     public function addReservations(?array $reservations, AppUser $appUser, bool $isApproved): void
     {
+        if (!$reservations) {
+            return;
+        }
         foreach ($reservations as $reservationId) {
             if (is_numeric($reservationId)){
                 $reservation = $this->reservationRepository->find($reservationId);
@@ -109,6 +121,9 @@ class ReservationManager
 
     public function addReservationsToRoom(?array $reservations, Room $room): void
     {
+        if (!$reservations) {
+            return;
+        }
         foreach ($reservations as $reservationId) {
             if (is_numeric($reservationId)){
                 $reservation = $this->reservationRepository->find($reservationId);

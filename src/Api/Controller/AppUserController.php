@@ -18,10 +18,8 @@ use Exception;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
-use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\ConstraintViolationInterface;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -33,10 +31,8 @@ class AppUserController extends AbstractFOSRestController {
         private readonly GroupManager $groupManager,
         private readonly RoomManager $roomManager,
         private readonly ReservationManager $reservationManager,
-        UserPasswordHasherInterface $passwordHasher
-    ) {
-        $this->passwordHasher = $passwordHasher;
-    }
+        private UserPasswordHasherInterface $passwordHasher
+    ) {}
 
     #[Rest\Get('/user', name: 'api_app_users_list')]
     #[Rest\View]
@@ -95,7 +91,11 @@ class AppUserController extends AbstractFOSRestController {
     public function update(?int $id, AppUserInput $appUserInput, ConstraintViolationListInterface $errors): AppUserOutput
     {
         $appUser = $id !== null ? $this->findOrFail($id) : new AppUser();
-        $this->denyAccessUnlessGranted(UserVoter::EDIT, $appUser);
+        if($id === null) {
+            $this->denyAccessUnlessGranted(UserVoter::CREATE);
+        } else {
+            $this->denyAccessUnlessGranted(UserVoter::EDIT, $appUser);
+        }
 
         if ($errors->count() > 0) {
             throw new HttpException(400, message: \implode("\n", \array_map(
@@ -143,7 +143,17 @@ class AppUserController extends AbstractFOSRestController {
             )));
         }
 
-        $appUser = $appUserInput->toEntity($appUser);
+        if ($appUserInput->password === null) {
+            throw new HttpException(400, message: 'Password is required');
+        }
+
+        if($appUserInput->memberRooms !== null || $appUserInput->adminRooms !== null ||
+            $appUserInput->memberGroups !== null || $appUserInput->adminGroups !== null ||
+            $appUserInput->approvedReservations !== null || $appUserInput->reservations !== null) {
+            throw new HttpException(400, message: 'You cannot set rooms, groups or reservations when registering');
+        }
+
+        $appUser = $appUserInput->toEntity($appUser, $this->groupManager, $this->roomManager, $this->reservationManager);
         $appUser->setRoles(['ROLE_USER']);
         $hashedPassword = $this->passwordHasher->hashPassword($appUser, $appUserInput->getPlainPassword());
         $appUser->setPassword($hashedPassword);

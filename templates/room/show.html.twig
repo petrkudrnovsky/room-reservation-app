@@ -25,6 +25,10 @@
                     <th>IsPrivate</th>
                     <td>{{ room.isPrivate ? 'Yes' : 'No' }}</td>
                 </tr>
+                <tr>
+                    <th>IsLocked</th>
+                    <td>{{ room.isLocked ? 'Yes' : 'No' }}</td>
+                </tr>
                 {% if is_granted('IS_AUTHENTICATED_FULLY') %}
                     <tr>
                         <th>Members</th>
