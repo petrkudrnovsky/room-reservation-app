@@ -33,8 +33,14 @@ class ReservationController extends AbstractFOSRestController
     public function list(Request $request): array
     {
         $this->denyAccessUnlessGranted(ReservationVoter::VIEW_INDEX_ALL);
-        $title = $request->query->get('title');
-        $description = $request->query->get('description');
+
+        $filter = [
+            'title' => $request->query->get('title'),
+            'status' => $request->query->get('status'),
+            'room' => $request->query->get('room'),
+            'reservedFor' => $request->query->get('reserved_for'),
+            'visitors' => $request->query->get('visitors'),
+        ];
 
         $reservations = array_map(
             fn (Reservation $entity) => ReservationOutput::fromEntity(
@@ -44,7 +50,7 @@ class ReservationController extends AbstractFOSRestController
                 $this->generateUrlIfNotNull($entity->getReservedFor(), 'api_app_users_detail'),
                 $this->getVisitorsUrls($entity),
             ),
-            $this->reservationManager->findReservationsByFilters($title, $description)
+            $this->reservationManager->findReservationsByFilters($filter)
         );
 
         return ['reservations' => $reservations];
@@ -54,11 +60,8 @@ class ReservationController extends AbstractFOSRestController
     #[Rest\View(statusCode: 200)]
     public function detail(int $id): ReservationOutput
     {
-        $reservation = $this->reservationManager->findById($id);
+        $reservation = $this->findOrFail($id);
         $this->denyAccessUnlessGranted(ReservationVoter::VIEW_DETAIL, $reservation);
-        if (!$reservation) {
-            throw new HttpException(404, 'Reservation not found');
-        }
 
         return ReservationOutput::fromEntity(
             $reservation,
@@ -78,14 +81,6 @@ class ReservationController extends AbstractFOSRestController
     #[Rest\View(statusCode: 201)]
     public function update(?int $id, ReservationInput $reservationInput, ConstraintViolationListInterface $errors): ReservationOutput
     {
-        if ($id !== null) {
-            $reservation = $this->findOrFail($id);
-            $this->denyAccessUnlessGranted(ReservationVoter::EDIT, $reservation);
-        } else {
-            $reservation = new Reservation();
-            $this->denyAccessUnlessGranted(ReservationVoter::CREATE);
-        }
-
         if ($errors->count() > 0) {
             throw new HttpException(400, message: \implode("\n", \array_map(
                 fn (ConstraintViolationInterface $constraintViolation) => $constraintViolation->getMessage(),
@@ -93,7 +88,24 @@ class ReservationController extends AbstractFOSRestController
             )));
         }
 
+        // create new reservation or update existing one
+        if ($id !== null) {
+            $reservation = $this->findOrFail($id);
+        } else {
+            $reservation = new Reservation();
+            $reservation->setStatus(Reservation::STATUS_PENDING);
+        }
+
+        // convert ReservationInput to Reservation entity before determining access rights, because we need to know the room
         $reservation = $reservationInput->toEntity($this->roomManager, $this->appUserManager, $reservation);
+
+        if($id !== null) {
+            $this->denyAccessUnlessGranted(ReservationVoter::EDIT, $reservation);
+        }
+        else {
+            $this->denyAccessUnlessGranted(ReservationVoter::CREATE, $reservation->getRoom());
+        }
+
         $reservation = $this->reservationManager->saveToDatabase($reservation);
 
         return ReservationOutput::fromEntity(
@@ -109,8 +121,8 @@ class ReservationController extends AbstractFOSRestController
     #[Rest\View(statusCode: 204)]
     public function delete(int $id): void
     {
-        $this->denyAccessUnlessGranted(ReservationVoter::DELETE);
         $reservation = $this->findOrFail($id);
+        $this->denyAccessUnlessGranted(ReservationVoter::DELETE, $reservation);
         $this->reservationManager->deleteFromDatabase($reservation);
     }
 
@@ -124,7 +136,11 @@ class ReservationController extends AbstractFOSRestController
         $reservation = $this->findOrFail($id);
         $this->denyAccessUnlessGranted(ReservationVoter::CAN_APPROVE, $reservation);
 
-        $reservation->setStatus('approved');
+        if($reservation->getStatus() !== Reservation::STATUS_PENDING) {
+            throw new HttpException(400, message: 'Reservation is not pending');
+        }
+
+        $reservation->setStatus(Reservation::STATUS_APPROVED);
         $reservation->setApprovedBy($this->getUser());
         $reservation = $this->reservationManager->saveToDatabase($reservation);
 
@@ -147,7 +163,11 @@ class ReservationController extends AbstractFOSRestController
         $reservation = $this->findOrFail($id);
         $this->denyAccessUnlessGranted(ReservationVoter::CAN_REJECT, $reservation);
 
-        $reservation->setStatus('rejected');
+        if($reservation->getStatus() !== Reservation::STATUS_PENDING) {
+            throw new HttpException(400, message: 'Reservation is not pending');
+        }
+
+        $reservation->setStatus(Reservation::STATUS_REJECTED);
         $reservation = $this->reservationManager->saveToDatabase($reservation);
 
         return ReservationOutput::fromEntity(
@@ -166,6 +186,7 @@ class ReservationController extends AbstractFOSRestController
     {
         $reservation = $this->findOrFail($id);
         $user = $this->findOrFailUser($appUserInput->id);
+        $this->denyAccessUnlessGranted(ReservationVoter::EDIT, $reservation);
 
         $reservation->addVisitor($user);
         $reservation = $this->reservationManager->saveToDatabase($reservation);
@@ -184,6 +205,7 @@ class ReservationController extends AbstractFOSRestController
     {
         $reservation = $this->findOrFail($id);
         $user = $this->findOrFailUser($visitorId);
+        $this->denyAccessUnlessGranted(ReservationVoter::EDIT, $reservation);
 
         $reservation->removeVisitor($user);
         $this->reservationManager->saveToDatabase($reservation);

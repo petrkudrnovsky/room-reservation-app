@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Entity\AppUser;
 use App\Entity\Group;
 use App\Entity\Room;
 use App\Repository\GroupRepository;
@@ -28,13 +29,36 @@ class GroupManager
         $this->em->flush();
     }
 
-    public function findGroupsByName(?string $name): array {
+    public function findGroupsByFilters(?string $name, $filters): array {
         $qb = $this->groupRepository->createQueryBuilder('a');
+        foreach ($filters as $key => $value) {
+            if ($value) {
+                $filters[$key] = explode(',', $value);
+            }
+        }
 
         if ($name) {
             $pattern = '%' . strtolower($name) . '%';
             $qb->andWhere('LOWER(a.name) LIKE :pattern')
                 ->setParameter('pattern', $pattern);
+        }
+
+        if ($filters['members']) {
+            $qb->innerJoin('a.members', 'm')
+                ->andWhere('m.id IN (:membersUsernames)')
+                ->setParameter('membersUsernames', $filters['members']);
+        }
+
+        if ($filters['admins']) {
+            $qb->innerJoin('a.admins', 'ad')
+                ->andWhere('ad.id IN (:admins)')
+                ->setParameter('admins', $filters['admins']);
+        }
+
+        if ($filters['rooms']) {
+            $qb->innerJoin('a.rooms', 'r')
+                ->andWhere('r.id IN (:rooms)')
+                ->setParameter('rooms', $filters['rooms']);
         }
 
         return $qb->getQuery()->getResult();
@@ -64,8 +88,11 @@ class GroupManager
     /**
      * @throws Exception
      */
-    public function addUserGroups(?array $memberGroups, \App\Entity\AppUser $appUser, bool $isAdmin): void
+    public function addUserGroups(?array $memberGroups, AppUser $appUser, bool $isAdmin): void
     {
+        if (!$memberGroups) {
+            return;
+        }
         foreach ($memberGroups as $groupId) {
             $group = $this->groupRepository->find($groupId);
             if ($group) {

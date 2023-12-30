@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\AppUser;
 use App\Entity\Group;
+use App\Entity\Reservation;
 use App\Entity\Room;
 use App\Repository\RoomRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -71,9 +72,15 @@ class RoomManager
         return $orderedReservations;
     }
 
-    public function findRoomsByFilters(?string $name, ?string $code, ?int $buildingId): array
+    public function findRoomsByFilters(?string $name, ?string $code, ?string $buildingCode, $filter): array
     {
         $qb = $this->roomRepository->createQueryBuilder('a');
+
+        foreach ($filter as $key => $value) {
+            if ($value) {
+                $filter[$key] = explode(',', $value);
+            }
+        }
 
         if ($name) {
             $pattern = '%' . strtolower($name) . '%';
@@ -87,9 +94,28 @@ class RoomManager
                 ->setParameter('pattern', $pattern);
         }
 
-        if ($buildingId) {
-            $qb->andWhere('a.building = :buildingId')
-                ->setParameter('buildingId', $buildingId);
+        if ($buildingCode) {
+            $qb->innerJoin('a.building', 'b')
+                ->andWhere('b.code = :buildingCode')
+                ->setParameter('buildingCode', $buildingCode);
+        }
+
+        if ($filter['owningGroups']) {
+            $qb->innerJoin('a.owningGroups', 'og')
+                ->andWhere('og.id IN (:owningGroups)')
+                ->setParameter('owningGroups', $filter['owningGroups']);
+        }
+
+        if ($filter['members']) {
+            $qb->innerJoin('a.members', 'm')
+                ->andWhere('m.id IN (:members)')
+                ->setParameter('members', $filter['members']);
+        }
+
+        if ($filter['admins']) {
+            $qb->innerJoin('a.admins', 'ad')
+                ->andWhere('ad.id IN (:admins)')
+                ->setParameter('admins', $filter['admins']);
         }
 
         return $qb->getQuery()->getResult();
@@ -119,6 +145,9 @@ class RoomManager
      */
     public function addUserRooms(?array $memberRooms, AppUser $appUser, bool $false): void
     {
+        if (!$memberRooms) {
+            return;
+        }
         foreach ($memberRooms as $roomId) {
             $room = $this->roomRepository->find($roomId);
             if ($room) {
@@ -163,11 +192,35 @@ class RoomManager
     {
         $reservations = $room->getReservations();
         foreach ($reservations as $reservation) {
-            if ($reservation->getStatus() === 'approved' && $reservation->getReservedFor() === $user) {
+            if ($reservation->getStatus() === Reservation::STATUS_APPROVED && $reservation->getReservedFor() === $user) {
                 return true;
             }
         }
         return false;
+    }
+
+    public function unlockRoom(Room $room): void
+    {
+        $room->setIsLocked(false);
+        $this->em->flush();
+    }
+
+    public function lockRoom(Room $room): void
+    {
+        $room->setIsLocked(true);
+        $this->em->flush();
+    }
+
+    public function getOngoingReservation(Room $room): ?Reservation
+    {
+        $reservations = $room->getReservations();
+        $today = new \DateTime();
+        foreach ($reservations as $reservation) {
+            if ($reservation->getEndDatetime() >= $today && $reservation->getStatus() === Reservation::STATUS_APPROVED && $reservation->getStartDatetime() <= $today) {
+                return $reservation;
+            }
+        }
+        return null;
     }
 
     public function isRoomFree(Room $room): bool
@@ -178,7 +231,7 @@ class RoomManager
         }
         $today = new \DateTime();
         foreach ($reservations as $reservation) {
-            if ($reservation->getEndDatetime() >= $today) {
+            if ($reservation->getEndDatetime() >= $today && $reservation->getStatus() === Reservation::STATUS_APPROVED && $reservation->getStartDatetime() <= $today) {
                 return true;
             }
         }
