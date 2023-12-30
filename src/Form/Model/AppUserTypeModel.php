@@ -3,9 +3,12 @@
 namespace App\Form\Model;
 
 use App\Entity\AppUser;
+use App\Form\Constraints\UniqueUsername;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Mapping\ClassMetadata;
 
 class AppUserTypeModel
 {
@@ -98,5 +101,10 @@ class AppUserTypeModel
         $model->isSuperAdmin = in_array('ROLE_SUPER_ADMIN', $appUser->getRoles());
 
         return $model;
+    }
+
+    public static function loadValidatorMetadata(ClassMetadata $metadata): void
+    {
+        $metadata->addConstraint(new UniqueUsername());
     }
 }

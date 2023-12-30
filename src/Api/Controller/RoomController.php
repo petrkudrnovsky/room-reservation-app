@@ -9,12 +9,15 @@ use App\Entity\Reservation;
 use App\Entity\Room;
 use App\Repository\BuildingRepository;
 use App\Repository\GroupRepository;
+use App\Repository\RoomRepository;
 use App\Service\AppUserManager;
 use App\Service\GroupManager;
 use App\Service\RoomManager;
 use App\Voter\RoomVoter;
 use Exception;
+use PHPUnit\Util\Json;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
@@ -41,6 +44,17 @@ class RoomController extends AbstractFOSRestController
         $code = $request->query->get('code');
         $buildingId = $request->query->get('buildingId');
 
+        /** @var AppUser $currentUser */
+        $currentUser = $this->getUser();
+
+        // restrict rooms to those that are accessible by current user, public or have an approved reservation for current user
+        $roomsOutput = array_filter(
+            $this->roomManager->findRoomsByFilters($name, $code, $buildingId),
+            fn (Room $room) => $this->isGranted(RoomVoter::VIEW_DETAIL, $room)
+                || $room->isIsPrivate() === false
+                || $this->roomManager->hasApprovedReservation($room, $currentUser)
+        );
+
         $rooms = array_map(
             fn (Room $entity) => RoomOutput::fromEntity(
                 $entity,
@@ -48,7 +62,7 @@ class RoomController extends AbstractFOSRestController
                 $this->getUsersUrls($entity, false),
                 $this->getGroupsUrls($entity),
                 $this->getReservationsUrls($entity)),
-            $this->roomManager->findRoomsByFilters($name, $code, $buildingId)
+            $roomsOutput
         );
 
         return ['rooms' => $rooms];
@@ -58,12 +72,8 @@ class RoomController extends AbstractFOSRestController
     #[Rest\View(statusCode: 200)]
     public function detail(int $id): RoomOutput
     {
-        $room = $this->roomManager->getRoomById($id);
+        $room = $this->findOrFail($id);
         $this->denyAccessUnlessGranted(RoomVoter::VIEW_DETAIL, $room);
-
-        if (!$room) {
-            throw $this->createNotFoundException('Room not found');
-        }
 
         return RoomOutput::fromEntity(
             $room,
@@ -124,15 +134,51 @@ class RoomController extends AbstractFOSRestController
     public function hasAccess(int $id): bool
     {
         $room = $this->findOrFail($id);
+
+        if($room->isIsLocked()) {
+            return false;
+        }
+        // the room is unlocked now
+
         /** @var AppUser $user */
         $user = $this->getUser();
-        if ($this->isGranted(RoomVoter::HAS_FULL_ACCESS_TO_ROOM, $room)
-            || $this->roomManager->isRoomFree($room)
-            || $this->roomManager->hasApprovedReservation($room, $user)
-        ) {
-            return true;
+        $ongoingReservation = $this->roomManager->getOngoingReservation($room);
+        if(!$ongoingReservation) {
+            if ($this->isGranted(RoomVoter::HAS_FULL_ACCESS_TO_ROOM, $room)
+                || $room->getMembers()->contains($user)
+                || $room->getOwningGroups()->exists(fn (int $key, $group) => $group->getMembers()->contains($user))
+            ) {
+                return true;
+            }
+        }
+        else {
+            if ($this->isGranted(RoomVoter::HAS_FULL_ACCESS_TO_ROOM, $room)
+                || $ongoingReservation->getReservedFor() === $user
+                || $ongoingReservation->getVisitors()->contains($user)
+            ) {
+                return true;
+            }
         }
         return false;
+    }
+
+    #[Rest\Patch('/room/{id}/toggleLock', name: 'api_rooms_toggle_lock', requirements: ['id' => '\d+'])]
+    #[Rest\View(statusCode: 200)]
+    public function toggleLock(int $id, RoomRepository $roomRepository): JsonResponse
+    {
+        $room = $this->findOrFail($id);
+        $this->denyAccessUnlessGranted(RoomVoter::CAN_TOGGLE_LOCK, $room);
+        if($room->isIsLocked()) {
+            $this->roomManager->unlockRoom($room);
+            $message = "Room unlocked successfully.";
+        } else {
+            $this->roomManager->lockRoom($room);
+            $message = "Room locked successfully.";
+        }
+
+        $this->roomManager->saveToDatabase($room);
+
+        return new JsonResponse(['message' => $message], 200);
     }
 
     private function findOrFail(int $id): Room

@@ -11,7 +11,7 @@ class TimespanValidator extends ConstraintValidator
 {
     public function validate(mixed $value, Constraint $constraint): void
     {
-        /* @var $object ReservationTypeModel */
+        /* @var $value ReservationTypeModel */
         /* @var $constraint Timespan */
         if(!$constraint instanceof Timespan) {
             throw new UnexpectedTypeException($constraint, Timespan::class);

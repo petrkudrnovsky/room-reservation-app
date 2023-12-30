@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Entity\AppUser;
 use App\Entity\Group;
 use App\Entity\Room;
 use App\Repository\GroupRepository;
@@ -64,8 +65,11 @@ class GroupManager
     /**
      * @throws Exception
      */
-    public function addUserGroups(?array $memberGroups, \App\Entity\AppUser $appUser, bool $isAdmin): void
+    public function addUserGroups(?array $memberGroups, AppUser $appUser, bool $isAdmin): void
     {
+        if (!$memberGroups) {
+            return;
+        }
         foreach ($memberGroups as $groupId) {
             $group = $this->groupRepository->find($groupId);
             if ($group) {
