@@ -6,7 +6,7 @@
     {% if is_granted('room_index_view') %}
         <a href="{{ path('app_room_index') }}" class="back-link">back to list</a>
     {% endif %}
-    <h1>Edit Room</h1>
+    <h1>Edit Room {{ room.name }}</h1>
 
     {{ include('room/_form.html.twig', {'button_label': 'Update'}) }}
     {% if is_granted('room_delete', room) %}

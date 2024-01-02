@@ -24,71 +24,56 @@ class AppUserType extends AbstractType
         $builder
             ->add('username', TextType::class, [
                 'attr' => [
-                    'class' => 'form__input',
+                    'class' => 'form-control',
                     'placeholder' => 'Your username',
                 ],
                 'label' => 'Username',
-                'label_attr' => [
-                    'class' => 'form__label',
-                ],
             ]);
         if(!$options['is_edit']) {
             $builder->add('password', PasswordType::class, [
                 'attr' => [
-                    'class' => 'form__input',
+                    'class' => 'form-control',
                     'placeholder' => 'Your password',
                 ],
                 'label' => 'Password',
-                'label_attr' => [
-                    'class' => 'form__label',
-                ],
                 'mapped' => false,
             ]);
         }
         $builder->add('firstName', TextType::class, [
                 'attr' => [
-                    'class' => 'form__input',
+                    'class' => 'form-control',
                     'placeholder' => 'Your first name',
                 ],
                 'label' => 'Given name',
-                'label_attr' => [
-                    'class' => 'form__label',
-                ],
             ])
             ->add('secondName', TextType::class, [
                 'attr' => [
-                    'class' => 'form__input',
+                    'class' => 'form-control',
                     'placeholder' => 'Your family name',
                 ],
                 'label' => 'Family name',
-                'label_attr' => [
-                    'class' => 'form__label',
-                ],
             ])
             ->add('email', EmailType::class, [
                 'attr' => [
-                    'class' => 'form__input',
+                    'class' => 'form-control',
                     'placeholder' => 'Your email',
                 ],
                 'label' => 'Email',
-                'label_attr' => [
-                    'class' => 'form__label',
-                ],
                 'required' => false,
             ])
             ->add('phone', TelType::class, [
                 'attr' => [
-                    'class' => 'form__input',
+                    'class' => 'form-control',
                     'placeholder' => 'Your phone number',
                 ],
                 'label' => 'Phone number',
-                'label_attr' => [
-                    'class' => 'form__label',
-                ],
                 'required' => false,
             ]);
             if(!$options['is_registration'] && $options['is_super_admin']) {
                 $builder->add('memberGroups', EntityType::class, [
+                    'attr' => [
+                        'class' => 'form-control select'
+                    ],
                     'class' => Group::class,
                     'choice_label' => 'name',
                     'multiple' => true,
@@ -96,6 +81,9 @@ class AppUserType extends AbstractType
                     'required' => false,
                 ])
                 ->add('adminGroups', EntityType::class, [
+                    'attr' => [
+                        'class' => 'form-control select'
+                    ],
                     'class' => Group::class,
                     'choice_label' => 'name',
                     'multiple' => true,
@@ -103,6 +91,9 @@ class AppUserType extends AbstractType
                     'required' => false,
                 ])
                 ->add('memberRooms', EntityType::class, [
+                    'attr' => [
+                        'class' => 'form-control select'
+                    ],
                     'class' => Room::class,
                     'choice_label' => 'codeName',
                     'multiple' => true,
@@ -110,6 +101,9 @@ class AppUserType extends AbstractType
                     'required' => false,
                 ])
                 ->add('adminRooms', EntityType::class, [
+                    'attr' => [
+                        'class' => 'form-control select'
+                    ],
                     'class' => Room::class,
                     'choice_label' => 'codeName',
                     'multiple' => true,
@@ -117,10 +111,13 @@ class AppUserType extends AbstractType
                     'required' => false,
                 ])
                 ->add('isSuperAdmin', CheckboxType::class, [
-                    'label' => 'Super admin',
-                    'label_attr' => [
-                        'class' => 'form__label',
+                    'attr' => [
+                        'class' => 'form-control checkbox'
                     ],
+                    'label_attr' => [
+                        'class' => 'form__label'
+                    ],
+                    'label' => 'Super admin',
                     'required' => false,
                 ]);
             }

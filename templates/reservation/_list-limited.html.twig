@@ -2,15 +2,14 @@
     {% for reservation in reservations %}
     <div class="reservation-entry">
         <div class="reservation-body">
-            <h5 class="reservation-title">{{ reservation.title }}</h5>
             <div class="reservation-info">
                 <div class="reservation-detail">
-                    <span>Start:</span>
-                    <span>{{ reservation.startDatetime ? reservation.startDatetime|date('d. m. Y H:i:s') : 'Not specified' }}</span>
+                    <dl>Start:</dl>
+                    <st>{{ reservation.startDatetime ? reservation.startDatetime|date('d. m. Y H:i:s') : 'Not specified' }}</st>
                 </div>
                 <div class="reservation-detail">
-                    <span>End:</span>
-                    <span>{{ reservation.endDatetime ? reservation.endDatetime|date('d. m. Y H:i:s') : 'Not specified' }}</span>
+                    <dl>End:</dl>
+                    <dt>{{ reservation.endDatetime ? reservation.endDatetime|date('d. m. Y H:i:s') : 'Not specified' }}</dt>
                 </div>
                 <div class="reservation-actions">
                     {% if is_granted('room_detail_view', reservation.room) %}

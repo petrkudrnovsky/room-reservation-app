@@ -25,10 +25,23 @@ body {
 }
 
 h1 {
-    margin: var(--space-m) 0;
+    margin: var(--space-m) var(--space-m) var(--space-m) 0;
     color: var(--color-secondary);
     text-align: center;
 }
+
+h2 {
+    font-size: var(--font-size-l);
+    margin: var(--space-m) var(--space-m) var(--space-s) 0;
+    color: var(--color-secondary);
+}
+
+span {
+    margin-bottom: var(--space-xs);
+    font-size: 18px;
+    font-weight: bold;
+}
+
 
 .app-header {
     height: 60px;
@@ -118,104 +131,6 @@ h1 {
 
 .menu-icon > li.icon-building > a:before {
     content: var(--icon-building);
-}
-
-
-/* Block: login-form */
-.form {
-    width: 50%;
-    margin: 10vh auto var(--space-m);
-    padding: var(--space-m);
-    background-color: var(--color-primary);
-    border-radius: var(--space-s);
-    align-items: center;
-}
-
-/* Element: input within login-form */
-.form__input {
-    display: block;
-    width: 80%;
-    padding: var(--space-s) var(--space-s);
-    margin: 0 auto var(--space-m) auto;
-    border: none;
-    border-radius: var(--space-xs);
-    font-size: var(--font-size);
-}
-
-
-/* Modifier: focus state of input */
-.form__input:focus {
-    outline: none;
-}
-
-/* Element: label within login-form */
-.form__label {
-    display: block;
-    width: 80%;
-    margin: 0 auto var(--space-s) auto;
-    color: var(--color-tertiary);
-}
-
-.form-button {
-    padding: var(--space-s) var(--space-xl);
-    margin-right: var(--space-s);
-    border: none;
-    border-radius: var(--space-xs);
-    font-size: var(--font-size);
-    cursor: pointer;
-}
-
-/* Element: button within login-form */
-.form-button__confirm {
-    background-color: var(--color-tertiary);
-    color: var(--color-primary);
-}
-
-.form-button__delete {
-    background-color: var(--color-error);
-    border: 1px solid var(--color-error);
-    color: var(--color-tertiary);
-}
-
-.form-button__success {
-    background-color: var(--color-success);
-    border: 1px solid var(--color-success);
-    color: var(--color-tertiary);
-}
-
-.form-button__success:hover {
-    background-color: var(--color-light-success);
-}
-
-.form-button__confirm:hover {
-    background-color: var(--color-white);
-    color: var(--color-primary);
-}
-
-.form-button__delete:hover {
-    background-color: var(--color-light-error);
-}
-
-/* Element: button wrapper within login-form */
-.form__button-wrapper {
-    text-align: center;
-}
-
-/* Element: paragraph within button wrapper */
-.form__button-wrapper p {
-    margin-bottom: var(--space-m);
-    color: var(--color-tertiary);
-}
-
-.form__button-wrapper a:hover {
-    color: var(--color-secondary);
-}
-
-/* Element: heading within login-form */
-.form h2 {
-    text-align: center;
-    margin-bottom: var(--space-m);
-    color: var(--color-tertiary);
 }
 
 footer {
@@ -313,6 +228,7 @@ footer p, footer a {
     margin: var(--space-m);
     padding: var(--space-m);
     border-radius: var(--space-xs);
+    z-index: 100;
 }
 
 .flash__success {
@@ -336,8 +252,8 @@ footer p, footer a {
 
 .action-link {
     display: inline-block;
-    padding: 7px var(--space-xl);
-    background-color: var(--color-primary);
+    padding: 7px var(--space-m);
+    background-color: var(--color-secondary);
     color: var(--color-tertiary);
     text-align: center;
     border-radius: var(--space-xs);
@@ -346,10 +262,10 @@ footer p, footer a {
 }
 
 .action-link:hover {
-    background-color: var(--color-secondary);
+    background-color: var(--color-primary);
 }
 
-.actions {
+.actions-wrapper {
     display: flex;
     gap: var(--space-s);
     padding-top: var(--space-s);
@@ -357,12 +273,14 @@ footer p, footer a {
     justify-content: flex-start;
 }
 
-.back-link {
+.back-link,
+.create-link {
     text-decoration: none;
     color: var(--color-black);
 }
 
-.back-link:hover {
+.back-link:hover,
+.create-link:hover {
     text-decoration: underline;
 }
 
@@ -370,4 +288,144 @@ footer p, footer a {
     content: var(--icon-arrow-back);
     margin-right: var(--space-s);
     vertical-align: -2px;
+}
+
+.create-link::before {
+    content: var(--icon-plus);
+    margin-right: var(--space-s);
+    vertical-align: -2px;
+}
+
+.building-image {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: var(--space-xs);
+}
+
+.building-name {
+    font-size: var(--font-size-l);
+    font-weight: bold;
+    margin-bottom: var(--space-s);
+}
+
+.page__text {
+    font-size: var(--font-size-l);
+    text-align: center;
+    margin-bottom: var(--space-m);
+}
+
+.list-item .tag-item {
+    margin-bottom: var(--space-m);
+}
+
+.list-item .info-item {
+    margin-bottom: var(--space-m);
+}
+
+.list-item .info-item span {
+    display: block;
+    color: #333;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.list-item ul {
+    list-style: none;
+    padding: 0;
+    margin: var(--space-xs) 0 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+}
+
+.list-item li {
+    padding: 5px 10px;
+    background-color: var(--color-tertiary);
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    display: inline-flex;
+    margin-right: var(--space-xs);
+    margin-bottom: 0;/
+}
+
+.list-item li a {
+    text-decoration: none;
+    color: var(--color-secondary);
+    display: block;
+}
+
+.list-item li a:hover {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
+.heading-section {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+/** USER **/
+.user__profile {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: var(--space-xl);
+}
+
+.info-item {
+    display: grid;
+    grid-template-columns: 2fr 2fr;
+    gap: var(--space-l);
+    background-color: var(--color-tertiary);
+    margin-bottom: 1rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.reservations {
+    margin-left: var(--space-xl);
+    padding-left : var(--space-xl);
+    border-left: 1px solid var(--color-primary);
+}
+
+
+@media screen and (max-width: 1200px) {
+    .user__profile {
+        grid-template-columns: 1fr;
+    }
+
+    .info-item {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .reservations {
+        margin-left: 0;
+        border-left: none;
+        padding-left: 0;
+        border-top: 1px solid var(--color-primary);
+    }
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.25em 0.4em;
+    font-weight: 700;
+    font-size: var(--font-size-xs);
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    border-radius: 0.25rem;
+    background-color: var(--color-primary);
+    color: white;
+    margin: 0.125rem;
+}
+
+.badge-ROLE_USER {
+    background-color: var(--color-success);
+}
+
+.badge-ROLE_SUPER_ADMIN {
+    background-color: var(--color-error);
 }

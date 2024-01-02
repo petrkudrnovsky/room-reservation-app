@@ -5,30 +5,30 @@
                 <h5 class="reservation-title">{{ reservation.title }}</h5>
                 <div class="reservation-info">
                     <div class="reservation-detail">
-                        <span>Description:</span>
-                        <span>{{ reservation.description|default('No description provided') }}</span>
+                        <dl>Description:</dl>
+                        <dt>{{ reservation.description|default('No description provided') }}</dt>
                     </div>
                     <div class="reservation-detail">
-                        <span>Start:</span>
-                        <span>{{ reservation.startDatetime ? reservation.startDatetime|date('d. m. Y H:i:s') : 'Not specified' }}</span>
+                        <dl>Start:</dl>
+                        <dt>{{ reservation.startDatetime ? reservation.startDatetime|date('d. m. Y H:i:s') : 'Not specified' }}</dt>
                     </div>
                     <div class="reservation-detail">
-                        <span>End:</span>
-                        <span>{{ reservation.endDatetime ? reservation.endDatetime|date('d. m. Y H:i:s') : 'Not specified' }}</span>
+                        <dl>End:</dl>
+                        <dt>{{ reservation.endDatetime ? reservation.endDatetime|date('d. m. Y H:i:s') : 'Not specified' }}</dt>
                     </div>
                     <div class="reservation-detail">
-                        <span>Room:</span>
-                        <span>{{ reservation.room.codeName }}</span>
+                        <dl>Room:</dl>
+                        <dt>{{ reservation.room.codeName }}</dt>
                     </div>
                     <div class="reservation-detail">
-                        <span>Status:</span>
-                        <span class="reservation-status {{ reservation.status|lower }}">
+                        <dl>Status:</dl>
+                        <dt class="reservation-status {{ reservation.status|lower }}">
                             {{ reservation.status }}
-                        </span>
+                        </dt>
                     </div>
                     <div class="reservation-detail">
-                        <span>Reserved for:</span>
-                        <span>{{ reservation.reservedFor.username }}</span>
+                        <dl>Reserved for:</dl>
+                        <dt>{{ reservation.reservedFor.username }}</dt>
                     </div>
                 </div>
                 <div class="reservation-actions">

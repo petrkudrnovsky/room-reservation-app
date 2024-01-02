@@ -6,12 +6,12 @@
     {% if is_granted('group_index_view') %}
         <a href="{{ path('app_group_index') }}" class="back-link">back to list</a>
     {% endif %}
-    <main class="user__profile">
-        <section class="user-info">
-            <h2>Group: {{ group.name }}</h2>
-            <aside class="user-rooms">
+    <main>
+        <section>
+            <h1>Group: {{ group.name }}</h1>
+            <aside class="list-item">
                 <div class="tag-item">
-                    <span>Members</span>
+                    <h2>Members</h2>
                     <ul>
                         {% for member in group.members %}
                             <li>
@@ -21,7 +21,7 @@
                     </ul>
                 </div>
                 <div class="tag-item">
-                    <span>Admins</span>
+                    <h2>Admins</h2>
                     <ul>
                         {% for admin in group.admins %}
                             <li>
@@ -31,19 +31,19 @@
                     </ul>
                 </div>
                 <div class="tag-item">
-                    <span>Rooms</span>
+                    <h2>Rooms</h2>
                     <ul>
                         {% for room in group.rooms %}
                             <li>
-                                <a href="{{ path('app_room_show', {'id': room.id}) }}">{{ room.name }}</a>
+                                <a href="{{ path('app_room_show', {'id': room.id}) }}">{{ room.codeName }}</a>
                             </li>
                         {% endfor %}
                     </ul>
                 </div>
             </aside>
-            <div class="actions">
+            <div class="actions-wrapper">
                 {% if is_granted('group_edit', group) %}
-                    <a href="{{ path('app_group_edit', {'id': group.id}) }}" class="action-link">edit</a>
+                    <a href="{{ path('app_group_edit', {'id': group.id}) }}" class="action-link">Edit</a>
                 {% endif %}
                 {% if is_granted('group_delete', group) %}
                     {{ include('group/_delete_form.html.twig') }}

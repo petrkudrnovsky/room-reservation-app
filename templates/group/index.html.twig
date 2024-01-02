@@ -4,18 +4,21 @@
 
 {% block body %}
     <h1>Groups</h1>
-    <h2>I'm member here:</h2>
-    {{ include('group/_list.html.twig', {'groups': memberGroups}) }}
-
-    <h2>I'm admin here:</h2>
-    {{ include('group/_list.html.twig', {'groups': adminGroups}) }}
-
-    {% if allGroups != null and is_granted('ROLE_SUPER_ADMIN') %}
-    <h2>All groups</h2>
-        {{ include('group/_list.html.twig', {'groups': allGroups}) }}
-    {% endif %}
-
     {% if is_granted('group_create') %}
-        <a href="{{ path('app_group_new') }}" class="action-link">Create new</a>
+        <a href="{{ path('app_group_new') }}" class="create-link">Create new group</a>
     {% endif %}
+
+    <section class="list-item">
+        <div class="tag-item">
+            <h2>I'm member here:</h2>
+            {{ include('group/_list.html.twig', {'groups': memberGroups}) }}
+            <h2>I'm admin here:</h2>
+            {{ include('group/_list.html.twig', {'groups': adminGroups}) }}
+
+            {% if allGroups != null and is_granted('ROLE_SUPER_ADMIN') %}
+            <h2>All groups</h2>
+                {{ include('group/_list.html.twig', {'groups': allGroups}) }}
+            {% endif %}
+        </div>
+    </section>
 {% endblock %}

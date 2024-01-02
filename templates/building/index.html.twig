@@ -3,33 +3,26 @@
 {% block title %}Building index{% endblock %}
 
 {% block body %}
-    <h1>Building index</h1>
+    <h1>Buildings</h1>
 
-    <table class="table">
-        <thead>
-        <tr>
-            <th>Id</th>
-            <th>Name</th>
-            {# <th>actions</th> #}
-        </tr>
-        </thead>
-        <tbody>
-        {% for building in buildings %}
-            <tr>
-                <td>{{ building.id }}</td>
-                <td>{{ building.name }}</td>
-                {# <td>
-                    <a href="{{ path('app_group_show', {'id': group.id}) }}">show</a>
-                    <a href="{{ path('app_group_edit', {'id': group.id}) }}">edit</a>
-                </td> #}
-            </tr>
+    {% for building in buildings %}
+    <div class="user-list">
+        <div class="user-list__item">
+            <span class="building-name">{{ building.name }}</span>
+            {% if building.name == 'Budova A - Fakulta Stavební' %}
+            <img class="building-image" src="{{ asset('images/budova-a-fsv.jpeg') }}" alt="building-fsv-a">
+            {% elseif building.name == 'Budova D - Fakulta Stavební' %}
+            <img class="building-image" src="{{ asset('images/budova-d-fsv.jpeg') }}" alt="building-fsv-d">
+            {% elseif building.name == 'Nová budova ČVUT' %}
+            <img class="building-image" src="{{ asset('images/nova_budova_cvut.jpeg') }}" alt="building-new">
+            {% elseif building.name == 'Národní technická knihovna' %}
+            <img class="building-image" src="{{ asset('images/ntk.jpeg') }}" alt="building-ntk">
+            {% endif %}
+        </div>
         {% else %}
-            <tr>
-                <td colspan="2">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+        <p>No buildings found.</p>
+    </div>
+    {% endfor %}
 
     {# <a href="{{ path('app_group_new') }}">Create new</a> #}
 {% endblock %}

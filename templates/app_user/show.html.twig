@@ -10,36 +10,44 @@
         <section class="user-info">
             <h2>User: {{ app_user.firstName }} {{ app_user.secondName }}</h2>
             <div class="info-item">
-                <span>Username:</span>
-                <span>{{ app_user.username }}</span>
+                <dl>Username:</dl>
+                <dt>{{ app_user.username }}</dt>
             </div>
             <div class="info-item">
-                <span>Roles:</span>
+                <dl>Roles:</dl>
                 <div>
                     {% for role in app_user.roles %}
-                        <span class="badge badge-{{ role }}">{{ role }}</span>
+                        <dt class="badge badge-{{ role }}">{{ role }}</dt>
                     {% endfor %}
                 </div>
             </div>
             <div class="info-item">
-                <span>First name:</span>
-                <span>{{ app_user.firstName }}</span>
+                <dl>First name:</dl>
+                <dt>{{ app_user.firstName }}</dt>
             </div>
             <div class="info-item">
-                <span>Second name:</span>
-                <span>{{ app_user.secondName }}</span>
+                <dl>Second name:</dl>
+                <st>{{ app_user.secondName }}</st>
             </div>
             <div class="info-item">
-                <span>Email:</span>
-                <span>{{ app_user.email }}</span>
+                <dl>Email:</dl>
+                {% if app_user.email is empty %}
+                    <dt>-</dt>
+                {% else %}
+                    <dt>{{ app_user.email }}</dt>
+                {% endif %}
             </div>
             <div class="info-item">
-                <span>Phone:</span>
-                <span>{{ app_user.phone }}</span>
+                <dl>Phone:</dl>
+                {% if app_user.phone is empty %}
+                    <dt>-</dt>
+                {% else %}
+                    <dt>{{ app_user.phone }}</dt>
+                {% endif %}
             </div>
-            <aside class="user-rooms">
+            <aside class="list-item">
                 <div class="tag-item">
-                    <span>Member of these rooms:</span>
+                    <h2>Member of these rooms:</h2>
                     <ul>
                         {% for room in app_user.memberRooms %}
                             <li>
@@ -51,7 +59,7 @@
                     </ul>
                 </div>
                 <div class="tag-item">
-                    <span>Admin of these rooms:</span>
+                    <h2>Admin of these rooms:</h2>
                     <ul>
                         {% for room in app_user.adminRooms %}
                             <li>
@@ -63,7 +71,7 @@
                     </ul>
                 </div>
                 <div class="tag-item">
-                    <span>Member of these groups:</span>
+                    <h2>Member of these groups:</h2>
                     <ul>
                         {% for group in app_user.memberGroups %}
                             <li>
@@ -75,7 +83,7 @@
                     </ul>
                 </div>
                 <div class="tag-item">
-                    <span>Admin of these groups:</span>
+                    <h2>Admin of these groups:</h2>
                     <ul>
                         {% for group in app_user.adminGroups %}
                             <li>
@@ -87,7 +95,7 @@
                     </ul>
                 </div>
             </aside>
-            <div class="actions">
+            <div class="actions-wrapper">
                 {% if is_granted('user_edit', app_user) %}
                     <a href="{{ path('app_user_edit', {'id': app_user.id}) }}" class="action-link">Edit</a>
                 {% endif %}

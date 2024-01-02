@@ -8,31 +8,38 @@
     {% endif %}
     <main>
         <section class="user-info">
-            <h1>Room: {{ room.name }}</h1>
-            <div class="info-item">
-                <span>Name:</span>
-                <span>{{ room.name }}</span>
+            <div class="heading-section">
+                <h1>Room: {{ room.name }}</h1>
+                {% if is_granted('reservation_create', room) %}
+                    <a href="{{ path('app_room_reservation_new', {'roomId': room.id}) }}" class="action-link">Reserve this room</a>
+                {% else %}
+                    <p>You can not create a Reservation for this room.</p>
+                {% endif %}
             </div>
             <div class="info-item">
-                <span>Code:</span>
-                <span>{{ room.codeName }}</span>
+                <dl>Name:</dl>
+                <dt>{{ room.name }}</dt>
             </div>
             <div class="info-item">
-                <span>Building:</span>
-                <span>{{ room.building.name }}</span>
+                <dl>Code:</dl>
+                <dt>{{ room.codeName }}</dt>
             </div>
             <div class="info-item">
-                <span>IsPrivate:</span>
-                <span>{{ room.isPrivate ? 'Yes' : 'No' }}</span>
+                <dl>Building:</dl>
+                <dt>{{ room.building.name }}</dt>
             </div>
             <div class="info-item">
-                <span>IsLocked:</span>
-                <span>{{ room.isLocked ? 'Yes' : 'No' }}</span>
+                <dl>IsPrivate:</dl>
+                <dt>{{ room.isPrivate ? 'Yes' : 'No' }}</dt>
+            </div>
+            <div class="info-item">
+                <dl>IsLocked:</dl>
+                <dt>{{ room.isLocked ? 'Yes' : 'No' }}</dt>
             </div>
             {% if is_granted('IS_AUTHENTICATED_FULLY') %}
-            <aside class="user-rooms">
+            <aside class="list-item">
                 <div class="tag-item">
-                    <span>Members:</span>
+                    <h2>Members:</h2>
                     <ul>
                         {% for member in room.members %}
                             <li>
@@ -45,7 +52,7 @@
                     </ul>
                 </div>
                 <div class="tag-item">
-                    <span>Admins:</span>
+                    <h2>Admins:</h2>
                     <ul>
                         {% for admin in room.admins %}
                             <li>
@@ -58,7 +65,7 @@
                     </ul>
                 </div>
                 <div class="tag-item">
-                    <span>Groups:</span>
+                    <h2>Groups:</h2>
                     <ul>
                         {% for group in room.owningGroups %}
                             <li>
@@ -72,10 +79,7 @@
                 </div>
             </aside>
             {% endif %}
-            <div class="actions">
-                {% if is_granted('reservation_create', room) %}
-                    <a href="{{ path('app_room_reservation_new', {'roomId': room.id}) }}" class="action-link">Reserve this room</a>
-                {% endif %}
+            <div class="actions-wrapper">
                 {% if is_granted('room_edit', room) %}
                     <a href="{{ path('app_room_edit', {'id': room.id}) }}" class="action-link">Edit</a>
                 {% endif %}

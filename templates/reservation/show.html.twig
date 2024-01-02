@@ -3,66 +3,75 @@
 {% block title %}Reservation{% endblock %}
 
 {% block body %}
-    <h1>Reservation</h1>
-
-    <table class="table">
-        <tbody>
-        {% if is_granted('reservation_detail_view', reservation) %}
-            <tr>
-                <th>Title</th>
-                <td>{{ reservation.title }}</td>
-            </tr>
-            <tr>
-                <th>Description</th>
-                <td>{{ reservation.description }}</td>
-            </tr>
-        {% endif %}
-            <tr>
-                <th>Start</th>
-                <td>{{ reservation.startDatetime ? reservation.startDatetime|date('Y-m-d H:i:s') : '' }}</td>
-            </tr>
-            <tr>
-                <th>EndTime</th>
-                <td>{{ reservation.endDatetime ? reservation.endDatetime|date('Y-m-d H:i:s') : '' }}</td>
-            </tr>
-            <tr>
-                <th>Room</th>
-                <td><a href="{{ path('app_room_show', {'id': reservation.room.id}) }}">{{ reservation.room.codeName }} - {{ reservation.room.name }}</a></td>
-            </tr>
-        {% if is_granted('reservation_detail_view', reservation) %}
-            <tr>
-                <th>Status</th>
-                <td>{{ reservation.status }}</td>
-            </tr>
-            <tr>
-                <th>ReservedFor</th>
-                <td>{{ reservation.reservedFor.username }}</td>
-            </tr>
-            <tr>
-                <th>ApprovedBy</th>
-                <td>{{ reservation.approvedBy ? reservation.approvedBy.username : 'Not approved' }}</td>
-            </tr>
-            <tr>
-                <th>Visitors</th>
-                <td>
-                    <ul>
-                        {% for visitor in reservation.visitors %}
-                            <li>{{ visitor.username }}</li>
-                        {% endfor %}
-                    </ul>
-                </td>
-            </tr>
-        {% endif %}
-        </tbody>
-    </table>
-
     {% if is_granted('room_detail_view', reservation.room) %}
-        <a href="{{ path('app_room_reservation_index', {'roomId': reservation.room.id}) }}">back to list</a>
+        <a href="{{ path('app_room_reservation_index', {'roomId': reservation.room.id}) }}" class="back-link">back to list</a>
     {% endif %}
-    {% if is_granted('reservation_edit', reservation) %}
-        <a href="{{ path('app_room_reservation_edit', {'id': reservation.id, 'roomId': reservation.room.id}) }}">edit</a>
-    {% endif %}
-    {% if is_granted('reservation_delete', reservation) %}
-        {{ include('reservation/_delete_form.html.twig') }}
-    {% endif %}
+    <main>
+        <section>
+            {% if is_granted('reservation_detail_view', reservation) %}
+                <h1>Reservation: {{ reservation.title }}</h1>
+            {% else %}
+                <h1>Reservation</h1>
+            {% endif %}
+            {% if is_granted('reservation_detail_view', reservation) %}
+                <div class="info-item">
+                    <dl>Description:</dl>
+                    <dt>{{ reservation.description }}</dt>
+                </div>
+            {% endif %}
+            <div class="info-item">
+                <dl>Start:</dl>
+                <dt>{{ reservation.startDatetime ? reservation.startDatetime|date('Y-m-d H:i:s') : '' }}</dt>
+            </div>
+            <div class="info-item">
+                <dl>End:</dl>
+                <dt>{{ reservation.endDatetime ? reservation.endDatetime|date('Y-m-d H:i:s') : '' }}</dt>
+            </div>
+            {% if is_granted('reservation_detail_view', reservation) %}
+                <div class="info-item">
+                    <dl>Status:</dl>
+                    <dt class="reservation-status {{ reservation.status|lower }}">
+                        {{ reservation.status }}
+                    </dt>
+                </div>
+                <div class="info-item">
+                    <dl>Reserved for:</dl>
+                    <dt>{{ reservation.reservedFor.username }}</dt>
+                </div>
+                <div class="info-item">
+                    <dl>Approved by:</dl>
+                    <dt>{{ reservation.approvedBy ? reservation.approvedBy.username : 'Not approved' }}</dt>
+                </div>
+                <aside class="list-item">
+                    <div class="tag-item">
+                        <h2>Visitors:</h2>
+                        <ul>
+                            {% for visitor in reservation.visitors %}
+                                <li>{{ visitor.username }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="tag-item">
+                        <h2>Room:</h2>
+                        <ul>
+                            <li>
+                                <a href="{{ path('app_room_show', {'id': reservation.room.id}) }}">{{ reservation.room.codeName }} - {{ reservation.room.name }}</a>
+                            </li>
+                        </ul>
+
+                    </div>
+                </aside>
+            {% endif %}
+
+        </section>
+    </main>
+
+    <div class="actions-wrapper">
+        {% if is_granted('reservation_edit', reservation) %}
+            <a href="{{ path('app_room_reservation_edit', {'id': reservation.id, 'roomId': reservation.room.id}) }}" class="action-link">Edit</a>
+        {% endif %}
+        {% if is_granted('reservation_delete', reservation) %}
+            {{ include('reservation/_delete_form.html.twig') }}
+        {% endif %}
+    </div>
 {% endblock %}

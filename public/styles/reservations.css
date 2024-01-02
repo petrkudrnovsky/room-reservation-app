@@ -46,13 +46,9 @@
     flex-direction: column;
 }
 
-.reservation-info span:first-of-type {
+.reservation-info dl {
     font-weight: bold;
     color: #000;
-}
-
-.reservation-info span:last-of-type {
-    font-weight: bold;
 }
 
 .reservation-status {
@@ -70,4 +66,10 @@
 
 .reservation-status.pending {
     color: var(--color-warning);
+}
+
+.reservation-detail {
+    display: flex;
+    flex-direction: row;
+    gap: var(--space-s);
 }

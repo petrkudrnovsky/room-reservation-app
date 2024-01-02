@@ -17,7 +17,7 @@ label {
     display: block;
     margin-bottom: 8px;
     font-weight: bold;
-    color: #555;
+    color: var(--color-black);
 }
 
 /* Textarea */
@@ -69,4 +69,111 @@ label {
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.3s ease;
+}
+
+/** LOGIN FORM **/
+
+/* Block: login-form */
+.login-form {
+    width: 50%;
+    margin: 10vh auto var(--space-m);
+    padding: var(--space-m);
+    background-color: var(--color-primary);
+    border-radius: var(--space-s);
+    align-items: center;
+}
+
+/* Element: input within login-form */
+.login-form__input {
+    display: block;
+    width: 80%;
+    padding: var(--space-s) var(--space-s);
+    margin: 0 auto var(--space-m) auto;
+    border: none;
+    border-radius: var(--space-xs);
+    font-size: var(--font-size);
+}
+
+
+/* Modifier: focus state of input */
+.login-form__input:focus {
+    outline: none;
+}
+
+/* Element: label within login-form */
+.login-form__label {
+    display: block;
+    width: 80%;
+    margin: 0 auto var(--space-s) auto;
+    color: var(--color-tertiary);
+}
+
+.login-form__heading {
+    color: var(--color-tertiary);
+    text-align: center;
+}
+
+.form__checkbox {
+    display: inline-block;
+    margin-right: var(--space-s);
+}
+
+.form-button {
+    padding: var(--space-s) var(--space-m);
+    margin-right: var(--space-s);
+    border: none;
+    border-radius: var(--space-xs);
+    font-size: var(--font-size);
+    cursor: pointer;
+}
+
+/* Element: button within login-form */
+.form-button__confirm {
+    background-color: var(--color-secondary);
+    color: var(--color-tertiary);
+    margin-bottom: var(--space-s);
+}
+
+.form-button__login {
+    background-color: var(--color-tertiary);
+    color: var(--color-primary);
+}
+
+.form-button__delete {
+    background-color: var(--color-error);
+    border: 1px solid var(--color-error);
+    color: var(--color-tertiary);
+}
+
+.form-button__success {
+    background-color: var(--color-success);
+    border: 1px solid var(--color-success);
+    color: var(--color-tertiary);
+}
+
+.form-button__success:hover {
+    background-color: var(--color-light-success);
+}
+
+.form-button__confirm:hover {
+    background-color: var(--color-primary);
+}
+
+.form-button__delete:hover {
+    background-color: var(--color-light-error);
+}
+
+/* Element: button wrapper within login-form */
+.form__button-wrapper {
+    text-align: center;
+}
+
+/* Element: paragraph within button wrapper */
+.form__button-wrapper p {
+    margin: var(--space-s) 0;
+    color: var(--color-tertiary);
+}
+
+.form__button-wrapper a:hover {
+    color: var(--color-secondary);
 }

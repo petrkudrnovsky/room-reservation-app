@@ -1,29 +1,10 @@
-<table class="table">
-    <thead>
-    <tr>
-        <th>Id</th>
-        <th>Name</th>
-        <th>actions</th>
-    </tr>
-    </thead>
-    <tbody>
+<ul>
     {% for group in groups %}
-        <tr>
-            <td>{{ group.id }}</td>
-            <td>{{ group.name }}</td>
-            <td>
-                {% if is_granted('group_detail_view', group) %}
-                    <a href="{{ path('app_group_show', {'id': group.id}) }}">show</a>
-                {% endif %}
-                {% if is_granted('group_edit', group) %}
-                    <a href="{{ path('app_group_edit', {'id': group.id}) }}">edit</a>
-                {% endif %}
-            </td>
-        </tr>
-    {% else %}
-        <tr>
-            <td colspan="3">no records found</td>
-        </tr>
+        <li>
+            <a href="{{ path('app_group_show', {'id': group.id}) }}">{{ group.name }}</a>
+        </li>
     {% endfor %}
-    </tbody>
-</table>
+    {% if groups|length == 0 %}
+        <li>No groups found</li>
+    {% endif %}
+</ul>
