@@ -27,6 +27,10 @@ class RoomManager
 
     public function deleteFromDatabase(Room $room): void
     {
+        $reservations = $room->getReservations();
+        foreach ($reservations as $reservation) {
+            $this->em->remove($reservation);
+        }
         $this->em->remove($room);
         $this->em->flush();
     }

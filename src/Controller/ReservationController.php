@@ -53,7 +53,8 @@ class ReservationController extends AbstractController
         /** @var AppUser $currentUser */
         $currentUser = $this->getUser();
         $reservationModel->reservedFor = $currentUser;
-        $form = $this->createForm(ReservationType::class, $reservationModel, ['can_edit_reservedFor' => $this->isGranted(RoomVoter::HAS_FULL_ACCESS_TO_ROOM, $reservationModel->room)]);
+        // can can_edit_after_approved be true? - yes, because the user can edit the reservation before it is approved
+        $form = $this->createForm(ReservationType::class, $reservationModel, ['can_edit_reservedFor' => $this->isGranted(RoomVoter::HAS_FULL_ACCESS_TO_ROOM, $reservationModel->room), 'can_edit_after_approved' => true]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -87,7 +88,10 @@ class ReservationController extends AbstractController
     public function edit(Request $request, Reservation $reservation, ReservationManager $reservationManager): Response
     {
         $reservationModel = ReservationTypeModel::fromEntity($reservation);
-        $form = $this->createForm(ReservationType::class, $reservationModel, ['can_edit_reservedFor' => $this->isGranted(RoomVoter::HAS_FULL_ACCESS_TO_ROOM, $reservation->getRoom())]);
+        $form = $this->createForm(ReservationType::class, $reservationModel, [
+            'can_edit_reservedFor' => $this->isGranted(RoomVoter::HAS_FULL_ACCESS_TO_ROOM, $reservation->getRoom()),
+            'can_edit_after_approved' => ($reservation->getStatus() !== Reservation::STATUS_APPROVED || $this->isGranted(ReservationVoter::CAN_APPROVE, $reservation))
+        ]);
 
         $form->handleRequest($request);
 
