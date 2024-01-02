@@ -87,12 +87,11 @@ class AppUserController extends AbstractController
 
     #[Route('/{id}/delete', name: 'app_user_delete')]
     #[IsGranted(UserVoter::DELETE, 'appUser')]
-    public function delete(Request $request, AppUser $appUser, EntityManagerInterface $entityManager, SessionInterface $session): Response
+    public function delete(Request $request, AppUser $appUser, AppUserManager $appUserManager, SessionInterface $session): Response
     {
         $isCurrentUser = $this->getUser()->getId() == $appUser->getId();
         if ($this->isCsrfTokenValid('delete'.$appUser->getId(), $request->request->get('_token'))) {
-            $entityManager->remove($appUser);
-            $entityManager->flush();
+            $appUserManager->removeFromDatabase($appUser);
         }
 
         if($isCurrentUser) {

@@ -91,11 +91,10 @@ class GroupController extends AbstractController
 
     #[Route('/{id}/delete', name: 'app_group_delete')]
     #[IsGranted(GroupVoter::DELETE)]
-    public function delete(Request $request, Group $group, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, Group $group, GroupManager $groupManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$group->getId(), $request->request->get('_token'))) {
-            $entityManager->remove($group);
-            $entityManager->flush();
+            $groupManager->removeFromDatabase($group);
         }
 
         return $this->redirectToRoute('app_group_index', [], Response::HTTP_SEE_OTHER);
