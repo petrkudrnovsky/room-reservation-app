@@ -1,0 +1,75 @@
+@import "helper.css";
+
+.reservation-entry {
+    background: var(--color-tertiary);
+    margin-bottom: var(--space-m);
+    border-radius: var(--space-xs);
+}
+
+.reservation-body {
+    padding: var(--space-m);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+}
+
+.reservation-title {
+    font-size: var(--font-size-l);
+    color: var(--color-secondary);
+    margin-bottom: var(--space-s);
+}
+
+.reservation-info {
+    display: flex;
+    gap: var(--space-s);
+    border-top: 1px solid var(--color-white);
+    padding-top: var(--space-s);
+}
+
+.reservation-text {
+    font-size: var(--font-size-m);
+    color: var(--color-black);
+    margin: 0;
+}
+
+.reservation-actions {
+    display: flex;
+    gap: var(--space-s);
+    padding-top: var(--space-s);
+    flex-wrap: wrap;
+    justify-content: flex-start;
+}
+
+.reservation-info {
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+}
+
+.reservation-info dl {
+    font-weight: bold;
+    color: #000;
+}
+
+.reservation-status {
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.reservation-status.approved {
+    color: var(--color-success);
+}
+
+.reservation-status.rejected {
+    color: var(--color-error);
+}
+
+.reservation-status.pending {
+    color: var(--color-warning);
+}
+
+.reservation-detail {
+    display: flex;
+    flex-direction: row;
+    gap: var(--space-s);
+}

@@ -3,15 +3,10 @@
 {% block title %}New Room{% endblock %}
 
 {% block body %}
-    {% include 'components/_header.html.twig' %}
-    <div class="content-wrapper">
-        <h1>Create new Room</h1>
+    {% if is_granted('room_index_view') %}
+        <a href="{{ path('app_room_index') }}" class="back-link">back to list</a>
+    {% endif %}
+    <h1>Create new Room</h1>
 
-        {{ include('room/_form.html.twig') }}
-
-        {% if is_granted('room_index_view') %}
-            <a href="{{ path('app_room_index') }}">back to list</a>
-        {% endif %}
-    </div>
-    {% include 'components/_footer.html.twig' %}
+    {{ include('room/_form.html.twig') }}
 {% endblock %}

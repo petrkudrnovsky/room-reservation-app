@@ -1,0 +1,46 @@
+<aside class="sidebar">
+    <nav class="sidebar-nav">
+        <ul class="menu-icon">
+            {% if is_granted('user_index_view') %}
+                <li class="icon-user">
+                    <a href="{{ path('app_user_index') }}" class="sidebar-nav__item">
+                        All users
+                    </a>
+                </li>
+            {% endif %}
+            {% if is_granted('group_index_view') %}
+                <li class="icon-group">
+                    <a href="{{ path('app_group_index') }}" class="sidebar-nav__item">
+                        Groups
+                    </a>
+                </li>
+            {% endif %}
+            {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+                <li class="icon-building">
+                    <a href="{{ path('app_building_index') }}" class="sidebar-nav__item">
+                        Buildings
+                    </a>
+                </li>
+            {% endif %}
+            {% if is_granted('room_index_view') %}
+                <li class="icon-room">
+                    <a href="{{ path('app_room_index') }}" class="sidebar-nav__item">
+                        Rooms
+                    </a>
+                </li>
+            {% endif %}
+            {% if is_granted('ROLE_SUPER_ADMIN') %}
+                <li class="icon-reservation">
+                    <a href="{{ path('app_all_reservations_index') }}" class="sidebar-nav__item">
+                        All reservations
+                    </a>
+                </li>
+            {% endif %}
+            <li class="icon-reservation">
+                <a href="{{ path('app_my_reservations_index') }}" class="sidebar-nav__item">
+                    My reservations
+                </a>
+            </li>
+        </ul>
+    </nav>
+</aside>

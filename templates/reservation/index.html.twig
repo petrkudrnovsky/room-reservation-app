@@ -3,21 +3,17 @@
 {% block title %}Reservations for {{ room.codeName }}{% endblock %}
 
 {% block body %}
-    {% include 'components/_header.html.twig' %}
-    <div class="content-wrapper">
+    <section class="heading-section">
         <h1>Reservations for {{ room.codeName }}</h1>
-
-        <h2>My reservations</h2>
-        {{ include('reservation/_list.html.twig', { reservations: userReservations }) }}
-
-        {% if allReservations != null and is_granted('room_can_view_full_reservations', room) %}
-            <h2>All reservations</h2>
-            {{ include('reservation/_list.html.twig', { reservations: allReservations }) }}
-        {% endif %}
-
         {% if is_granted('reservation_create', room) %}
-            <a href="{{ path('app_room_reservation_new', { roomId: room.id }) }}">Create new reservation</a>
+            <a href="{{ path('app_room_reservation_new', { roomId: room.id }) }}" class="action-link">Create new reservation</a>
         {% endif %}
-    </div>
-    {% include 'components/_footer.html.twig' %}
+    </section>
+    <h2>My reservations</h2>
+    {{ include('reservation/_list.html.twig', { reservations: userReservations }) }}
+
+    {% if allReservations != null and is_granted('room_can_view_full_reservations', room) %}
+        <h2>All reservations</h2>
+        {{ include('reservation/_list.html.twig', { reservations: allReservations }) }}
+    {% endif %}
 {% endblock %}

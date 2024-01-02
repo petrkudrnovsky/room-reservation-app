@@ -18,9 +18,11 @@ class GroupType extends AbstractType
     {
         $builder
             ->add('name', TextType::class, [
+                'attr' => ['class' => 'form-control'],
                 'label' => 'Group name',
             ])
             ->add('members', EntityType::class, [
+                'attr' => ['class' => 'form-control select'],
                 'class' => AppUser::class,
                 'choice_label' => 'username',
                 'multiple' => true,
@@ -30,6 +32,7 @@ class GroupType extends AbstractType
         if($options['is_super_admin']) {
             $builder
                 ->add('admins', EntityType::class, [
+                    'attr' => ['class' => 'form-control select'],
                     'class' => AppUser::class,
                     'choice_label' => 'username',
                     'multiple' => true,
@@ -37,6 +40,7 @@ class GroupType extends AbstractType
                     'required' => false,
                 ])
                 ->add('rooms', EntityType::class, [
+                    'attr' => ['class' => 'form-control select'],
                     'class' => Room::class,
                     'choice_label' => 'name',
                     'multiple' => true,

@@ -1,4 +1,4 @@
 <form method="post" action="{{ path('app_room_reservation_approve', {'id': reservation.id, 'roomId': reservation.room.id}) }}" onsubmit="return confirm('Are you sure you want to approve reservation: {{ reservation.title }}?');">
     <input type="hidden" name="_token" value="{{ csrf_token('approve' ~ reservation.id) }}">
-    <button class="btn">Approve</button>
+    <button class="form-button form-button__success">Approve</button>
 </form>

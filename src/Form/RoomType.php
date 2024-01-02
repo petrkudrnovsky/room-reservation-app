@@ -19,21 +19,26 @@ class RoomType extends AbstractType
     {
         $builder
             ->add('name', TextType::class, [
+                'attr' => ['class' => 'form-control'],
                 'label' => 'Room name',
             ])
             ->add('code', TextType::class, [
+                'attr' => ['class' => 'form-control'],
                 'label' => 'Room code',
             ])
             ->add('isPrivate', CheckboxType::class, [
+                'attr' => ['class' => 'form-control checkbox'],
                 'label' => 'Private room',
                 'required' => false,
             ])
             ->add('building', EntityType::class, [
+                'attr' => ['class' => 'form-control select'],
                 'class' => Building::class,
                 'choice_label' => 'name',
             ]);
         if($options['can_edit_members'] || $options['is_super_admin']) {
             $builder->add('members', EntityType::class, [
+                'attr' => ['class' => 'form-control select'],
                 'class' => AppUser::class,
                 'choice_label' => 'username',
                 'multiple' => true,
@@ -43,6 +48,7 @@ class RoomType extends AbstractType
         }
         if($options['can_edit_admins'] || $options['is_super_admin']) {
             $builder->add('admins', EntityType::class, [
+                'attr' => ['class' => 'form-control select'],
                 'class' => AppUser::class,
                 'choice_label' => 'username',
                 'multiple' => true,
@@ -52,6 +58,7 @@ class RoomType extends AbstractType
         }
         if($options['is_super_admin']) {
            $builder->add('owningGroups', EntityType::class, [
+               'attr' => ['class' => 'form-control select'],
                'class' => Group::class,
                'choice_label' => 'name',
                'multiple' => true,
