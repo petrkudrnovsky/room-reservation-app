@@ -10,7 +10,7 @@
             {% for app_user in app_users %}
                 <li class="user-list__item">
                     <strong class="user-list__item--name">
-                        <a href="{{ path('app_user_show', {'id': app_user.id}) }}">
+                        <a href="{{ path('app_user_show', {'id': app_user.id}) }}" data-user-id="{{ app_user.id }}" class="username-link">
                             {{ app_user.firstName }} {{ app_user.secondName }}
                         </a>
                     </strong>
@@ -28,6 +28,9 @@
                     </a>
                 </li>
         </ul>
+    </div>
+    <div id="profile-preview" style="display: none;">
+        <!-- Profile preview will be loaded here -->
     </div>
     {% include 'components/_footer.html.twig' %}
 {% endblock %}
