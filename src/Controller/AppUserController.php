@@ -89,16 +89,19 @@ class AppUserController extends AbstractController
     #[IsGranted(UserVoter::DELETE, 'appUser')]
     public function delete(Request $request, AppUser $appUser, AppUserManager $appUserManager, SessionInterface $session): Response
     {
-        $isCurrentUser = $this->getUser()->getId() == $appUser->getId();
+        // if the user is deleting their own account, log them out
+        if($appUser === $this->getUser()) {
+            if ($this->isCsrfTokenValid('delete'.$appUser->getId(), $request->request->get('_token'))) {
+                //dd("deleteing");
+                $session->invalidate();
+                $appUserManager->removeFromDatabase($appUser);
+            }
+            return $this->redirectToRoute('app_logout');
+        }
         if ($this->isCsrfTokenValid('delete'.$appUser->getId(), $request->request->get('_token'))) {
             $appUserManager->removeFromDatabase($appUser);
-        }
-
-        if($isCurrentUser) {
-            // TO-DO: not working
-            $session->invalidate();
-            return $this->render('app_user/deleted_user.html.twig');
         }
         return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
     }
 }
+

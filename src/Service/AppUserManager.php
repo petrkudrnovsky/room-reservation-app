@@ -32,6 +32,10 @@ class AppUserManager
         foreach ($reservations as $reservation) {
             $this->em->remove($reservation);
         }
+        $reservations = $appUser->getApprovedReservations();
+        foreach ($reservations as $reservation) {
+            $this->em->remove($reservation);
+        }
         $this->em->remove($appUser);
         $this->em->flush();
     }
