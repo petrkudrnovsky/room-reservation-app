@@ -123,6 +123,7 @@ class AppUserManager
                 $admin = $this->userRepository->find($adminId);
                 if ($admin) {
                     $group !== null ? $group->addAdmin($admin) : $room->addAdmin($admin);
+                    $group !== null ? $group->addMember($admin) : $room->addMember($admin);
                 } else {
                     throw new Exception('User not found');
                 }

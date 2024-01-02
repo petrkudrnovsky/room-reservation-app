@@ -51,6 +51,7 @@ class RoomTypeModel
         }
         foreach ($this->admins as $admin) {
             $room->addAdmin($admin);
+            $room->addMember($admin);
         }
 
         return $room;

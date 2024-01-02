@@ -35,6 +35,7 @@ class GroupTypeModel
         }
         foreach ($this->admins as $admin) {
             $group->addAdmin($admin);
+            $group->addMember($admin);
         }
 
         foreach ($group->getRooms() as $room) {
