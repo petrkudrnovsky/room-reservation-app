@@ -3,31 +3,33 @@
 {% block title %}AppUser index{% endblock %}
 
 {% block body %}
-    {% include 'components/_header.html.twig' %}
-    <div class="content-wrapper">
-        <h1>Users</h1>
-        <ul class="user-list">
-            {% for app_user in app_users %}
-                <li class="user-list__item">
-                    <strong class="user-list__item--name">
-                        <a href="{{ path('app_user_show', {'id': app_user.id}) }}">
-                            {{ app_user.firstName }} {{ app_user.secondName }}
-                        </a>
-                    </strong>
-                    <span class="user-list__text">Username: {{ app_user.username }}</span>
-                    <span class="user-list__text">Role: {{ app_user.roles ? app_user.roles|json_encode : '' }}</span>
-                    <div class="user-list__item--actions">
-                        <a href="{{ path('app_user_edit', {'id': app_user.id}) }}" class="user-list__edit-link">Edit</a>
-                        <a href="{{ path('app_user_show', {'id': app_user.id}) }}" class="user-list__detail-link">Detail</a>
-                    </div>
-                </li>
-            {% endfor %}
-                <li class="user-list__item user-list__item--new">
-                    <a href="{{ path('app_user_new') }}" class="user-list__new-link">
-                        <span class="user-list__plus">+</span> Create New
-                    </a>
-                </li>
-        </ul>
-    </div>
-    {% include 'components/_footer.html.twig' %}
+    <h1>Users</h1>
+    <ul class="user-list">
+        <li class="user-list__item user-list__item--new">
+            <a href="{{ path('app_user_new') }}" class="user-list__new-link">
+                <span class="user-list__plus">+</span> Create New
+            </a>
+        </li>
+        {% for app_user in app_users %}
+        <li class="user-list__item">
+            <strong class="user-list__item--name">
+                <a href="{{ path('app_user_show', {'id': app_user.id}) }}">
+                    {{ app_user.firstName }} {{ app_user.secondName }}
+                </a>
+            </strong>
+            <span class="user-list__text">Username: {{ app_user.username }}</span>
+            <div>
+                {% for role in app_user.roles %}
+                    {% if role == 'ROLE_SUPER_ADMIN' %}
+                        <span class="badge badge-{{ role }}">ADMIN</span>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div class="user-list__item--actions">
+                <a href="{{ path('app_user_edit', {'id': app_user.id}) }}" class="user-list__edit-link">Edit</a>
+                <a href="{{ path('app_user_show', {'id': app_user.id}) }}" class="user-list__detail-link">Detail</a>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
 {% endblock %}

@@ -1,35 +1,34 @@
-<table class="table">
-    <thead>
-    <tr>
-        <th>Start</th>
-        <th>End</th>
-        <th>actions</th>
-    </tr>
-    </thead>
-    <tbody>
+<div class="reservations-list">
     {% for reservation in reservations %}
-        <tr>
-            <td>{{ reservation.startDatetime ? reservation.startDatetime|date('d. m. Y H:i:s') : '' }}</td>
-            <td>{{ reservation.endDatetime ? reservation.endDatetime|date('d. m. Y H:i:s') : '' }}</td>
-            <td>
-                {% if is_granted('room_detail_view', reservation.room) %}
-                    <a href="{{ path('app_room_reservation_show', {'id': reservation.id, 'roomId': reservation.room.id}) }}">show</a>
-                {% endif %}
-                {% if is_granted('reservation_edit', reservation) %}
-                    <a href="{{ path('app_room_reservation_edit', {'id': reservation.id, 'roomId': reservation.room.id}) }}">edit</a>
-                {% endif %}
-                {% if reservation.status == 'pending' and is_granted('reservation_can_approve', reservation) %}
-                    {% include 'reservation/_approve.html.twig' %}
-                {% endif %}
-                {% if reservation.status == 'pending' and is_granted('reservation_can_reject', reservation) %}
-                    {% include 'reservation/_reject.html.twig' %}
-                {% endif %}
-            </td>
-        </tr>
+    <div class="reservation-entry">
+        <div class="reservation-body">
+            <div class="reservation-info">
+                <div class="reservation-detail">
+                    <dl>Start:</dl>
+                    <st>{{ reservation.startDatetime ? reservation.startDatetime|date('d. m. Y H:i:s') : 'Not specified' }}</st>
+                </div>
+                <div class="reservation-detail">
+                    <dl>End:</dl>
+                    <dt>{{ reservation.endDatetime ? reservation.endDatetime|date('d. m. Y H:i:s') : 'Not specified' }}</dt>
+                </div>
+                <div class="reservation-actions">
+                    {% if is_granted('room_detail_view', reservation.room) %}
+                        <a href="{{ path('app_room_reservation_show', {'id': reservation.id, 'roomId': reservation.room.id}) }}" class="action-link">show</a>
+                    {% endif %}
+                    {% if is_granted('reservation_edit', reservation) %}
+                        <a href="{{ path('app_room_reservation_edit', {'id': reservation.id, 'roomId': reservation.room.id}) }}" class="action-link">edit</a>
+                    {% endif %}
+                    {% if reservation.status == 'pending' and is_granted('reservation_can_approve', reservation) %}
+                        {% include 'reservation/_approve.html.twig' %}
+                    {% endif %}
+                    {% if reservation.status == 'pending' and is_granted('reservation_can_reject', reservation) %}
+                        {% include 'reservation/_reject.html.twig' %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
     {% else %}
-        <tr>
-            <td colspan="5">No records found</td>
-        </tr>
+        <p>No records found</p>
     {% endfor %}
-    </tbody>
-</table>
+</div>

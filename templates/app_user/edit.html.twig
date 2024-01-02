@@ -3,20 +3,13 @@
 {% block title %}Edit user{% endblock %}
 
 {% block body %}
-    {% include 'components/_header.html.twig' %}
-    <div class="content-wrapper">
+    {% if is_granted('user_index_view', app_user) %}
+        <a href="{{ path('app_user_index') }}" class="back-link">Back to list</a>
+    {% endif %}<br>
+    <a href="{{ path('app_user_show', {'id': app_user.id}) }}" class="back-link">Back to profile details</a>
+    {{ include('app_user/_form.html.twig', {'heading_label': 'Edit user', 'button_label': 'Update'}) }}
 
-        {{ include('app_user/_form.html.twig', {'heading_label': 'Edit user', 'button_label': 'Update'}) }}
-
-        <div class="form__button-wrapper">
-            <a href="{{ path('app_user_show', {'id': app_user.id}) }}">Back to profile details</a>
-            {% if is_granted('user_delete', app_user) %}
-                {{ include('app_user/_delete_form.html.twig') }}
-            {% endif %}
-            {% if is_granted('user_index_view', app_user) %}
-                <a href="{{ path('app_user_index') }}">Back to list</a>
-            {% endif %}
-        </div>
-    </div>
-    {% include 'components/_footer.html.twig' %}
+        {% if is_granted('user_delete', app_user) %}
+            {{ include('app_user/_delete_form.html.twig') }}
+        {% endif %}
 {% endblock %}

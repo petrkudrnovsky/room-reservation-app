@@ -3,23 +3,22 @@
 {% block title %}Group index{% endblock %}
 
 {% block body %}
-    {% include 'components/_header.html.twig' %}
-    <div class="content-wrapper">
-        <h1>Group index</h1>
-        <h2>I'm member here:</h2>
-        {{ include('group/_list.html.twig', {'groups': memberGroups}) }}
+    <h1>Groups</h1>
+    {% if is_granted('group_create') %}
+        <a href="{{ path('app_group_new') }}" class="create-link">Create new group</a>
+    {% endif %}
 
-        <h2>I'm admin here:</h2>
-        {{ include('group/_list.html.twig', {'groups': adminGroups}) }}
+    <section class="list-item">
+        <div class="tag-item">
+            <h2>I'm member here:</h2>
+            {{ include('group/_list.html.twig', {'groups': memberGroups}) }}
+            <h2>I'm admin here:</h2>
+            {{ include('group/_list.html.twig', {'groups': adminGroups}) }}
 
-        {% if allGroups != null and is_granted('ROLE_SUPER_ADMIN') %}
-        <h2>All groups</h2>
-            {{ include('group/_list.html.twig', {'groups': allGroups}) }}
-        {% endif %}
-
-        {% if is_granted('group_create') %}
-            <a href="{{ path('app_group_new') }}">Create new</a>
-        {% endif %}
-    </div>
-    {% include 'components/_footer.html.twig' %}
+            {% if allGroups != null and is_granted('ROLE_SUPER_ADMIN') %}
+            <h2>All groups</h2>
+                {{ include('group/_list.html.twig', {'groups': allGroups}) }}
+            {% endif %}
+        </div>
+    </section>
 {% endblock %}

@@ -3,15 +3,10 @@
 {% block title %}New Group{% endblock %}
 
 {% block body %}
-    {% include 'components/_header.html.twig' %}
-    <div class="content-wrapper">
-        <h1>Create new Group</h1>
+    {% if is_granted('group_index_view') %}
+        <a href="{{ path('app_group_index') }}" class="back-link">back to list</a>
+    {% endif %}
+    <h1>Create new Group</h1>
 
-        {{ include('group/_form.html.twig') }}
-
-        {% if is_granted('group_index_view') %}
-            <a href="{{ path('app_group_index') }}">back to list</a>
-        {% endif %}
-    </div>
-    {% include 'components/_footer.html.twig' %}
+    {{ include('group/_form.html.twig') }}
 {% endblock %}

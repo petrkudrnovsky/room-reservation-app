@@ -18,21 +18,27 @@ class ReservationType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('title', TextType::class)
+            ->add('title', TextType::class, [
+                'attr' => ['class' => 'form-control']
+            ])
             ->add('description', TextareaType::class, [
-                'required' => false
+                'required' => false,
+                'attr' => ['class' => 'form-control description-textarea']
             ])
             ->add('startDatetime', DateTimeType::class, [
-                'widget' => 'single_text'
+                'widget' => 'single_text',
+                'attr' => ['class' => 'form-control datetime-input']
             ])
             ->add('endDatetime', DateTimeType::class, [
-                'widget' => 'single_text'
+                'widget' => 'single_text',
+                'attr' => ['class' => 'form-control datetime-input']
             ])
             ->add('visitors', EntityType::class, [
                 'class' => AppUser::class,
                 'choice_label' => 'username',
                 'multiple' => true,
                 'required' => false,
+                'attr' => ['class' => 'form-control select']
             ]);
             if($options['edit_room']) {
                 $builder->add('room', EntityType::class, [
@@ -46,6 +52,8 @@ class ReservationType extends AbstractType
                 $builder->add('reservedFor', EntityType::class, [
                     'class' => AppUser::class,
                     'choice_label' => 'username',
+                    'multiple' => false,
+                    'attr' => ['class' => 'form-control'],
                 ]);
             }
     }

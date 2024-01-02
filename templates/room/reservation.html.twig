@@ -3,25 +3,21 @@
 {% block title %}New Reservation for Room {{ room.codeName }}{% endblock %}
 
 {% block body %}
-    {% include 'components/_header.html.twig' %}
-    <div class="content-wrapper">
-        <h1>Create new Reservation for Room {{ room.codeName }}</h1>
+    <h1>Create new Reservation for Room {{ room.codeName }}</h1>
 
-        {{ include('reservation/_form.html.twig') }}
+    {{ include('reservation/_form.html.twig') }}
 
-        <h2>Reservations for this room</h2>
-        {% if is_granted('room_can_view_full_reservations', room) %}
-            {{ include('reservation/_list.html.twig', {reservations: approvedReservations}) }}
-        {% else %}
-            {{ include('reservation/_list-limited.html.twig', {reservations: approvedReservations}) }}
-        {% endif %}
+    <h2>Reservations for this room</h2>
+    {% if is_granted('room_can_view_full_reservations', room) %}
+        {{ include('reservation/_list.html.twig', {reservations: approvedReservations}) }}
+    {% else %}
+        {{ include('reservation/_list-limited.html.twig', {reservations: approvedReservations}) }}
+    {% endif %}
 
-        {% if is_granted('room_detail_view', room) %}
-            <a href="{{ path('app_room_show', {'id': room.id}) }}">back to room detail</a>
-        {% endif %}
-        {% if is_granted('room_index_view') %}
-            <a href="{{ path('app_room_index') }}">back to list</a>
-        {% endif %}
-    </div>
-    {% include 'components/_footer.html.twig' %}
+    {% if is_granted('room_detail_view', room) %}
+        <a href="{{ path('app_room_show', {'id': room.id}) }}">back to room detail</a>
+    {% endif %}
+    {% if is_granted('room_index_view') %}
+        <a href="{{ path('app_room_index') }}">back to list</a>
+    {% endif %}
 {% endblock %}

@@ -3,20 +3,15 @@
 {% block title %}New Reservation{% endblock %}
 
 {% block body %}
-    {% include 'components/_header.html.twig' %}
-    <div class="content-wrapper">
-        <h1>Create new Reservation (room {{ reservation.room.codeName }})</h1>
+    <a href="{{ path('app_room_reservation_index', {'roomId': reservation.room.id}) }}" class="back-link">back to list</a>
+    <h1>Create new Reservation (room {{ reservation.room.codeName }})</h1>
 
-        {{ include('reservation/_form.html.twig') }}
+    {{ include('reservation/_form.html.twig') }}
 
-        <a href="{{ path('app_room_reservation_index', {'roomId': reservation.room.id}) }}">back to list</a>
-
-        <h2>Reservations for this room</h2>
-        {% if is_granted('room_can_view_full_reservations', reservation.room) %}
-            {{ include('reservation/_list.html.twig', {reservations: approvedReservations}) }}
-        {% else %}
-            {{ include('reservation/_list-limited.html.twig', {reservations: approvedReservations}) }}
-        {% endif %}
-    </div>
-    {% include 'components/_footer.html.twig' %}
+    <h2>Reservations for this room</h2>
+    {% if is_granted('room_can_view_full_reservations', reservation.room) %}
+        {{ include('reservation/_list.html.twig', {reservations: approvedReservations}) }}
+    {% else %}
+        {{ include('reservation/_list-limited.html.twig', {reservations: approvedReservations}) }}
+    {% endif %}
 {% endblock %}

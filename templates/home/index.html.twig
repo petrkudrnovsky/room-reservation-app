@@ -3,36 +3,14 @@
 {% block title %}Pendrej Reservations App{% endblock %}
 
 {% block body %}
-    {% include 'components/_header.html.twig' %}
-    <div class="content-wrapper">
-        <h1>Pendrej Reservations App</h1>
-        <p>Welcome to Pendrej Reservations! Quick, efficient, and user-friendly - manage all your room bookings with just a few taps. Let's make every space count!</p>
-        <p>Use the navigation bar to get started.</p>
-        {% if is_granted('user_index_view') %}
-            <a href="{{ path('app_user_index') }}">List of users</a>
-        {% endif %}
-        {% if is_granted('group_index_view') %}
-            <a href="{{ path('app_group_index') }}">List of groups</a>
-        {% endif %}
-        {% if is_granted('IS_AUTHENTICATED_FULLY') %}
-            <a href="{{ path('app_building_index') }}">List of buildings</a>
-        {% endif %}
-        {% if is_granted('room_index_view') %}
-            <a href="{{ path('app_room_index') }}">List of rooms</a>
-        {% endif %}
-        {% if is_granted('ROLE_SUPER_ADMIN') %}
-            <a href="{{ path('app_all_reservations_index') }}">List of all reservations</a>
-        {% endif %}
+    <h1>Pendrej Reservations App</h1>
+    <p class="page__text">Welcome to Pendrej Reservations! Quick, efficient, and user-friendly - manage all your room bookings with just a few taps. Let's make every space count!
+    Begin by selecting the room you wish to reserve. If you'd like to quickly set up a new room, please proceed to the <a href="{{ path('app_room_new') }}">create a new room</a> section.</p>
+    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+        <h2>My reservations</h2>
+        {{ include('reservation/_list.html.twig', {reservations: userReservations}) }}
 
-        {% if is_granted('IS_AUTHENTICATED_FULLY') %}
-            <h2>My reservations</h2>
-            {{ include('reservation/_list.html.twig', {reservations: userReservations}) }}
-
-            <h2>Reservations visiting:</h2>
-            {{ include('reservation/_list.html.twig', {reservations: userVisitingReservations}) }}
-        {% endif %}
-
-
-    </div>
-    {% include 'components/_footer.html.twig' %}
+        <h2>Reservations visiting:</h2>
+        {{ include('reservation/_list.html.twig', {reservations: userVisitingReservations}) }}
+    {% endif %}
 {% endblock %}
