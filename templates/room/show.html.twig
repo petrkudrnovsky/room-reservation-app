@@ -43,7 +43,7 @@
                     <ul>
                         {% for member in room.members %}
                             <li>
-                                <a href="{{ path('app_user_show', {'id': member.id}) }}">{{ member.username }}</a>
+                                <a href="{{ path('app_user_show', {'id': member.id}) }}" data-user-id="{{ member.id }}" class="username-link">{{ member.username }}</a>
                             </li>
                         {% endfor %}
                         {% if room.members|length == 0 %}
@@ -56,7 +56,7 @@
                     <ul>
                         {% for admin in room.admins %}
                             <li>
-                                <a href="{{ path('app_user_show', {'id': admin.id}) }}">{{ admin.username }}</a>
+                                <a href="{{ path('app_user_show', {'id': admin.id}) }}" data-user-id="{{ admin.id }}" class="username-link">{{ admin.username }}</a>
                             </li>
                         {% endfor %}
                         {% if room.admins|length == 0 %}
@@ -101,4 +101,5 @@
             {{ include('reservation/_list.html.twig', {reservations: pendingReservations}) }}
         {% endif %}
     </main>
+    <div id="profile-preview" style="display: none;"></div>
 {% endblock %}

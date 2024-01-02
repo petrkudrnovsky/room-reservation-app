@@ -14,7 +14,6 @@ function loginUser(username, password, onSuccess, onError) {
 
 // Function to fetch user data with the token
 function fetchUserData(userId, token, onSuccess, onError) {
-    console.log('Fetching user data for user id:', userId);
     fetch(`http://localhost:8080/api/user/${userId}`, {
         headers: {
             'Authorization': `Bearer ${token}`,

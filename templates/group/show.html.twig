@@ -15,7 +15,7 @@
                     <ul>
                         {% for member in group.members %}
                             <li>
-                                <a href="{{ path('app_user_show', {'id': member.id}) }}">{{ member.username }}</a>
+                                <a href="{{ path('app_user_show', {'id': member.id}) }}" data-user-id="{{ member.id }}" class="username-link">{{ member.username }}</a>
                             </li>
                         {% endfor %}
                     </ul>
@@ -25,7 +25,7 @@
                     <ul>
                         {% for admin in group.admins %}
                             <li>
-                                <a href="{{ path('app_user_show', {'id': admin.id}) }}">{{ admin.username }}</a>
+                                <a href="{{ path('app_user_show', {'id': admin.id}) }}" data-user-id="{{ admin.id }}" class="username-link">{{ admin.username }}</a>
                             </li>
                         {% endfor %}
                     </ul>
@@ -35,7 +35,7 @@
                     <ul>
                         {% for room in group.rooms %}
                             <li>
-                                <a href="{{ path('app_room_show', {'id': room.id}) }}">{{ room.codeName }}</a>
+                                <a href="{{ path('app_room_show', {'id': room.id}) }}" data-room-id="{{ room.id }}" class="room-link">{{ room.codeName }}</a>
                             </li>
                         {% endfor %}
                     </ul>
@@ -51,4 +51,5 @@
             </div>
         </section>
     </main>
+    <div id="profile-preview" style="display: none;"></div>
 {% endblock %}
