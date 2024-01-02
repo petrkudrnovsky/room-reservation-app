@@ -1,9 +1,10 @@
 <ul>
     {% for room in rooms %}
         <li>
-            <a href="{{ path('app_room_show', {'id': room.id}) }}">{{ room.codeName }}</a>
+            <a href="{{ path('app_room_show', {'id': room.id}) }}" data-room-id="{{ room.id }}" class="room-link">{{ room.codeName }}</a>
         </li>
     {% else %}
         <li>No rooms found</li>
     {% endfor %}
 </ul>
+<div id="profile-preview" style="display: none;"></div>
