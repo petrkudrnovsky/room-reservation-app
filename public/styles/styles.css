@@ -298,6 +298,8 @@ footer p, footer a {
 .create-link {
     text-decoration: none;
     color: var(--color-black);
+    display: block;
+    margin-top: var(--space-m);
 }
 
 .back-link:hover,
