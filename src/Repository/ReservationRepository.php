@@ -55,7 +55,7 @@ class ReservationRepository extends ServiceEntityRepository
         ;
     }
 
-    public function findOverlappingReservations(int $roomId, \DateTime $start, \DateTime $end, ?int $reservationId): array
+    public function findOverlappingReservations(int $roomId, ?\DateTime $start, ?\DateTime $end, ?int $reservationId): array
     {
         $qb = $this->createQueryBuilder('r')
             ->andWhere('r.room = :roomId')

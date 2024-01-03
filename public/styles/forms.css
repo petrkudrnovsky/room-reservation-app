@@ -15,7 +15,6 @@
 /* Label styling */
 label {
     display: block;
-    margin-bottom: 8px;
     font-weight: bold;
     color: var(--color-black);
 }
@@ -176,4 +175,9 @@ label {
 
 .form__button-wrapper a:hover {
     color: var(--color-secondary);
+}
+
+.form__error-message {
+    color: var(--color-error);
+    font-weight: bold;
 }

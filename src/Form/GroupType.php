@@ -19,7 +19,6 @@ class GroupType extends AbstractType
         $builder
             ->add('name', TextType::class, [
                 'attr' => ['class' => 'form-control'],
-                'label' => 'Group name',
             ])
             ->add('members', EntityType::class, [
                 'attr' => ['class' => 'form-control select'],
