@@ -17,17 +17,10 @@ body {
     min-height: 100vh;
 }
 
-.content-wrapper {
-    flex-grow: 1;
-    padding: var(--space-m);
-    background-color: var(--color-white);
-    margin-left: 240px;
-}
-
 h1 {
     margin: var(--space-m) var(--space-m) var(--space-m) 0;
     color: var(--color-secondary);
-    text-align: center;
+    text-align: left;
 }
 
 h2 {
@@ -42,9 +35,8 @@ span {
     font-weight: bold;
 }
 
-
 .app-header {
-    height: 60px;
+    height: 53px;
 }
 
 .app-header > nav {
@@ -68,22 +60,55 @@ span {
     text-decoration: underline;
 }
 
+.content-wrapper {
+    display: grid;
+    grid-template-columns: 12rem 1fr;
+    gap: var(--space-m);
+    background-color: var(--color-white);
+    padding-right: var(--space-m);
+}
+
 .sidebar {
-    width: 240px;
     background-color: var(--color-secondary);
     padding: var(--space-m);
-    height: 100vh;
-    position: fixed;
-    bottom: 0;
+    min-height: calc(100vh - 53px);
     overflow-y: auto;
-    top: 53px;
 }
 
 .sidebar-nav {
     list-style-type: none;
-    background-color: var(--color-secondary);
+    position: fixed;
     padding: 0;
     margin: 0;
+}
+
+.sidebar-nav-only-icons {
+    display: none;
+}
+
+@media screen and (max-width: 600px) {
+    .content-wrapper {
+        grid-template-columns: minmax(3.5rem, 1fr) 10fr;
+    }
+
+    .sidebar-nav {
+        display: none;
+    }
+
+    .sidebar-nav-only-icons {
+        display: block;
+        position: fixed;
+    }
+
+    .sidebar-nav-only-icons > li > a {
+        display: inline-block;
+        width: 100%;
+        text-decoration: none;
+    }
+
+    .sidebar {
+        padding: var(--space-s) 0 0 var(--space-s);
+    }
 }
 
 .menu-icon {
@@ -216,10 +241,6 @@ footer p, footer a {
     margin-right: var(--space-s);
 }
 
-.user-list__item > div:first-of-type {
-    margin-top: var(--space-s);
-}
-
 .flash {
     display: block;
     position: fixed;
@@ -277,6 +298,9 @@ footer p, footer a {
 .create-link {
     text-decoration: none;
     color: var(--color-black);
+    display: block;
+    width: fit-content;
+    margin-top: var(--space-m);
 }
 
 .back-link:hover,
@@ -310,8 +334,8 @@ footer p, footer a {
 }
 
 .page__text {
-    font-size: var(--font-size-l);
-    text-align: center;
+    font-size: var(--font-size-m);
+    text-align: left;
     margin-bottom: var(--space-m);
 }
 
@@ -419,6 +443,8 @@ footer p, footer a {
     background-color: var(--color-primary);
     color: white;
     margin: 0.125rem;
+    text-transform: uppercase;
+
 }
 
 .badge-ROLE_USER {

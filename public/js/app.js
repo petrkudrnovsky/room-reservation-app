@@ -42,7 +42,6 @@ function showUserProfilePreview(userData, linkElement) {
         <p>Username: ${userData.username}</p>
     `;
     preview.style.display = 'block';
-    preview.style.position = 'absolute';
     preview.style.left = `${linkElement.getBoundingClientRect().right + 10}px`;
     preview.style.top = `${linkElement.getBoundingClientRect().top}px`;
 }
@@ -56,8 +55,8 @@ function showRoomPreview(roomData, linkElement) {
     const preview = document.getElementById('profile-preview');
     preview.innerHTML = `
         <p>Room name: ${roomData.name}</p>
-        <p>Room type: ${roomData.code}</p>
-        <p>Is private: ${roomData.isPrivate}</p>
+        <p>Room code: ${roomData.buildingCode}:${roomData.code}</p>
+        <p>Is private: ${roomData.isPrivate ? 'Yes' : 'No'}</p>
     `;
     preview.style.display = 'block';
     preview.style.position = 'absolute';

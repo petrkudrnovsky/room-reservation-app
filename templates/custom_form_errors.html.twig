@@ -1,0 +1,10 @@
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('styles/forms.css') }}" />
+{% endblock %}
+{% block form_errors %}
+    {% if errors|length > 0 %}
+        {% for error in errors %}
+            <p class="form__error-message">{{ error.message }}</p>
+        {% endfor %}
+    {% endif %}
+{% endblock form_errors %}

@@ -1,4 +1,4 @@
-<div class="reservations-list">
+<div>
     {% for reservation in reservations %}
         <div class="reservation-entry">
             <div class="reservation-body">
@@ -48,8 +48,8 @@
             </div>
         </div>
     {% else %}
-        <div class="alert alert-info" role="alert">
-            No records found.
-        </div>
+        <ul class="list-item">
+            <li class="tag-item"> No reservations found.</li>
+        </ul>
     {% endfor %}
 </div>

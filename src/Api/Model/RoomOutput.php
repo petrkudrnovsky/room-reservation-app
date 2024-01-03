@@ -14,7 +14,8 @@ class RoomOutput
     public array $members;
     public array $admins;
     public array $reservations;
-    public string $building;
+    public string $buildingName;
+    public string $buildingCode;
 
     public function __construct(
         int $id,
@@ -25,7 +26,8 @@ class RoomOutput
         array $members,
         array $admins,
         array $reservations,
-        string $building
+        string $buildingName,
+        string $buildingCode
     ) {
         $this->id = $id;
         $this->name = $name;
@@ -35,7 +37,8 @@ class RoomOutput
         $this->members = $members;
         $this->admins = $admins;
         $this->reservations = $reservations;
-        $this->building = $building;
+        $this->buildingName = $buildingName;
+        $this->buildingCode = $buildingCode;
     }
 
     public static function fromEntity(
@@ -54,7 +57,8 @@ class RoomOutput
             $membersUrls,
             $adminsUrls,
             $reservationUrls,
-            $entity->getBuilding()->getName()
+            $entity->getBuilding()->getName(),
+            $entity->getBuilding()->getCode()
         );
     }
 }
