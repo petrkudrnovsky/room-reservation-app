@@ -27,11 +27,13 @@ class ReservationType extends AbstractType
             ])
             ->add('startDatetime', DateTimeType::class, [
                 'widget' => 'single_text',
-                'attr' => ['class' => 'form-control datetime-input']
+                'attr' => ['class' => 'form-control datetime-input'],
+                'disabled' => !$options['can_edit_after_approved'],
             ])
             ->add('endDatetime', DateTimeType::class, [
                 'widget' => 'single_text',
-                'attr' => ['class' => 'form-control datetime-input']
+                'attr' => ['class' => 'form-control datetime-input'],
+                'disabled' => !$options['can_edit_after_approved'],
             ])
             ->add('visitors', EntityType::class, [
                 'class' => AppUser::class,
@@ -64,6 +66,7 @@ class ReservationType extends AbstractType
             'data_class' => ReservationTypeModel::class,
             'edit_room' => false,
             'can_edit_reservedFor' => false,
+            'can_edit_after_approved' => true,
         ]);
     }
 }

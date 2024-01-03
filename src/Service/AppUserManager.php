@@ -27,12 +27,17 @@ class AppUserManager
 
     public function removeFromDatabase(AppUser $appUser): void
     {
+        // if there are any reservations, remove them first
+        $reservations = $appUser->getReservations();
+        foreach ($reservations as $reservation) {
+            $this->em->remove($reservation);
+        }
+        $reservations = $appUser->getApprovedReservations();
+        foreach ($reservations as $reservation) {
+            $this->em->remove($reservation);
+        }
         $this->em->remove($appUser);
         $this->em->flush();
-    }
-
-    public function getCurrentUser()
-    {
     }
 
     public function getAppUserById(int $appUserId): AppUser
@@ -123,6 +128,7 @@ class AppUserManager
                 $admin = $this->userRepository->find($adminId);
                 if ($admin) {
                     $group !== null ? $group->addAdmin($admin) : $room->addAdmin($admin);
+                    $group !== null ? $group->addMember($admin) : $room->addMember($admin);
                 } else {
                     throw new Exception('User not found');
                 }
