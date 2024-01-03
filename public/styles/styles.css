@@ -17,13 +17,6 @@ body {
     min-height: 100vh;
 }
 
-.content-wrapper {
-    flex-grow: 1;
-    padding: var(--space-m);
-    background-color: var(--color-white);
-    margin-left: 240px;
-}
-
 h1 {
     margin: var(--space-m) var(--space-m) var(--space-m) 0;
     color: var(--color-secondary);
@@ -42,9 +35,8 @@ span {
     font-weight: bold;
 }
 
-
 .app-header {
-    height: 60px;
+    height: 53px;
 }
 
 .app-header > nav {
@@ -68,22 +60,55 @@ span {
     text-decoration: underline;
 }
 
+.content-wrapper {
+    display: grid;
+    grid-template-columns: minmax(12rem, 1fr) 5fr;
+    gap: var(--space-m);
+    background-color: var(--color-white);
+    padding-right: var(--space-m);
+}
+
 .sidebar {
-    width: 240px;
     background-color: var(--color-secondary);
     padding: var(--space-m);
-    height: 100vh;
-    position: fixed;
-    bottom: 0;
+    min-height: 100vh;
     overflow-y: auto;
-    top: 53px;
 }
 
 .sidebar-nav {
     list-style-type: none;
-    background-color: var(--color-secondary);
+    position: fixed;
     padding: 0;
     margin: 0;
+}
+
+.sidebar-nav-only-icons {
+    display: none;
+}
+
+@media screen and (max-width: 600px) {
+    .content-wrapper {
+        grid-template-columns: minmax(3.5rem, 1fr) 10fr;
+    }
+
+    .sidebar-nav {
+        display: none;
+    }
+
+    .sidebar-nav-only-icons {
+        display: block;
+        position: fixed;
+    }
+
+    .sidebar-nav-only-icons > li > a {
+        display: inline-block;
+        width: 100%;
+        text-decoration: none;
+    }
+
+    .sidebar {
+        padding: var(--space-s) 0 0 var(--space-s);
+    }
 }
 
 .menu-icon {
@@ -214,10 +239,6 @@ footer p, footer a {
 .user-list__plus {
     font-size: var(--space-l);
     margin-right: var(--space-s);
-}
-
-.user-list__item > div:first-of-type {
-    margin-top: var(--space-s);
 }
 
 .flash {
@@ -419,6 +440,8 @@ footer p, footer a {
     background-color: var(--color-primary);
     color: white;
     margin: 0.125rem;
+    text-transform: uppercase;
+
 }
 
 .badge-ROLE_USER {

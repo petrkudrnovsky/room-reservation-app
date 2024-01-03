@@ -17,7 +17,13 @@
                 <dl>Roles:</dl>
                 <div>
                     {% for role in app_user.roles %}
-                        <dt class="badge badge-{{ role }}">{{ role }}</dt>
+                        <dt class="badge badge-{{ role }}">
+                            {% if role == 'ROLE_SUPER_ADMIN' %}
+                                Admin
+                            {% elseif role == 'ROLE_USER' %}
+                                User
+                            {% endif %}
+                        </dt>
                     {% endfor %}
                 </div>
             </div>

@@ -24,10 +24,12 @@
             {% endfor %}
         {% endfor %}
         {% include 'components/_header.html.twig' %}
-        {% include 'components/_sidebar.html.twig' %}
         <div class="content-wrapper">
-            {% block body %}
-            {% endblock %}
+        {% include 'components/_sidebar.html.twig' %}
+            <div>
+                {% block body %}
+                {% endblock %}
+            </div>
         </div>
     </body>
 </html>
