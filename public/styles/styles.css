@@ -20,7 +20,7 @@ body {
 h1 {
     margin: var(--space-m) var(--space-m) var(--space-m) 0;
     color: var(--color-secondary);
-    text-align: center;
+    text-align: left;
 }
 
 h2 {
@@ -62,7 +62,7 @@ span {
 
 .content-wrapper {
     display: grid;
-    grid-template-columns: minmax(12rem, 1fr) 5fr;
+    grid-template-columns: 12rem 1fr;
     gap: var(--space-m);
     background-color: var(--color-white);
     padding-right: var(--space-m);
@@ -71,7 +71,7 @@ span {
 .sidebar {
     background-color: var(--color-secondary);
     padding: var(--space-m);
-    min-height: 100vh;
+    min-height: calc(100vh - 53px);
     overflow-y: auto;
 }
 
@@ -334,8 +334,8 @@ footer p, footer a {
 }
 
 .page__text {
-    font-size: var(--font-size-l);
-    text-align: center;
+    font-size: var(--font-size-m);
+    text-align: left;
     margin-bottom: var(--space-m);
 }
 
