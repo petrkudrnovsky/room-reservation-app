@@ -57,6 +57,11 @@ class ReservationRepository extends ServiceEntityRepository
 
     public function findOverlappingReservations(int $roomId, ?\DateTime $start, ?\DateTime $end, ?int $reservationId): array
     {
+        // if start or end is null, there is no overlap (null values should be handled by validation (e.g. NotBlank))
+        if(!$start || !$end) {
+            return [];
+        }
+
         $qb = $this->createQueryBuilder('r')
             ->andWhere('r.room = :roomId')
             ->andWhere('r.status = :status')

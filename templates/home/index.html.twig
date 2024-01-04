@@ -3,9 +3,12 @@
 {% block title %}Pendrej Reservations App{% endblock %}
 
 {% block body %}
-    <h1>Pendrej Reservations App</h1>
+    <div class="heading-section">
+        <h1>Pendrej Reservations App</h1>
+        <a class="action-link" href="{{ path('app_room_index') }}">Pick a room to reserve</a>
+    </div>
     <p class="page__text">Welcome to Pendrej Reservations! Quick, efficient, and user-friendly - manage all your room bookings with just a few taps. Let's make every space count!
-    Begin by selecting the room you wish to reserve. If you'd like to quickly set up a new room, please proceed to the <a href="{{ path('app_room_new') }}">create a new room</a> section.</p>
+    Begin by <a href="{{ path('app_room_index') }}">selecting the room</a> you wish to reserve. If you'd like to quickly set up a new room, please proceed to the <a href="{{ path('app_room_new') }}">create a new room</a> section.</p>
     {% if is_granted('IS_AUTHENTICATED_FULLY') %}
         <h2>My reservations</h2>
         {{ include('reservation/_list.html.twig', {reservations: userReservations}) }}

@@ -28,6 +28,8 @@ class RegistrationController extends AbstractController
             }
             $appUserManager->saveToDatabase($appUser);
 
+            $this->addFlash('success', 'Welcome to the reservation system! You can now log in.');
+
             return $this->redirectToRoute('app_login');
         }
 

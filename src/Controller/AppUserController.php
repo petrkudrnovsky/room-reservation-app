@@ -45,6 +45,7 @@ class AppUserController extends AbstractController
                 $appUser->setPassword($hashedPassword);
             }
             $appUserManager->saveToDatabase($appUser);
+            $this->addFlash('success', 'User created successfully.');
 
             return $this->redirectToRoute('app_user_index');
         }
@@ -75,6 +76,7 @@ class AppUserController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $appUser = $appUserModel->toEntity($appUser);
             $appUserManager->saveToDatabase($appUser);
+            $this->addFlash('success', 'User edited successfully.');
 
             return $this->redirectToRoute('app_user_show', ['id' => $appUser->getId()]);
         }
@@ -100,6 +102,7 @@ class AppUserController extends AbstractController
         }
         if ($this->isCsrfTokenValid('delete'.$appUser->getId(), $request->request->get('_token'))) {
             $appUserManager->removeFromDatabase($appUser);
+            $this->addFlash('success', 'User deleted from the system.');
         }
         return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
     }
