@@ -68,6 +68,10 @@ span {
     padding-right: var(--space-m);
 }
 
+.main-content {
+    padding-bottom: 2rem;
+}
+
 .sidebar {
     background-color: var(--color-secondary);
     padding: var(--space-m);

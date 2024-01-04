@@ -5,7 +5,7 @@
 {% block body %}
     {% if is_granted('user_index_view', app_user) %}
         <a href="{{ path('app_user_index') }}" class="back-link">Back to list</a>
-    {% endif %}<br>
+    {% endif %}
     <a href="{{ path('app_user_show', {'id': app_user.id}) }}" class="back-link">Back to profile details</a>
     {{ include('app_user/_form.html.twig', {'heading_label': 'Edit user', 'button_label': 'Update'}) }}
 

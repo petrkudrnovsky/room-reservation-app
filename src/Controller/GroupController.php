@@ -49,6 +49,7 @@ class GroupController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $group = $groupModel->toEntity();
             $groupManager->saveToDatabase($group);
+            $this->addFlash('success', 'Group created successfully.');
 
             return $this->redirectToRoute('app_group_index', [], Response::HTTP_SEE_OTHER);
         }
@@ -79,6 +80,7 @@ class GroupController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $group = $groupModel->toEntity($group);
             $groupManager->saveToDatabase($group);
+            $this->addFlash('success', 'Group edited successfully.');
 
             return $this->redirectToRoute('app_group_show', ['id' => $group->getId()]);
         }
@@ -95,6 +97,7 @@ class GroupController extends AbstractController
     {
         if ($this->isCsrfTokenValid('delete'.$group->getId(), $request->request->get('_token'))) {
             $groupManager->removeFromDatabase($group);
+            $this->addFlash('error', 'Group deleted.');
         }
 
         return $this->redirectToRoute('app_group_index', [], Response::HTTP_SEE_OTHER);

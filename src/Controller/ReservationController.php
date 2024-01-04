@@ -62,7 +62,7 @@ class ReservationController extends AbstractController
             $reservation = $reservationManager->prepareNewReservation($reservation);
             $reservationManager->saveToDatabase($reservation);
 
-            $this->addFlash('success', 'Reservation created.');
+            $this->addFlash('success', 'Reservation created successfully.');
             return $this->redirectToRoute('app_room_show', ['id' => $roomId]);
         }
 
@@ -98,6 +98,7 @@ class ReservationController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $reservation = $reservationModel->toEntity($reservation);
             $reservationManager->saveToDatabase($reservation);
+            $this->addFlash('success', 'Reservation edited successfully.');
 
             return $this->redirectToRoute('app_room_reservation_show', ['id' => $reservation->getId(), 'roomId' => $reservation->getRoom()->getId()]);
         }
@@ -114,6 +115,7 @@ class ReservationController extends AbstractController
     {
         if ($this->isCsrfTokenValid('delete'.$reservation->getId(), $request->request->get('_token'))) {
             $reservationManager->deleteFromDatabase($reservation);
+            $this->addFlash('error', 'Reservation deleted.');
         }
 
         return $this->redirectToRoute('app_room_show', ['id' => $reservation->getRoom()->getId()]);

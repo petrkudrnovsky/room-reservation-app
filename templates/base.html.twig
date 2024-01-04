@@ -7,7 +7,6 @@
         {% block stylesheets %}
             <link rel="stylesheet" href="{{ asset('styles/styles.css') }}" />
             <link rel="stylesheet" href="{{ asset('styles/reservations.css') }}">
-            <link rel="stylesheet" href="{{ asset('styles/user.css') }}">
             <link rel="stylesheet" href="{{ asset('styles/forms.css') }}">
         {% endblock %}
 
@@ -26,7 +25,7 @@
         {% include 'components/_header.html.twig' %}
         <div class="content-wrapper">
         {% include 'components/_sidebar.html.twig' %}
-            <div>
+            <div class="main-content">
                 {% block body %}
                 {% endblock %}
             </div>

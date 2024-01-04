@@ -56,8 +56,8 @@ class RoomController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $room = $roomModel->toEntity();
-
             $roomManager->saveToDatabase($room);
+            $this->addFlash('success', 'Room created successfully.');
 
             return $this->redirectToRoute('app_room_index', [], Response::HTTP_SEE_OTHER);
         }
@@ -102,6 +102,7 @@ class RoomController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $room = $roomModel->toEntity($room);
             $roomManager->saveToDatabase($room);
+            $this->addFlash('success', 'Room edited successfully.');
 
             return $this->redirectToRoute('app_room_show', ['id' => $room->getId()]);
         }
@@ -118,6 +119,7 @@ class RoomController extends AbstractController
     {
         if ($this->isCsrfTokenValid('delete'.$room->getId(), $request->request->get('_token'))) {
             $roomManager->deleteFromDatabase($room);
+            $this->addFlash('error', 'Room deleted.');
         }
 
         return $this->redirectToRoute('app_room_index', [], Response::HTTP_SEE_OTHER);
