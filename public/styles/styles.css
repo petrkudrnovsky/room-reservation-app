@@ -250,7 +250,7 @@ footer p, footer a {
     position: fixed;
     top: 0;
     right: 0;
-    margin: var(--space-m);
+    margin: var(--space-xl) var(--space-m);
     padding: var(--space-m);
     border-radius: var(--space-xs);
     z-index: 100;

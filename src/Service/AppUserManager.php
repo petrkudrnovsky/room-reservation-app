@@ -168,9 +168,12 @@ class AppUserManager
         }
     }
 
-    public function isUniqueUsername(?string $username): bool
+    public function isUniqueUsername(?string $username, ?int $userId): bool
     {
         $appUser = $this->userRepository->findOneBy(array('username' => $username));
+        if ($appUser !== null && $appUser->getId() === $userId) {
+            return true;
+        }
         return $appUser === null;
     }
 }

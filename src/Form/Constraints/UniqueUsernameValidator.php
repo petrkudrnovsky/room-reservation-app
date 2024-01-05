@@ -2,6 +2,7 @@
 
 namespace App\Form\Constraints;
 
+use App\Api\Model\AppUserInput;
 use App\Form\Model\AppUserTypeModel;
 use App\Service\AppUserManager;
 use Symfony\Component\Validator\Constraint;
@@ -22,7 +23,15 @@ class UniqueUsernameValidator extends ConstraintValidator
             throw new UnexpectedTypeException($constraint, UniqueUsername::class);
         }
 
-        if(!$this->appUserManager->isUniqueUsername($value->username)) {
+        if ($value instanceof AppUserInput) {
+            if(!$this->appUserManager->isUniqueUsername($value->username, $value->id)) {
+                $this->context->buildViolation($constraint->message)
+                    ->addViolation();
+            }
+            return;
+        }
+
+        if(!$this->appUserManager->isUniqueUsername($value->username, $value->userId)) {
             $this->context->buildViolation($constraint->message)
                 ->addViolation();
         }

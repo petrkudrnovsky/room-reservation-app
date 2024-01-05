@@ -12,7 +12,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Mapping\ClassMetadata;
 
 class AppUserInput {
-    public ?int $id;
+    public ?int $id = null;
     #[Assert\NotBlank(message: 'Username cannot be blank')]
     #[Assert\Length(min: 3, max: 250, minMessage: 'Username must have at least 3 characters', maxMessage: 'Username must have maximum of 250 characters')]
     public ?string $username = null;

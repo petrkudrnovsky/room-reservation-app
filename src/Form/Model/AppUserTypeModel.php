@@ -12,6 +12,7 @@ use Symfony\Component\Validator\Mapping\ClassMetadata;
 
 class AppUserTypeModel
 {
+    public ?int $userId = null;
     #[Assert\NotBlank]
     #[Assert\Length(min: 3, max: 250, minMessage: 'Username must have at least 3 characters', maxMessage: 'Username must have maximum of 250 characters')]
     public ?string $username = null;
@@ -59,6 +60,7 @@ class AppUserTypeModel
         }
         foreach ($this->adminGroups as $adminGroup) {
             $appUser->addAdminGroup($adminGroup);
+            $appUser->addMemberGroup($adminGroup);
         }
 
         foreach ($appUser->getMemberRooms() as $memberRoom) {
@@ -73,6 +75,7 @@ class AppUserTypeModel
         }
         foreach ($this->adminRooms as $adminRoom) {
             $appUser->addAdminRoom($adminRoom);
+            $appUser->addMemberRoom($adminRoom);
         }
 
         $appUser->addRole('ROLE_USER');
@@ -99,6 +102,7 @@ class AppUserTypeModel
         $model->memberRooms = new ArrayCollection(iterator_to_array($appUser->getMemberRooms()));
         $model->adminRooms = new ArrayCollection(iterator_to_array($appUser->getAdminRooms()));
         $model->isSuperAdmin = in_array('ROLE_SUPER_ADMIN', $appUser->getRoles());
+        $model->userId = $appUser->getId();
 
         return $model;
     }

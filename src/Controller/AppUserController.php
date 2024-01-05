@@ -53,6 +53,8 @@ class AppUserController extends AbstractController
         return $this->render('app_user/new.html.twig', [
             'app_user' => $appUserModel,
             'form' => $form,
+            'heading_label' => 'Create new user',
+            'button_label' => 'Create user',
         ]);
     }
 
@@ -102,7 +104,7 @@ class AppUserController extends AbstractController
         }
         if ($this->isCsrfTokenValid('delete'.$appUser->getId(), $request->request->get('_token'))) {
             $appUserManager->removeFromDatabase($appUser);
-            $this->addFlash('success', 'User deleted from the system.');
+            $this->addFlash('error', 'User deleted from the system.');
         }
         return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
     }
