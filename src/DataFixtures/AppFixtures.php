@@ -47,7 +47,7 @@ class AppFixtures extends Fixture
             $appUser->setUsername('user' . $i);
             $appUser->setPassword($this->hasher->hashPassword($appUser, 'user' . $i));
             $appUser->setFirstName('User');
-            $appUser->setSecondName('Userovič' . $i);
+            $appUser->setSecondName($i);
 
             $appUser->addRole('ROLE_USER');
 
@@ -58,10 +58,10 @@ class AppFixtures extends Fixture
     public function loadBuildings(ObjectManager $manager)
     {
         $buildingNamesAndCodes = [
-            'TH:A' => 'Budova A - Fakulta Stavební',
-            'TH:D' => 'Budova D - Fakulta Stavební',
-            'T9' => 'Nová budova ČVUT',
-            'TK' => 'Národní technická knihovna',
+            'TH:A' => 'Building A - Faculty of Civil Engineering',
+            'TH:D' => 'Building D - Faculty of Civil Engineering',
+            'T9' => 'New Building ČVUT',
+            'TK' => 'National Technical Library',
         ];
 
         foreach ($buildingNamesAndCodes as $code => $name) {

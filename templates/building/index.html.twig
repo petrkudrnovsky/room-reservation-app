@@ -9,13 +9,13 @@
     <div class="user-list">
         <div class="user-list__item">
             <span class="building-name">{{ building.name }}</span>
-            {% if building.name == 'Budova A - Fakulta Stavební' %}
+            {% if building.code == 'TH:A' %}
             <img class="building-image" src="{{ asset('images/budova-a-fsv.jpeg') }}" alt="building-fsv-a">
-            {% elseif building.name == 'Budova D - Fakulta Stavební' %}
+            {% elseif building.code == 'TH:D' %}
             <img class="building-image" src="{{ asset('images/budova-d-fsv.jpeg') }}" alt="building-fsv-d">
-            {% elseif building.name == 'Nová budova ČVUT' %}
+            {% elseif building.code == 'T9' %}
             <img class="building-image" src="{{ asset('images/nova_budova_cvut.jpeg') }}" alt="building-new">
-            {% elseif building.name == 'Národní technická knihovna' %}
+            {% elseif building.code == 'TK' %}
             <img class="building-image" src="{{ asset('images/ntk.jpeg') }}" alt="building-ntk">
             {% endif %}
         </div>
