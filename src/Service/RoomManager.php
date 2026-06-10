@@ -6,6 +6,7 @@ use App\Entity\AppUser;
 use App\Entity\Group;
 use App\Entity\Reservation;
 use App\Entity\Room;
+use App\Filter\RoomFilterCriteria;
 use App\Repository\RoomRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -76,50 +77,42 @@ class RoomManager
         return $orderedReservations;
     }
 
-    public function findRoomsByFilters(?string $name, ?string $code, ?string $buildingCode, $filter): array
+    public function findRoomsByFilters(RoomFilterCriteria $criteria): array
     {
         $qb = $this->roomRepository->createQueryBuilder('a');
 
-        foreach ($filter as $key => $value) {
-            if ($value) {
-                $filter[$key] = explode(',', $value);
-            }
+        if ($criteria->name) {
+            $qb->andWhere('LOWER(a.name) LIKE :namePattern')
+                ->setParameter('namePattern', '%' . strtolower($criteria->name) . '%');
         }
 
-        if ($name) {
-            $pattern = '%' . strtolower($name) . '%';
-            $qb->andWhere('LOWER(a.name) LIKE :pattern')
-                ->setParameter('pattern', $pattern);
+        if ($criteria->code) {
+            $qb->andWhere('LOWER(a.code) LIKE :codePattern')
+                ->setParameter('codePattern', '%' . strtolower($criteria->code) . '%');
         }
 
-        if ($code) {
-            $pattern = '%' . strtolower($code) . '%';
-            $qb->andWhere('LOWER(a.code) LIKE :pattern')
-                ->setParameter('pattern', $pattern);
-        }
-
-        if ($buildingCode) {
+        if ($criteria->buildingCode) {
             $qb->innerJoin('a.building', 'b')
                 ->andWhere('b.code = :buildingCode')
-                ->setParameter('buildingCode', $buildingCode);
+                ->setParameter('buildingCode', $criteria->buildingCode);
         }
 
-        if ($filter['owningGroups']) {
+        if ($criteria->owningGroupIds) {
             $qb->innerJoin('a.owningGroups', 'og')
                 ->andWhere('og.id IN (:owningGroups)')
-                ->setParameter('owningGroups', $filter['owningGroups']);
+                ->setParameter('owningGroups', $criteria->owningGroupIds);
         }
 
-        if ($filter['members']) {
+        if ($criteria->memberIds) {
             $qb->innerJoin('a.members', 'm')
                 ->andWhere('m.id IN (:members)')
-                ->setParameter('members', $filter['members']);
+                ->setParameter('members', $criteria->memberIds);
         }
 
-        if ($filter['admins']) {
+        if ($criteria->adminIds) {
             $qb->innerJoin('a.admins', 'ad')
                 ->andWhere('ad.id IN (:admins)')
-                ->setParameter('admins', $filter['admins']);
+                ->setParameter('admins', $criteria->adminIds);
         }
 
         return $qb->getQuery()->getResult();

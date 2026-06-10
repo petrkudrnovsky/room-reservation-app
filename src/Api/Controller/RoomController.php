@@ -8,6 +8,7 @@ use App\Api\Model\RoomOutput;
 use App\Api\Service\EntityLinksFactory;
 use App\Entity\AppUser;
 use App\Entity\Room;
+use App\Filter\RoomFilterCriteria;
 use App\Repository\RoomRepository;
 use App\Service\RoomManager;
 use App\Voter\RoomVoter;
@@ -37,32 +38,34 @@ class RoomController extends AbstractFOSRestController
     {
         $this->denyAccessUnlessGranted(RoomVoter::VIEW_INDEX);
 
-        $name = $request->query->get('name');
-        $code = $request->query->get('code');
-        $buildingCode = $request->query->get('building_code');
-        $filter = [
-            'owningGroups' => $request->query->get('owning_groups'),
-            'members' => $request->query->get('members'),
-            'admins' => $request->query->get('admins'),
-        ];
+        $parseIds = fn (?string $s): ?array => $s !== null ? explode(',', $s) : null;
+
+        $criteria = new RoomFilterCriteria(
+            name: $request->query->get('name'),
+            code: $request->query->get('code'),
+            buildingCode: $request->query->get('building_code'),
+            owningGroupIds: $parseIds($request->query->get('owning_groups')),
+            memberIds: $parseIds($request->query->get('members')),
+            adminIds: $parseIds($request->query->get('admins')),
+        );
 
         /** @var AppUser $currentUser */
         $currentUser = $this->getUser();
 
+        $allRooms = $this->roomManager->findRoomsByFilters($criteria);
+
         // restrict rooms to those that are accessible by current user, public or have an approved reservation for current user
-        $roomsOutput = array_filter(
-            $this->roomManager->findRoomsByFilters($name, $code, $buildingCode, $filter),
+        $rooms = array_values(array_filter(
+            $allRooms,
             fn (Room $room) => $this->isGranted(RoomVoter::VIEW_DETAIL, $room)
                 || $room->isIsPrivate() === false
                 || $this->roomManager->hasApprovedReservation($room, $currentUser)
-        );
+        ));
 
-        $rooms = array_map(
+        return ['rooms' => array_map(
             fn (Room $entity) => RoomOutput::fromEntity($entity, $this->linksFactory->forRoom($entity)),
-            $this->roomManager->findRoomsByFilters($name, $code, $buildingCode, $filter)
-        );
-
-        return ['rooms' => $rooms];
+            $rooms
+        )];
     }
 
     #[Rest\Get('/room/{id}', name: 'api_rooms_detail', requirements: ['id' => '\d+'])]

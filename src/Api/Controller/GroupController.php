@@ -11,6 +11,7 @@ use App\Api\Service\EntityLinksFactory;
 use App\Entity\AppUser;
 use App\Entity\Group;
 use App\Entity\Room;
+use App\Filter\GroupFilterCriteria;
 use App\Repository\AppUserRepository;
 use App\Repository\GroupRepository;
 use App\Repository\RoomRepository;
@@ -43,16 +44,18 @@ class GroupController extends AbstractFOSRestController {
     {
         $this->denyAccessUnlessGranted(GroupVoter::VIEW_INDEX);
 
-        $name = $request->query->get('name');
-        $filters = [
-            'members' => $request->query->get('members'),
-            'admins' => $request->query->get('admins'),
-            'rooms' => $request->query->get('rooms'),
-        ];
+        $parseIds = fn (?string $s): ?array => $s !== null ? explode(',', $s) : null;
+
+        $criteria = new GroupFilterCriteria(
+            name: $request->query->get('name'),
+            memberIds: $parseIds($request->query->get('members')),
+            adminIds: $parseIds($request->query->get('admins')),
+            roomIds: $parseIds($request->query->get('rooms')),
+        );
 
         $groups = array_map(
             fn(Group $entity) => GroupOutput::fromEntity($entity, $this->linksFactory->forGroup($entity)),
-            $this->groupManager->findGroupsByFilters($name, $filters)
+            $this->groupManager->findGroupsByFilters($criteria)
         );
 
         return ['groups' => $groups];

@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\AppUser;
 use App\Entity\Group;
 use App\Entity\Room;
+use App\Filter\GroupFilterCriteria;
 use App\Repository\GroupRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -29,36 +30,30 @@ class GroupManager
         $this->em->flush();
     }
 
-    public function findGroupsByFilters(?string $name, $filters): array {
+    public function findGroupsByFilters(GroupFilterCriteria $criteria): array {
         $qb = $this->groupRepository->createQueryBuilder('a');
-        foreach ($filters as $key => $value) {
-            if ($value) {
-                $filters[$key] = explode(',', $value);
-            }
-        }
 
-        if ($name) {
-            $pattern = '%' . strtolower($name) . '%';
+        if ($criteria->name) {
             $qb->andWhere('LOWER(a.name) LIKE :pattern')
-                ->setParameter('pattern', $pattern);
+                ->setParameter('pattern', '%' . strtolower($criteria->name) . '%');
         }
 
-        if ($filters['members']) {
+        if ($criteria->memberIds) {
             $qb->innerJoin('a.members', 'm')
-                ->andWhere('m.id IN (:membersUsernames)')
-                ->setParameter('membersUsernames', $filters['members']);
+                ->andWhere('m.id IN (:memberIds)')
+                ->setParameter('memberIds', $criteria->memberIds);
         }
 
-        if ($filters['admins']) {
+        if ($criteria->adminIds) {
             $qb->innerJoin('a.admins', 'ad')
-                ->andWhere('ad.id IN (:admins)')
-                ->setParameter('admins', $filters['admins']);
+                ->andWhere('ad.id IN (:adminIds)')
+                ->setParameter('adminIds', $criteria->adminIds);
         }
 
-        if ($filters['rooms']) {
+        if ($criteria->roomIds) {
             $qb->innerJoin('a.rooms', 'r')
-                ->andWhere('r.id IN (:rooms)')
-                ->setParameter('rooms', $filters['rooms']);
+                ->andWhere('r.id IN (:roomIds)')
+                ->setParameter('roomIds', $criteria->roomIds);
         }
 
         return $qb->getQuery()->getResult();

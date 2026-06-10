@@ -22,6 +22,9 @@
                 <h2>I'm admin of these rooms</h2>
                 {{ include('room/_list.html.twig', {'rooms': adminRooms}) }}
 
+                <h2>I have access to these rooms through my department</h2>
+                {{ include('room/_list.html.twig', {'rooms': groupRooms}) }}
+
                 {% if allRooms != null and is_granted('ROLE_SUPER_ADMIN') %}
                     <h2>All rooms</h2>
                     {{ include('room/_list.html.twig', {'rooms': allRooms}) }}

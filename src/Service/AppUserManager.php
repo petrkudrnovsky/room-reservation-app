@@ -6,6 +6,7 @@ use App\Entity\AppUser;
 use App\Entity\Group;
 use App\Entity\Reservation;
 use App\Entity\Room;
+use App\Filter\AppUserFilterCriteria;
 use App\Repository\AppUserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -60,17 +61,17 @@ class AppUserManager
         return $appUser;
     }
 
-    public function findAppUsersByFilters(?string $username, ?string $name, ?string $email, ?string $phone): array {
+    public function findAppUsersByFilters(AppUserFilterCriteria $criteria): array {
         $qb = $this->userRepository->createQueryBuilder('a');
 
-        if ($username) {
+        if ($criteria->username) {
             $qb->andWhere('LOWER(a.username) = :username')
-                ->setParameter('username', strtolower($username));
+                ->setParameter('username', strtolower($criteria->username));
         }
 
-        if ($name) {
+        if ($criteria->name) {
             // Split the name into parts and convert to lowercase
-            $nameParts = explode(' ', strtolower($name));
+            $nameParts = explode(' ', strtolower($criteria->name));
             $qb->andWhere('(LOWER(a.firstName) LIKE :part1 OR LOWER(a.secondName) LIKE :part1)')
                 ->setParameter('part1', '%' . $nameParts[0] . '%');
 
@@ -80,14 +81,14 @@ class AppUserManager
             }
         }
 
-        if ($email) {
+        if ($criteria->email) {
             $qb->andWhere('LOWER(a.email) = :email')
-                ->setParameter('email', strtolower($email));
+                ->setParameter('email', strtolower($criteria->email));
         }
 
-        if ($phone) {
+        if ($criteria->phone) {
             $qb->andWhere('a.phone = :phone')
-                ->setParameter('phone', $phone);
+                ->setParameter('phone', $criteria->phone);
         }
 
         return $qb->getQuery()->getResult();

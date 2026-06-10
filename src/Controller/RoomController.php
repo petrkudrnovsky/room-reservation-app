@@ -39,9 +39,27 @@ class RoomController extends AbstractController
             ]);
         }
 
+        $memberGroups = $currentUser->getMemberGroups();
+        $adminGroups = $currentUser->getAdminGroups();
+
+        $groupRooms = [];
+
+        foreach ($memberGroups as $memberGroup) {
+            foreach ($memberGroup->getRooms() as $room) {
+                $groupRooms[] = $room;
+            }
+        }
+
+        foreach ($adminGroups as $adminGroup) {
+            foreach ($adminGroup->getRooms() as $room) {
+                $groupRooms[] = $room;
+            }
+        }
+
         return $this->render('room/index.html.twig', [
             'memberRooms' => $currentUser->getMemberRooms(),
             'adminRooms' => $currentUser->getAdminRooms(),
+            'groupRooms' => $groupRooms,
             'allRooms' => $allRooms,
             'publicRooms' => $roomRepository->findBy(['isPrivate' => false]),
         ]);

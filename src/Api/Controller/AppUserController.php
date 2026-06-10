@@ -7,6 +7,7 @@ use App\Api\Model\AppUserInput;
 use App\Api\Model\AppUserOutput;
 use App\Api\Service\EntityLinksFactory;
 use App\Entity\AppUser;
+use App\Filter\AppUserFilterCriteria;
 use App\Repository\AppUserRepository;
 use App\Service\AppUserManager;
 use App\Voter\UserVoter;
@@ -34,14 +35,16 @@ class AppUserController extends AbstractFOSRestController {
     public function list(Request $request): array {
         $this->denyAccessUnlessGranted(UserVoter::VIEW_INDEX);
 
-        $username = $request->query->get('username');
-        $name = $request->query->get('name');
-        $email = $request->query->get('email');
-        $phone = $request->query->get('phone');
+        $criteria = new AppUserFilterCriteria(
+            username: $request->query->get('username'),
+            name: $request->query->get('name'),
+            email: $request->query->get('email'),
+            phone: $request->query->get('phone'),
+        );
 
         $appUsers = array_map(
             fn (AppUser $entity) => AppUserOutput::fromEntity($entity, $this->linksFactory->forAppUser($entity)),
-            $this->appUserManager->findAppUsersByFilters($username, $name, $email, $phone)
+            $this->appUserManager->findAppUsersByFilters($criteria)
         );
 
         return ['appUsers' => $appUsers];
