@@ -105,7 +105,7 @@ class RoomController extends AbstractController
 
         return $this->render('room/show.html.twig', [
             'room' => $room,
-            'approvedReservations' => $roomManager->getOrderedReservations($room, Reservation::STATUS_APPROVED),
+            'approvedReservations' => $roomManager->getOrderedReservations($room, [Reservation::STATUS_APPROVED, Reservation::STATUS_ACTIVE]),
             'pendingReservations' => $pendingReservations,
         ]);
     }

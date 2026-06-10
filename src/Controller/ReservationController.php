@@ -71,7 +71,7 @@ class ReservationController extends AbstractController
             'reservation' => $reservationModel,
             'form' => $form,
             'room' => $reservationModel->room,
-            'approvedReservations' => $roomManager->getOrderedReservations($reservationModel->room, Reservation::STATUS_APPROVED),
+            'approvedReservations' => $roomManager->getOrderedReservations($reservationModel->room, [Reservation::STATUS_APPROVED, Reservation::STATUS_ACTIVE]),
         ]);
     }
 
@@ -91,7 +91,7 @@ class ReservationController extends AbstractController
         $reservationModel = $mapper->fromEntity($reservation);
         $form = $this->createForm(ReservationType::class, $reservationModel, [
             'can_edit_reservedFor' => $this->isGranted(RoomVoter::HAS_FULL_ACCESS_TO_ROOM, $reservation->getRoom()),
-            'can_edit_after_approved' => ($reservation->getStatus() !== Reservation::STATUS_APPROVED || $this->isGranted(ReservationVoter::CAN_APPROVE, $reservation))
+            'can_edit_after_approved' => (!in_array($reservation->getStatus(), [Reservation::STATUS_APPROVED, Reservation::STATUS_ACTIVE]) || $this->isGranted(ReservationVoter::CAN_APPROVE, $reservation))
         ]);
 
         $form->handleRequest($request);
@@ -139,6 +139,7 @@ class ReservationController extends AbstractController
             }
             $reservation->setStatus(Reservation::STATUS_APPROVED);
             $reservation->setApprovedBy($this->getUser());
+            $reservation->setApprovedAt(new \DateTime());
             $reservationManager->saveToDatabase($reservation);
             $this->addFlash('success', 'Reservation approved.');
         }

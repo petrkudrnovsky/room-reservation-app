@@ -248,13 +248,10 @@ class RoomVoter extends Voter
             }
         }
 
-        $reservations = $accessedRoom->getReservations();
-        $today = new \DateTime();
-        foreach ($reservations as $reservation) {
-            if($reservation->getStatus() === Reservation::STATUS_APPROVED
+        foreach ($accessedRoom->getReservations() as $reservation) {
+            if ($reservation->getStatus() === Reservation::STATUS_ACTIVE
                 && $reservation->getReservedFor() === $currentUser
-                && $reservation->getStartDatetime() <= $today
-                && $reservation->getEndDatetime() >= $today) {
+            ) {
                 return true;
             }
         }

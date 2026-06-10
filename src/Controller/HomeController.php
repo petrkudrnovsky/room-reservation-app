@@ -21,7 +21,7 @@ class HomeController extends AbstractController
         $userVisitingReservations = null;
         if($currentUser) {
             $userReservations = $reservationRepository->findReservationsByUser($currentUser);
-            $userVisitingReservations = array_filter($reservationRepository->findVisitingReservationsByUser($currentUser), fn($reservation) => $reservation->getStatus() === Reservation::STATUS_APPROVED);
+            $userVisitingReservations = array_filter($reservationRepository->findVisitingReservationsByUser($currentUser), fn($reservation) => in_array($reservation->getStatus(), [Reservation::STATUS_APPROVED, Reservation::STATUS_ACTIVE]));
         }
 
         return $this->render('home/index.html.twig', [

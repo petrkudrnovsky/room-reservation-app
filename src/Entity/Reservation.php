@@ -14,6 +14,8 @@ class Reservation
 {
     public const STATUS_PENDING = 'pending';
     public const STATUS_APPROVED = 'approved';
+    public const STATUS_ACTIVE = 'active';
+    public const STATUS_EXPIRED = 'expired';
     public const STATUS_REJECTED = 'rejected';
 
     #[ORM\Id]
@@ -38,6 +40,9 @@ class Reservation
 
     #[ORM\ManyToOne(inversedBy: 'reservations')]
     private ?Room $room = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTime $approvedAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'approvedReservations')]
     private ?AppUser $approvedBy = null;
@@ -110,6 +115,18 @@ class Reservation
     public function setRoom(?Room $room): static
     {
         $this->room = $room;
+
+        return $this;
+    }
+
+    public function getApprovedAt(): ?\DateTime
+    {
+        return $this->approvedAt;
+    }
+
+    public function setApprovedAt(?\DateTime $approvedAt): static
+    {
+        $this->approvedAt = $approvedAt;
 
         return $this;
     }

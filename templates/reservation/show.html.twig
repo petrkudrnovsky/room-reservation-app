@@ -42,6 +42,10 @@
                     <dl>Approved by:</dl>
                     <dt>{{ reservation.approvedBy ? reservation.approvedBy.username : 'Not approved' }}</dt>
                 </div>
+                <div class="info-item">
+                    <dl>Approved at:</dl>
+                    <dt>{{ reservation.approvedAt ? reservation.approvedAt|date('Y-m-d H:i:s') : 'N/A' }}</dt>
+                </div>
                 <aside class="list-item">
                     <div class="tag-item">
                         <h2>Visitors:</h2>

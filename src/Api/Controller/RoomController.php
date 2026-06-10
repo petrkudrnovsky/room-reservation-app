@@ -6,12 +6,14 @@ use App\Api\Mapper\RoomInputMapper;
 use App\Api\Model\RoomInput;
 use App\Api\Model\RoomOutput;
 use App\Api\Service\EntityLinksFactory;
+use App\Entity\AccessLog;
 use App\Entity\AppUser;
 use App\Entity\Room;
 use App\Filter\RoomFilterCriteria;
 use App\Repository\RoomRepository;
 use App\Service\RoomManager;
 use App\Voter\RoomVoter;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use PHPUnit\Util\Json;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
@@ -29,6 +31,7 @@ class RoomController extends AbstractFOSRestController
         private readonly RoomManager $roomManager,
         private readonly RoomInputMapper $roomInputMapper,
         private readonly EntityLinksFactory $linksFactory,
+        private readonly EntityManagerInterface $em,
     ) {}
 
     #[Rest\Get('/room', name: 'api_rooms_list')]
@@ -119,35 +122,41 @@ class RoomController extends AbstractFOSRestController
     // ověření zda uživatel má v tuto chvíli přístup do místnosti (je neobsazená, je jejím uživatelem, má schválenou rezervaci)
     #[Rest\Get('/room/{id}/access', name: 'api_rooms_access', requirements: ['id' => '\d+'])]
     #[Rest\View(statusCode: 200)]
-    public function hasAccess(int $id): bool
+    public function hasAccess(int $id): JsonResponse
     {
         $room = $this->findOrFail($id);
+        /** @var ?AppUser $user */
+        $user = $this->getUser();
 
-        if($room->isIsLocked()) {
+        $result = $this->computeAccess($room, $user);
+
+        $log = new AccessLog();
+        $log->setRoom($room)
+            ->setUser($user)
+            ->setDecision($result ? AccessLog::DECISION_GRANTED : AccessLog::DECISION_DENIED)
+            ->setAccessedAt(new \DateTime());
+        $this->em->persist($log);
+        $this->em->flush();
+
+        return $this->json(['hasAccess' => $result]);
+    }
+
+    private function computeAccess(Room $room, ?AppUser $user): bool
+    {
+        if ($room->getLockState() === Room::LOCK_STATE_LOCKED) {
             return false;
         }
-        // the room is unlocked now
 
-        /** @var AppUser $user */
-        $user = $this->getUser();
         $ongoingReservation = $this->roomManager->getOngoingReservation($room);
-        if(!$ongoingReservation) {
-            if ($this->isGranted(RoomVoter::HAS_FULL_ACCESS_TO_ROOM, $room)
+        if (!$ongoingReservation) {
+            return $this->isGranted(RoomVoter::HAS_FULL_ACCESS_TO_ROOM, $room)
                 || $room->getMembers()->contains($user)
-                || $room->getOwningGroups()->exists(fn (int $key, $group) => $group->getMembers()->contains($user))
-            ) {
-                return true;
-            }
+                || $room->getOwningGroups()->exists(fn (int $key, $group) => $group->getMembers()->contains($user));
         }
-        else {
-            if ($this->isGranted(RoomVoter::HAS_FULL_ACCESS_TO_ROOM, $room)
-                || $ongoingReservation->getReservedFor() === $user
-                || $ongoingReservation->getVisitors()->contains($user)
-            ) {
-                return true;
-            }
-        }
-        return false;
+
+        return $this->isGranted(RoomVoter::HAS_FULL_ACCESS_TO_ROOM, $room)
+            || $ongoingReservation->getReservedFor() === $user
+            || $ongoingReservation->getVisitors()->contains($user);
     }
 
     #[Rest\Patch('/room/{id}/toggleLock', name: 'api_rooms_toggle_lock', requirements: ['id' => '\d+'])]
@@ -156,15 +165,13 @@ class RoomController extends AbstractFOSRestController
     {
         $room = $this->findOrFail($id);
         $this->denyAccessUnlessGranted(RoomVoter::CAN_TOGGLE_LOCK, $room);
-        if($room->isIsLocked()) {
+        if($room->getLockState() === Room::LOCK_STATE_LOCKED) {
             $this->roomManager->unlockRoom($room);
             $message = "Room unlocked successfully.";
         } else {
             $this->roomManager->lockRoom($room);
             $message = "Room locked successfully.";
         }
-
-        $this->roomManager->saveToDatabase($room);
 
         return new JsonResponse(['message' => $message], 200);
     }

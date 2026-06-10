@@ -68,6 +68,14 @@
     color: var(--color-warning);
 }
 
+.reservation-status.active {
+    color: var(--color-info);
+}
+
+.reservation-status.expired {
+    color: var(--color-black);
+}
+
 .reservation-detail {
     display: flex;
     flex-direction: row;

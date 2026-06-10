@@ -126,6 +126,7 @@ class ReservationController extends AbstractFOSRestController
 
         $reservation->setStatus(Reservation::STATUS_APPROVED);
         $reservation->setApprovedBy($this->getUser());
+        $reservation->setApprovedAt(new \DateTime());
         $reservation = $this->reservationManager->saveToDatabase($reservation);
 
         return ReservationOutput::fromEntity($reservation, $this->linksFactory->forReservation($reservation));

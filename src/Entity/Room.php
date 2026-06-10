@@ -43,8 +43,11 @@ class Room
     #[ORM\JoinColumn(nullable: false)]
     private ?Building $building = null;
 
-    #[ORM\Column]
-    private ?bool $isLocked = true;
+    public const LOCK_STATE_LOCKED = 'locked';
+    public const LOCK_STATE_UNLOCKED = 'unlocked';
+
+    #[ORM\Column(length: 20)]
+    private string $lockState = self::LOCK_STATE_LOCKED;
 
     public function __construct()
     {
@@ -244,14 +247,14 @@ class Room
         $this->reservations->clear();
     }
 
-    public function isIsLocked(): ?bool
+    public function getLockState(): string
     {
-        return $this->isLocked;
+        return $this->lockState;
     }
 
-    public function setIsLocked(bool $isLocked): static
+    public function setLockState(string $lockState): static
     {
-        $this->isLocked = $isLocked;
+        $this->lockState = $lockState;
 
         return $this;
     }

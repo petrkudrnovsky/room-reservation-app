@@ -64,11 +64,11 @@ class ReservationRepository extends ServiceEntityRepository
 
         $qb = $this->createQueryBuilder('r')
             ->andWhere('r.room = :roomId')
-            ->andWhere('r.status = :status')
+            ->andWhere('r.status IN (:statuses)')
             ->andWhere('r.startDatetime < :endDatetime')
             ->andWhere('r.endDatetime > :startDatetime')
             ->setParameter('roomId', $roomId)
-            ->setParameter('status', Reservation::STATUS_APPROVED)
+            ->setParameter('statuses', [Reservation::STATUS_APPROVED, Reservation::STATUS_ACTIVE])
             ->setParameter('startDatetime', $start)
             ->setParameter('endDatetime', $end);
 

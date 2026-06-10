@@ -59,21 +59,20 @@ class RoomManager
 
     /**
      * @param Room $room
+     * @param string|array $status
      * @return Room[]
      */
-    public function getOrderedReservations(Room $room, string $status): array
+    public function getOrderedReservations(Room $room, string|array $status): array
     {
-        $reservations = $room->getReservations();
+        $statuses = is_array($status) ? $status : [$status];
         $orderedReservations = [];
         $today = new \DateTime();
-        foreach ($reservations as $reservation) {
-            if ($reservation->getEndDatetime() >= $today && $reservation->getStatus() === $status) {
+        foreach ($room->getReservations() as $reservation) {
+            if ($reservation->getEndDatetime() >= $today && in_array($reservation->getStatus(), $statuses)) {
                 $orderedReservations[] = $reservation;
             }
         }
-        usort($orderedReservations, function ($a, $b) {
-            return $a->getStartDatetime() <=> $b->getStartDatetime();
-        });
+        usort($orderedReservations, fn($a, $b) => $a->getStartDatetime() <=> $b->getStartDatetime());
         return $orderedReservations;
     }
 
@@ -187,9 +186,10 @@ class RoomManager
 
     public function hasApprovedReservation(Room $room, AppUser $user): bool
     {
-        $reservations = $room->getReservations();
-        foreach ($reservations as $reservation) {
-            if ($reservation->getStatus() === Reservation::STATUS_APPROVED && $reservation->getReservedFor() === $user) {
+        foreach ($room->getReservations() as $reservation) {
+            if (in_array($reservation->getStatus(), [Reservation::STATUS_APPROVED, Reservation::STATUS_ACTIVE])
+                && $reservation->getReservedFor() === $user
+            ) {
                 return true;
             }
         }
@@ -198,22 +198,20 @@ class RoomManager
 
     public function unlockRoom(Room $room): void
     {
-        $room->setIsLocked(false);
+        $room->setLockState(Room::LOCK_STATE_UNLOCKED);
         $this->em->flush();
     }
 
     public function lockRoom(Room $room): void
     {
-        $room->setIsLocked(true);
+        $room->setLockState(Room::LOCK_STATE_LOCKED);
         $this->em->flush();
     }
 
     public function getOngoingReservation(Room $room): ?Reservation
     {
-        $reservations = $room->getReservations();
-        $today = new \DateTime();
-        foreach ($reservations as $reservation) {
-            if ($reservation->getEndDatetime() >= $today && $reservation->getStatus() === Reservation::STATUS_APPROVED && $reservation->getStartDatetime() <= $today) {
+        foreach ($room->getReservations() as $reservation) {
+            if ($reservation->getStatus() === Reservation::STATUS_ACTIVE) {
                 return $reservation;
             }
         }
@@ -222,16 +220,11 @@ class RoomManager
 
     public function isRoomFree(Room $room): bool
     {
-        $reservations = $room->getReservations();
-        if ($reservations->count() === 0) {
-            return true;
-        }
-        $today = new \DateTime();
-        foreach ($reservations as $reservation) {
-            if ($reservation->getEndDatetime() >= $today && $reservation->getStatus() === Reservation::STATUS_APPROVED && $reservation->getStartDatetime() <= $today) {
-                return true;
+        foreach ($room->getReservations() as $reservation) {
+            if ($reservation->getStatus() === Reservation::STATUS_ACTIVE) {
+                return false;
             }
         }
-        return false;
+        return true;
     }
 }

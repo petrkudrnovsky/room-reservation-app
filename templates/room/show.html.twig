@@ -33,8 +33,8 @@
                 <dt>{{ room.isPrivate ? 'Yes' : 'No' }}</dt>
             </div>
             <div class="info-item">
-                <dl>IsLocked:</dl>
-                <dt>{{ room.isLocked ? 'Yes' : 'No' }}</dt>
+                <dl>Lock state:</dl>
+                <dt>{{ room.lockState }}</dt>
             </div>
             {% if is_granted('IS_AUTHENTICATED_FULLY') %}
             <aside class="list-item">
@@ -89,7 +89,7 @@
             </div>
         </section>
 
-        <h2>Approved reservations for this room</h2>
+        <h2>Upcoming & Active reservations for this room</h2>
         {% if is_granted('room_can_view_full_reservations', room) %}
             {{ include('reservation/_list.html.twig', {reservations: approvedReservations}) }}
         {% else %}
