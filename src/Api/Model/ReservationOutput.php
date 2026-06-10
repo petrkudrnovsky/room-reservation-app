@@ -2,6 +2,7 @@
 
 namespace App\Api\Model;
 
+use App\Api\Model\Links\ReservationLinks;
 use App\Entity\Reservation;
 
 class ReservationOutput
@@ -42,13 +43,7 @@ class ReservationOutput
         $this->visitorsUrls = $visitorsUrls;
     }
 
-    public static function fromEntity(
-        Reservation $entity,
-        ?string $roomUrl,
-        ?string $approvedByUrl,
-        ?string $reservedForUrl,
-        ?array $visitorsUrls
-    ): self
+    public static function fromEntity(Reservation $entity, ReservationLinks $links): self
     {
         return new self(
             $entity->getId(),
@@ -57,10 +52,10 @@ class ReservationOutput
             $entity->getStartDatetime(),
             $entity->getEndDatetime(),
             $entity->getStatus(),
-            $roomUrl,
-            $approvedByUrl,
-            $reservedForUrl,
-            $visitorsUrls
+            $links->roomUrl,
+            $links->approvedByUrl,
+            $links->reservedForUrl,
+            $links->visitorsUrls
         );
     }
 

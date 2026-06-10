@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\AppUser;
 use App\Entity\Reservation;
 use App\Entity\Room;
+use App\Form\Mapper\RoomTypeMapper;
 use App\Form\Model\RoomTypeModel;
 use App\Form\RoomType;
 use App\Repository\RoomRepository;
@@ -48,14 +49,14 @@ class RoomController extends AbstractController
 
     #[Route('/new', name: 'app_room_new')]
     #[IsGranted(RoomVoter::CREATE)]
-    public function new(Request $request, RoomManager $roomManager): Response
+    public function new(Request $request, RoomManager $roomManager, RoomTypeMapper $mapper): Response
     {
         $roomModel = new RoomTypeModel();
         $form = $this->createForm(RoomType::class, $roomModel, ['is_super_admin' => $this->isGranted('ROLE_SUPER_ADMIN')]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $room = $roomModel->toEntity();
+            $room = $mapper->toEntity($roomModel);
             $roomManager->saveToDatabase($room);
             $this->addFlash('success', 'Room created successfully.');
 
@@ -93,14 +94,14 @@ class RoomController extends AbstractController
 
     #[Route('/{id}/edit', name: 'app_room_edit')]
     #[IsGranted(RoomVoter::EDIT, 'room')]
-    public function edit(Request $request, Room $room, RoomManager $roomManager): Response
+    public function edit(Request $request, Room $room, RoomManager $roomManager, RoomTypeMapper $mapper): Response
     {
-        $roomModel = RoomTypeModel::fromEntity($room);
+        $roomModel = $mapper->fromEntity($room);
         $form = $this->createForm(RoomType::class, $roomModel, ['is_super_admin' => $this->isGranted('ROLE_SUPER_ADMIN'), 'can_edit_members' => $this->isGranted(RoomVoter::EDIT_MEMBERS, $room), 'can_edit_admins' => $this->isGranted(RoomVoter::EDIT_ADMINS, $room)]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $room = $roomModel->toEntity($room);
+            $room = $mapper->toEntity($roomModel, $room);
             $roomManager->saveToDatabase($room);
             $this->addFlash('success', 'Room edited successfully.');
 

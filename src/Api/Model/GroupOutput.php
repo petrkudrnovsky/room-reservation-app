@@ -2,8 +2,8 @@
 
 namespace App\Api\Model;
 
+use App\Api\Model\Links\GroupLinks;
 use App\Entity\Group;
-use App\Entity\Room;
 
 class GroupOutput {
     public int $id;
@@ -26,14 +26,14 @@ class GroupOutput {
         $this->rooms = $rooms;
     }
 
-    public static function fromEntity(Group $group, array $membersUrls, array $adminsUrls, array $roomsUrls): self
+    public static function fromEntity(Group $group, GroupLinks $links): self
     {
         return new self(
             $group->getId(),
             $group->getName(),
-            $membersUrls,
-            $adminsUrls,
-            $roomsUrls
+            $links->members,
+            $links->admins,
+            $links->rooms
         );
     }
 }

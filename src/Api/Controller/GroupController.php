@@ -2,19 +2,19 @@
 
 namespace App\Api\Controller;
 
+use App\Api\Mapper\GroupInputMapper;
 use App\Api\Model\AppUserInput;
 use App\Api\Model\GroupInput;
 use App\Api\Model\GroupOutput;
 use App\Api\Model\RoomInput;
+use App\Api\Service\EntityLinksFactory;
 use App\Entity\AppUser;
 use App\Entity\Group;
 use App\Entity\Room;
 use App\Repository\AppUserRepository;
 use App\Repository\GroupRepository;
 use App\Repository\RoomRepository;
-use App\Service\AppUserManager;
 use App\Service\GroupManager;
-use App\Service\RoomManager;
 use App\Voter\GroupVoter;
 use Exception;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
@@ -32,8 +32,8 @@ class GroupController extends AbstractFOSRestController {
         private readonly GroupManager $groupManager,
         private readonly AppUserRepository $appUserRepository,
         private readonly RoomRepository $roomRepository,
-        private readonly AppUserManager $appUserManager,
-        private readonly RoomManager $roomManager,
+        private readonly GroupInputMapper $groupInputMapper,
+        private readonly EntityLinksFactory $linksFactory,
     ) {
     }
 
@@ -51,7 +51,7 @@ class GroupController extends AbstractFOSRestController {
         ];
 
         $groups = array_map(
-            fn(Group $entity) => GroupOutput::fromEntity($entity, $this->getUsersUrls($entity, true), $this->getUsersUrls($entity, false), $this->getRoomsUrls($entity)),
+            fn(Group $entity) => GroupOutput::fromEntity($entity, $this->linksFactory->forGroup($entity)),
             $this->groupManager->findGroupsByFilters($name, $filters)
         );
 
@@ -65,7 +65,7 @@ class GroupController extends AbstractFOSRestController {
     {
         $group = $this->findOrFail($id);
         $this->denyAccessUnlessGranted(GroupVoter::VIEW_DETAIL, $group);
-        return GroupOutput::fromEntity($group, $this->getUsersUrls($group, true), $this->getUsersUrls($group, false), $this->getRoomsUrls($group));
+        return GroupOutput::fromEntity($group, $this->linksFactory->forGroup($group));
     }
 
     /**
@@ -92,9 +92,9 @@ class GroupController extends AbstractFOSRestController {
             )));
         }
 
-        $group = $groupInput->toEntity($this->appUserManager, $this->roomManager, $group);
+        $group = $this->groupInputMapper->toEntity($groupInput, $group);
         $this->groupManager->saveToDatabase($group);
-        return GroupOutput::fromEntity($group, $this->getUsersUrls($group, true), $this->getUsersUrls($group, false), $this->getRoomsUrls($group));
+        return GroupOutput::fromEntity($group, $this->linksFactory->forGroup($group));
     }
 
     #[Rest\Delete('/group/{id}', name: 'api_groups_delete', requirements: ['id' => '\d+'])]
@@ -124,7 +124,7 @@ class GroupController extends AbstractFOSRestController {
 
         $group->addMember($user);
         $this->groupManager->saveToDatabase($group);
-        return GroupOutput::fromEntity($group, $this->getUsersUrls($group, true), $this->getUsersUrls($group, false), $this->getRoomsUrls($group));
+        return GroupOutput::fromEntity($group, $this->linksFactory->forGroup($group));
     }
 
     #[Rest\Delete('/group/{id}/user/{userId}', name: 'api_groups_remove_member', requirements: ['id' => '\d+', 'userId' => '\d+'])]
@@ -148,7 +148,7 @@ class GroupController extends AbstractFOSRestController {
 
         $group->removeMember($user);
         $this->groupManager->saveToDatabase($group);
-        return GroupOutput::fromEntity($group, $this->getUsersUrls($group, true), $this->getUsersUrls($group, false), $this->getRoomsUrls($group));
+        return GroupOutput::fromEntity($group, $this->linksFactory->forGroup($group));
     }
 
     #[Rest\Patch('/group/{id}/admin', name: 'api_groups_add_admin', requirements: ['id' => '\d+'])]
@@ -166,7 +166,7 @@ class GroupController extends AbstractFOSRestController {
 
         $group->addAdmin($user);
         $this->groupManager->saveToDatabase($group);
-        return GroupOutput::fromEntity($group, $this->getUsersUrls($group, true), $this->getUsersUrls($group, false), $this->getRoomsUrls($group));
+        return GroupOutput::fromEntity($group, $this->linksFactory->forGroup($group));
     }
 
     #[Rest\Delete('/group/{id}/admin/{userId}', name: 'api_groups_remove_admin', requirements: ['id' => '\d+', 'userId' => '\d+'])]
@@ -187,7 +187,7 @@ class GroupController extends AbstractFOSRestController {
 
         $group->removeAdmin($user);
         $this->groupManager->saveToDatabase($group);
-        return GroupOutput::fromEntity($group, $this->getUsersUrls($group, true), $this->getUsersUrls($group, false), $this->getRoomsUrls($group));
+        return GroupOutput::fromEntity($group, $this->linksFactory->forGroup($group));
     }
 
     #[Rest\Patch('/group/{id}/room', name: 'api_groups_add_room', requirements: ['id' => '\d+'])]
@@ -210,7 +210,7 @@ class GroupController extends AbstractFOSRestController {
 
         $group->addRoom($room);
         $this->groupManager->saveToDatabase($group);
-        return GroupOutput::fromEntity($group, $this->getUsersUrls($group, true), $this->getUsersUrls($group, false), $this->getRoomsUrls($group));
+        return GroupOutput::fromEntity($group, $this->linksFactory->forGroup($group));
     }
 
     #[Rest\Delete('/group/{id}/room/{roomId}', name: 'api_groups_remove_room', requirements: ['id' => '\d+', 'roomId' => '\d+'])]
@@ -234,31 +234,7 @@ class GroupController extends AbstractFOSRestController {
 
         $group->removeRoom($room);
         $this->groupManager->saveToDatabase($group);
-        return GroupOutput::fromEntity($group, $this->getUsersUrls($group, true), $this->getUsersUrls($group, false), $this->getRoomsUrls($group));
-    }
-
-    private function getUsersUrls(Group $group, bool $isMember): array
-    {
-        if ($isMember) {
-            return array_map(
-                fn ($member) => $this->generateUrl('api_app_users_detail', ['id' => $member->getId()]),
-                $group->getMembers()->toArray()
-            );
-        } else {
-            return array_map(
-                fn ($admin) => $this->generateUrl('api_app_users_detail', ['id' => $admin->getId()]),
-                $group->getAdmins()->toArray()
-            );
-
-        }
-    }
-
-    private function getRoomsUrls(Group $group): array
-    {
-        return array_map(
-            fn ($room) => $this->generateUrl('api_rooms_detail', ['id' => $room->getId()]),
-            $group->getRooms()->toArray()
-        );
+        return GroupOutput::fromEntity($group, $this->linksFactory->forGroup($group));
     }
 
     private function findOrFailUser(int $id): AppUser

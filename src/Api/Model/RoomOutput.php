@@ -2,6 +2,7 @@
 
 namespace App\Api\Model;
 
+use App\Api\Model\Links\RoomLinks;
 use App\Entity\Room;
 
 class RoomOutput
@@ -41,22 +42,17 @@ class RoomOutput
         $this->buildingCode = $buildingCode;
     }
 
-    public static function fromEntity(
-        Room $entity,
-        array $membersUrls,
-        array $adminsUrls,
-        array $owningGroupsUrls,
-        array $reservationUrls ): self
+    public static function fromEntity(Room $entity, RoomLinks $links): self
     {
         return new self(
             $entity->getId(),
             $entity->getName(),
             $entity->getCode(),
             $entity->isIsPrivate(),
-            $owningGroupsUrls,
-            $membersUrls,
-            $adminsUrls,
-            $reservationUrls,
+            $links->owningGroups,
+            $links->members,
+            $links->admins,
+            $links->reservations,
             $entity->getBuilding()->getName(),
             $entity->getBuilding()->getCode()
         );

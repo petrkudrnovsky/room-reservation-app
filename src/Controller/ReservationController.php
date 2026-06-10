@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\AppUser;
 use App\Entity\Reservation;
+use App\Form\Mapper\ReservationTypeMapper;
 use App\Form\Model\ReservationTypeModel;
 use App\Form\ReservationType;
 use App\Repository\ReservationRepository;
@@ -43,7 +44,7 @@ class ReservationController extends AbstractController
 
     #[Route('/new', name: 'app_room_reservation_new')]
     #[IsGranted('IS_AUTHENTICATED_FULLY')] // further access is checked in ReservationVoter
-    public function new(Request $request, int $roomId, ReservationManager $reservationManager, RoomManager $roomManager): Response
+    public function new(Request $request, int $roomId, ReservationManager $reservationManager, RoomManager $roomManager, ReservationTypeMapper $mapper): Response
     {
         $reservationModel = new ReservationTypeModel();
         $reservationModel->room = $roomManager->getRoomById($roomId);
@@ -58,7 +59,7 @@ class ReservationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $reservation = $reservationModel->toEntity();
+            $reservation = $mapper->toEntity($reservationModel);
             $reservation = $reservationManager->prepareNewReservation($reservation);
             $reservationManager->saveToDatabase($reservation);
 
@@ -85,9 +86,9 @@ class ReservationController extends AbstractController
 
     #[Route('/{id}/edit', name: 'app_room_reservation_edit')]
     #[IsGranted(ReservationVoter::EDIT, 'reservation')]
-    public function edit(Request $request, Reservation $reservation, ReservationManager $reservationManager): Response
+    public function edit(Request $request, Reservation $reservation, ReservationManager $reservationManager, ReservationTypeMapper $mapper): Response
     {
-        $reservationModel = ReservationTypeModel::fromEntity($reservation);
+        $reservationModel = $mapper->fromEntity($reservation);
         $form = $this->createForm(ReservationType::class, $reservationModel, [
             'can_edit_reservedFor' => $this->isGranted(RoomVoter::HAS_FULL_ACCESS_TO_ROOM, $reservation->getRoom()),
             'can_edit_after_approved' => ($reservation->getStatus() !== Reservation::STATUS_APPROVED || $this->isGranted(ReservationVoter::CAN_APPROVE, $reservation))
@@ -96,7 +97,7 @@ class ReservationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $reservation = $reservationModel->toEntity($reservation);
+            $reservation = $mapper->toEntity($reservationModel, $reservation);
             $reservationManager->saveToDatabase($reservation);
             $this->addFlash('success', 'Reservation edited successfully.');
 

@@ -2,6 +2,7 @@
 
 namespace App\Api\Model;
 
+use App\Api\Model\Links\AppUserLinks;
 use App\Entity\AppUser;
 use Symfony\Component\Serializer\Annotation\Groups;
 
@@ -52,15 +53,7 @@ class AppUserOutput {
     }
 
 
-    public static function fromEntity(
-        AppUser $appUser,
-        array $memberGroupsUrls,
-        array $adminGroupsUrls,
-        array $memberRoomsUrls,
-        array $adminRoomsUrls,
-        array $approvedReservationsUrls,
-        array $reservationsUrls
-    ): self
+    public static function fromEntity(AppUser $appUser, AppUserLinks $links): self
     {
         return new self(
             $appUser->getId(),
@@ -70,12 +63,12 @@ class AppUserOutput {
             $appUser->getSecondName(),
             $appUser->getEmail(),
             $appUser->getPhone(),
-            $memberGroupsUrls,
-            $adminGroupsUrls,
-            $memberRoomsUrls,
-            $adminRoomsUrls,
-            $approvedReservationsUrls,
-            $reservationsUrls
+            $links->memberGroups,
+            $links->adminGroups,
+            $links->memberRooms,
+            $links->adminRooms,
+            $links->approvedReservations,
+            $links->reservations
         );
     }
 }

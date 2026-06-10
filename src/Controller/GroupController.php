@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\AppUser;
 use App\Entity\Group;
 use App\Form\GroupType;
+use App\Form\Mapper\GroupTypeMapper;
 use App\Form\Model\GroupTypeModel;
 use App\Repository\GroupRepository;
 use App\Service\GroupManager;
@@ -40,14 +41,14 @@ class GroupController extends AbstractController
 
     #[Route('/new', name: 'app_group_new')]
     #[IsGranted(GroupVoter::CREATE)]
-    public function new(Request $request, GroupManager $groupManager): Response
+    public function new(Request $request, GroupManager $groupManager, GroupTypeMapper $mapper): Response
     {
         $groupModel = new GroupTypeModel();
         $form = $this->createForm(GroupType::class, $groupModel, ['is_super_admin' => $this->isGranted('ROLE_SUPER_ADMIN')]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $group = $groupModel->toEntity();
+            $group = $mapper->toEntity($groupModel);
             $groupManager->saveToDatabase($group);
             $this->addFlash('success', 'Group created successfully.');
 
@@ -71,14 +72,14 @@ class GroupController extends AbstractController
 
     #[Route('/{id}/edit', name: 'app_group_edit')]
     #[IsGranted(GroupVoter::EDIT, 'group')]
-    public function edit(Request $request, Group $group, GroupManager $groupManager): Response
+    public function edit(Request $request, Group $group, GroupManager $groupManager, GroupTypeMapper $mapper): Response
     {
-        $groupModel = GroupTypeModel::fromEntity($group);
+        $groupModel = $mapper->fromEntity($group);
         $form = $this->createForm(GroupType::class, $groupModel, ['is_super_admin' => $this->isGranted('ROLE_SUPER_ADMIN')]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $group = $groupModel->toEntity($group);
+            $group = $mapper->toEntity($groupModel, $group);
             $groupManager->saveToDatabase($group);
             $this->addFlash('success', 'Group edited successfully.');
 

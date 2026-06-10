@@ -2,16 +2,13 @@
 
 namespace App\Api\Controller;
 
+use App\Api\Mapper\RoomInputMapper;
 use App\Api\Model\RoomInput;
 use App\Api\Model\RoomOutput;
+use App\Api\Service\EntityLinksFactory;
 use App\Entity\AppUser;
-use App\Entity\Reservation;
 use App\Entity\Room;
-use App\Repository\BuildingRepository;
-use App\Repository\GroupRepository;
 use App\Repository\RoomRepository;
-use App\Service\AppUserManager;
-use App\Service\GroupManager;
 use App\Service\RoomManager;
 use App\Voter\RoomVoter;
 use Exception;
@@ -29,9 +26,8 @@ class RoomController extends AbstractFOSRestController
 {
     public function __construct(
         private readonly RoomManager $roomManager,
-        private readonly AppUserManager $userManager,
-        private readonly GroupManager $groupManager,
-        private readonly BuildingRepository $buildingRepository,
+        private readonly RoomInputMapper $roomInputMapper,
+        private readonly EntityLinksFactory $linksFactory,
     ) {}
 
     #[Rest\Get('/room', name: 'api_rooms_list')]
@@ -62,12 +58,7 @@ class RoomController extends AbstractFOSRestController
         );
 
         $rooms = array_map(
-            fn (Room $entity) => RoomOutput::fromEntity(
-                $entity,
-                $this->getUsersUrls($entity, true),
-                $this->getUsersUrls($entity, false),
-                $this->getGroupsUrls($entity),
-                $this->getReservationsUrls($entity)),
+            fn (Room $entity) => RoomOutput::fromEntity($entity, $this->linksFactory->forRoom($entity)),
             $this->roomManager->findRoomsByFilters($name, $code, $buildingCode, $filter)
         );
 
@@ -81,13 +72,7 @@ class RoomController extends AbstractFOSRestController
         $room = $this->findOrFail($id);
         $this->denyAccessUnlessGranted(RoomVoter::VIEW_DETAIL, $room);
 
-        return RoomOutput::fromEntity(
-            $room,
-            $this->getUsersUrls($room, true),
-            $this->getUsersUrls($room, false),
-            $this->getGroupsUrls($room),
-            $this->getReservationsUrls($room)
-        );
+        return RoomOutput::fromEntity($room, $this->linksFactory->forRoom($room));
     }
 
     /**
@@ -114,15 +99,9 @@ class RoomController extends AbstractFOSRestController
             )));
         }
 
-        $room = $roomInput->toEntity($this->userManager, $this->groupManager, $this->buildingRepository, $room);
+        $room = $this->roomInputMapper->toEntity($roomInput, $room);
         $room = $this->roomManager->saveToDatabase($room);
-        return RoomOutput::fromEntity(
-            $room,
-            $this->getUsersUrls($room, true),
-            $this->getUsersUrls($room, false),
-            $this->getGroupsUrls($room),
-            $this->getReservationsUrls($room)
-        );
+        return RoomOutput::fromEntity($room, $this->linksFactory->forRoom($room));
     }
 
     #[Rest\Delete('/room/{id}', name: 'api_rooms_delete', requirements: ['id' => '\d+'])]
@@ -194,37 +173,5 @@ class RoomController extends AbstractFOSRestController
             throw $this->createNotFoundException('Room not found');
         }
         return $room;
-    }
-
-    private function getUsersUrls(Room $room, bool $isMember): array
-    {
-        if ($isMember) {
-            return array_map(
-                fn ($member) => $this->generateUrl('api_app_users_detail', ['id' => $member->getId()]),
-                $room->getMembers()->toArray()
-            );
-        } else {
-            return array_map(
-                fn ($admin) => $this->generateUrl('api_app_users_detail', ['id' => $admin->getId()]),
-                $room->getAdmins()->toArray()
-            );
-
-        }
-    }
-
-    private function getGroupsUrls(Room $room): array
-    {
-        return array_map(
-            fn ($group) => $this->generateUrl('api_groups_detail', ['id' => $group->getId()]),
-            $room->getOwningGroups()->toArray()
-        );
-    }
-
-    private function getReservationsUrls(Room $room): array
-    {
-        return array_map(
-            fn ($reservation) => $this->generateUrl('api_reservations_detail', ['id' => $reservation->getId()]),
-            $room->getReservations()->toArray()
-        );
     }
 }

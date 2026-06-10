@@ -2,17 +2,13 @@
 
 namespace App\Api\Controller;
 
+use App\Api\Mapper\AppUserInputMapper;
 use App\Api\Model\AppUserInput;
 use App\Api\Model\AppUserOutput;
+use App\Api\Service\EntityLinksFactory;
 use App\Entity\AppUser;
-use App\Entity\Group;
-use App\Entity\Reservation;
-use App\Entity\Room;
 use App\Repository\AppUserRepository;
 use App\Service\AppUserManager;
-use App\Service\GroupManager;
-use App\Service\ReservationManager;
-use App\Service\RoomManager;
 use App\Voter\UserVoter;
 use Exception;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
@@ -28,9 +24,8 @@ class AppUserController extends AbstractFOSRestController {
     public function __construct(
         private readonly AppUserRepository $appUserRepository,
         private readonly AppUserManager $appUserManager,
-        private readonly GroupManager $groupManager,
-        private readonly RoomManager $roomManager,
-        private readonly ReservationManager $reservationManager,
+        private readonly AppUserInputMapper $appUserInputMapper,
+        private readonly EntityLinksFactory $linksFactory,
         private UserPasswordHasherInterface $passwordHasher
     ) {}
 
@@ -45,14 +40,7 @@ class AppUserController extends AbstractFOSRestController {
         $phone = $request->query->get('phone');
 
         $appUsers = array_map(
-            fn (AppUser $entity) => AppUserOutput::fromEntity(
-                $entity,
-                $this->getGroupsUrls($entity, true),
-                $this->getGroupsUrls($entity, false),
-                $this->getRoomsUrls($entity, true),
-                $this->getRoomsUrls($entity, false),
-                $this->getReservationsUrls($entity, true),
-                $this->getReservationsUrls($entity, false)),
+            fn (AppUser $entity) => AppUserOutput::fromEntity($entity, $this->linksFactory->forAppUser($entity)),
             $this->appUserManager->findAppUsersByFilters($username, $name, $email, $phone)
         );
 
@@ -71,14 +59,7 @@ class AppUserController extends AbstractFOSRestController {
 
         $this->denyAccessUnlessGranted(UserVoter::VIEW_DETAIL, $appUser);
 
-        return AppUserOutput::fromEntity(
-            $appUser,
-            $this->getGroupsUrls($appUser, true),
-            $this->getGroupsUrls($appUser, false),
-            $this->getRoomsUrls($appUser, true),
-            $this->getRoomsUrls($appUser, false),
-            $this->getReservationsUrls($appUser, true),
-            $this->getReservationsUrls($appUser, false));
+        return AppUserOutput::fromEntity($appUser, $this->linksFactory->forAppUser($appUser));
     }
 
     /**
@@ -104,18 +85,11 @@ class AppUserController extends AbstractFOSRestController {
             )));
         }
 
-        $appUser = $appUserInput->toEntity($appUser, $this->groupManager, $this->roomManager, $this->reservationManager);
+        $appUser = $this->appUserInputMapper->toEntity($appUserInput, $appUser);
         $hashedPassword = $this->passwordHasher->hashPassword($appUser, $appUserInput->getPlainPassword());
         $appUser->setPassword($hashedPassword);
         $this->appUserManager->saveToDatabase($appUser);
-        return AppUserOutput::fromEntity(
-            $appUser,
-            $this->getGroupsUrls($appUser, true),
-            $this->getGroupsUrls($appUser, false),
-            $this->getRoomsUrls($appUser, true),
-            $this->getRoomsUrls($appUser, false),
-            $this->getReservationsUrls($appUser, true),
-            $this->getReservationsUrls($appUser, false));
+        return AppUserOutput::fromEntity($appUser, $this->linksFactory->forAppUser($appUser));
     }
 
     #[Rest\Delete('/user/{id}', name: 'api_app_users_delete', requirements: ['id' => '\d+'])]
@@ -153,19 +127,12 @@ class AppUserController extends AbstractFOSRestController {
             throw new HttpException(400, message: 'You cannot set rooms, groups or reservations when registering');
         }
 
-        $appUser = $appUserInput->toEntity($appUser, $this->groupManager, $this->roomManager, $this->reservationManager);
+        $appUser = $this->appUserInputMapper->toEntity($appUserInput, $appUser);
         $appUser->setRoles(['ROLE_USER']);
         $hashedPassword = $this->passwordHasher->hashPassword($appUser, $appUserInput->getPlainPassword());
         $appUser->setPassword($hashedPassword);
         $this->appUserManager->saveToDatabase($appUser);
-        return AppUserOutput::fromEntity(
-            $appUser,
-            $this->getGroupsUrls($appUser, true),
-            $this->getGroupsUrls($appUser, false),
-            $this->getRoomsUrls($appUser, true),
-            $this->getRoomsUrls($appUser, false),
-            $this->getReservationsUrls($appUser, true),
-            $this->getReservationsUrls($appUser, false));
+        return AppUserOutput::fromEntity($appUser, $this->linksFactory->forAppUser($appUser));
     }
 
     private function findOrFail(int $id): AppUser
@@ -176,32 +143,5 @@ class AppUserController extends AbstractFOSRestController {
         }
 
         return $appUser;
-    }
-
-    private function getGroupsUrls(AppUser $appUser, bool $isAdmin): array
-    {
-        $groups = $isAdmin ? $appUser->getAdminGroups() : $appUser->getMemberGroups();
-        return array_map(
-            fn (Group $group) => $this->generateUrl('api_groups_detail', ['id' => $group->getId()]),
-            $groups->toArray()
-        );
-    }
-
-    private function getRoomsUrls(AppUser $appUser, bool $isAdmin): array
-    {
-        $rooms = $isAdmin ? $appUser->getAdminRooms() : $appUser->getMemberRooms();
-        return array_map(
-            fn (Room $room) => $this->generateUrl('api_rooms_detail', ['id' => $room->getId()]),
-            $rooms->toArray()
-        );
-    }
-
-    private function getReservationsUrls(AppUser $appUser, bool $isApproved): array
-    {
-        $reservations = $isApproved ? $appUser->getApprovedReservations() : $appUser->getReservations();
-        return array_map(
-            fn (Reservation $reservation) => $this->generateUrl('api_reservations_detail', ['id' => $reservation->getId()]),
-            $reservations->toArray()
-        );
     }
 }

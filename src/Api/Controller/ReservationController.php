@@ -2,14 +2,15 @@
 
 namespace App\Api\Controller;
 
+use App\Api\Mapper\ReservationInputMapper;
 use App\Api\Model\AppUserInput;
 use App\Api\Model\ReservationInput;
 use App\Api\Model\ReservationOutput;
+use App\Api\Service\EntityLinksFactory;
 use App\Entity\AppUser;
 use App\Entity\Reservation;
 use App\Service\AppUserManager;
 use App\Service\ReservationManager;
-use App\Service\RoomManager;
 use App\Voter\ReservationVoter;
 use Exception;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
@@ -24,8 +25,9 @@ class ReservationController extends AbstractFOSRestController
 {
     public function __construct(
         private readonly ReservationManager $reservationManager,
-        private readonly RoomManager $roomManager,
         private readonly AppUserManager $appUserManager,
+        private readonly ReservationInputMapper $reservationInputMapper,
+        private readonly EntityLinksFactory $linksFactory,
     ) {}
 
     #[Rest\Get('/reservation', name: 'api_reservations_list')]
@@ -43,13 +45,7 @@ class ReservationController extends AbstractFOSRestController
         ];
 
         $reservations = array_map(
-            fn (Reservation $entity) => ReservationOutput::fromEntity(
-                $entity,
-                $this->generateUrlIfNotNull($entity->getRoom(), 'api_rooms_detail'),
-                $this->generateUrlIfNotNull($entity->getApprovedBy(), 'api_app_users_detail'),
-                $this->generateUrlIfNotNull($entity->getReservedFor(), 'api_app_users_detail'),
-                $this->getVisitorsUrls($entity),
-            ),
+            fn (Reservation $entity) => ReservationOutput::fromEntity($entity, $this->linksFactory->forReservation($entity)),
             $this->reservationManager->findReservationsByFilters($filter)
         );
 
@@ -63,13 +59,7 @@ class ReservationController extends AbstractFOSRestController
         $reservation = $this->findOrFail($id);
         $this->denyAccessUnlessGranted(ReservationVoter::VIEW_DETAIL, $reservation);
 
-        return ReservationOutput::fromEntity(
-            $reservation,
-            $this->generateUrlIfNotNull($reservation->getRoom(), 'api_rooms_detail'),
-            $this->generateUrlIfNotNull($reservation->getApprovedBy(), 'api_app_users_detail'),
-            $this->generateUrlIfNotNull($reservation->getReservedFor(), 'api_app_users_detail'),
-            $this->getVisitorsUrls($reservation),
-        );
+        return ReservationOutput::fromEntity($reservation, $this->linksFactory->forReservation($reservation));
     }
 
     /**
@@ -97,7 +87,7 @@ class ReservationController extends AbstractFOSRestController
         }
 
         // convert ReservationInput to Reservation entity before determining access rights, because we need to know the room
-        $reservation = $reservationInput->toEntity($this->roomManager, $this->appUserManager, $reservation);
+        $reservation = $this->reservationInputMapper->toEntity($reservationInput, $reservation);
 
         if($id !== null) {
             $this->denyAccessUnlessGranted(ReservationVoter::EDIT, $reservation);
@@ -108,13 +98,7 @@ class ReservationController extends AbstractFOSRestController
 
         $reservation = $this->reservationManager->saveToDatabase($reservation);
 
-        return ReservationOutput::fromEntity(
-            $reservation,
-            $this->generateUrlIfNotNull($reservation->getRoom(), 'api_rooms_detail'),
-            $this->generateUrlIfNotNull($reservation->getApprovedBy(), 'api_app_users_detail'),
-            $this->generateUrlIfNotNull($reservation->getReservedFor(), 'api_app_users_detail'),
-            $this->getVisitorsUrls($reservation),
-        );
+        return ReservationOutput::fromEntity($reservation, $this->linksFactory->forReservation($reservation));
     }
 
     #[Rest\Delete('/reservation/{id}', name: 'api_reservations_delete', requirements: ['id' => '\d+'])]
@@ -144,13 +128,7 @@ class ReservationController extends AbstractFOSRestController
         $reservation->setApprovedBy($this->getUser());
         $reservation = $this->reservationManager->saveToDatabase($reservation);
 
-        return ReservationOutput::fromEntity(
-            $reservation,
-            $this->generateUrlIfNotNull($reservation->getRoom(), 'api_rooms_detail'),
-            $this->generateUrlIfNotNull($reservation->getApprovedBy(), 'api_app_users_detail'),
-            $this->generateUrlIfNotNull($reservation->getReservedFor(), 'api_app_users_detail'),
-            $this->getVisitorsUrls($reservation),
-        );
+        return ReservationOutput::fromEntity($reservation, $this->linksFactory->forReservation($reservation));
     }
 
     /**
@@ -170,13 +148,7 @@ class ReservationController extends AbstractFOSRestController
         $reservation->setStatus(Reservation::STATUS_REJECTED);
         $reservation = $this->reservationManager->saveToDatabase($reservation);
 
-        return ReservationOutput::fromEntity(
-            $reservation,
-            $this->generateUrlIfNotNull($reservation->getRoom(), 'api_rooms_detail'),
-            $this->generateUrlIfNotNull($reservation->getApprovedBy(), 'api_app_users_detail'),
-            $this->generateUrlIfNotNull($reservation->getReservedFor(), 'api_app_users_detail'),
-            $this->getVisitorsUrls($reservation),
-        );
+        return ReservationOutput::fromEntity($reservation, $this->linksFactory->forReservation($reservation));
     }
 
     #[Rest\Patch('/reservation/{id}/visitor', name: 'api_reservations_add_visitor', requirements: ['id' => '\d+'])]
@@ -190,13 +162,7 @@ class ReservationController extends AbstractFOSRestController
 
         $reservation->addVisitor($user);
         $reservation = $this->reservationManager->saveToDatabase($reservation);
-        return ReservationOutput::fromEntity(
-            $reservation,
-            $this->generateUrlIfNotNull($reservation->getRoom(), 'api_rooms_detail'),
-            $this->generateUrlIfNotNull($reservation->getApprovedBy(), 'api_app_users_detail'),
-            $this->generateUrlIfNotNull($reservation->getReservedFor(), 'api_app_users_detail'),
-            $this->getVisitorsUrls($reservation),
-        );
+        return ReservationOutput::fromEntity($reservation, $this->linksFactory->forReservation($reservation));
     }
 
     #[Rest\Delete('/reservation/{id}/visitor/{visitorId}', name: 'api_reservations_remove_visitor', requirements: ['id' => '\d+', 'visitorId' => '\d+'])]
@@ -231,20 +197,5 @@ class ReservationController extends AbstractFOSRestController
         }
 
         return $user;
-    }
-
-    private function generateUrlIfNotNull(?object $entity, string $routeName): ?string {
-        if ($entity !== null && method_exists($entity, 'getId')) {
-            return $this->generateUrl($routeName, ['id' => $entity->getId()]);
-        }
-        return null;
-    }
-
-    private function getVisitorsUrls(Reservation $reservation): array
-    {
-        return array_map(
-            fn (AppUser $entity) => $this->generateUrl('api_app_users_detail', ['id' => $entity->getId()]),
-            $reservation->getVisitors()->toArray()
-        );
     }
 }

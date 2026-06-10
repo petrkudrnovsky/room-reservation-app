@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\AppUser;
 use App\Form\AppUserType;
+use App\Form\Mapper\AppUserTypeMapper;
 use App\Form\Model\AppUserTypeModel;
 use App\Repository\AppUserRepository;
 use App\Service\AppUserManager;
@@ -32,13 +33,13 @@ class AppUserController extends AbstractController
 
     #[Route('/new', name: 'app_user_new')]
     #[IsGranted(UserVoter::CREATE)]
-    public function new(Request $request, AppUserManager $appUserManager, UserPasswordHasherInterface $passwordHasher): Response
+    public function new(Request $request, AppUserManager $appUserManager, UserPasswordHasherInterface $passwordHasher, AppUserTypeMapper $mapper): Response
     {
         $appUserModel = new AppUserTypeModel();
         $form = $this->createForm(AppUserType::class, $appUserModel, ['is_registration' => false, 'is_super_admin' => $this->isGranted('ROLE_SUPER_ADMIN')]);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $appUser = $appUserModel->toEntity();
+            $appUser = $mapper->toEntity($appUserModel);
             if($form->has('password')) {
                 $plainPassword = $form->get('password')->getData();
                 $hashedPassword = $passwordHasher->hashPassword($appUser, $plainPassword);
@@ -69,14 +70,14 @@ class AppUserController extends AbstractController
 
     #[Route('/{id}/edit', name: 'app_user_edit')]
     #[IsGranted(UserVoter::EDIT, 'appUser')]
-    public function edit(Request $request, AppUser $appUser, AppUserManager $appUserManager): Response
+    public function edit(Request $request, AppUser $appUser, AppUserManager $appUserManager, AppUserTypeMapper $mapper): Response
     {
-        $appUserModel = AppUserTypeModel::fromEntity($appUser);
+        $appUserModel = $mapper->fromEntity($appUser);
         $form = $this->createForm(AppUserType::class, $appUserModel, ['is_edit' => true, 'is_registration' => false, 'is_super_admin' => $this->isGranted('ROLE_SUPER_ADMIN')]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $appUser = $appUserModel->toEntity($appUser);
+            $appUser = $mapper->toEntity($appUserModel, $appUser);
             $appUserManager->saveToDatabase($appUser);
             $this->addFlash('success', 'User edited successfully.');
 
