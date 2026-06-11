@@ -66,7 +66,7 @@ class RoomController extends AbstractFOSRestController
             $allRooms,
             fn (Room $room) => $this->isGranted(RoomVoter::VIEW_DETAIL, $room)
                 || $room->isIsPrivate() === false
-                || $this->reservationManager->hasApprovedReservation($room, $currentUser)
+                || ($currentUser !== null && $this->reservationManager->hasApprovedReservation($room, $currentUser))
         ));
 
         return ['rooms' => array_map(

@@ -110,9 +110,9 @@ class GroupManager implements GroupManagerInterface
     /**
      * @throws Exception
      */
-    public function addRooms(array $rooms, Group $group): void
+    public function addRooms(?array $rooms, Group $group): void
     {
-        foreach ($rooms as $roomId) {
+        foreach ($rooms ?? [] as $roomId) {
             if (is_numeric($roomId)) {
                 $room = $this->roomRepository->find($roomId);
                 if ($room) {

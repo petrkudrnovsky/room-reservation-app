@@ -17,5 +17,5 @@ interface GroupManagerInterface
 
     public function addGroupAdmins(?array $admins, Group $group): void;
 
-    public function addRooms(array $rooms, Group $group): void;
+    public function addRooms(?array $rooms, Group $group): void;
 }

@@ -50,12 +50,16 @@ class RoomVoter extends Voter
             return false;
         }
 
-        if(!($subject instanceof Room) && $attribute !== self::CREATE) {
-            return false;
-        }
-        
         if($attribute === self::CREATE) {
             return $this->canCreate($currentUser);
+        }
+
+        if($attribute === self::DELETE) {
+            return $this->canDelete($currentUser);
+        }
+
+        if(!($subject instanceof Room)) {
+            return false;
         }
         
         /** @var Room $accessedRoom */

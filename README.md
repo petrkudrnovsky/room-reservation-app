@@ -75,6 +75,32 @@ docker exec -it pendrej-app php bin/console lexik:jwt:generate-keypair
 ```
 More information about JWT authentication can be found in the [LexikJWTAuthenticationBundle documentation](https://symfony.com/bundles/LexikJWTAuthenticationBundle/current/index.html).
 
+### Testing
+To run tests:
+```
+# Full test suite
+docker exec pendrej-app php bin/phpunit --testdox
+
+# Individual suites
+docker exec pendrej-app php bin/phpunit tests/Api/ApiAuthTest.php --testdox
+docker exec pendrej-app php bin/phpunit tests/Api/ApiRoomTest.php --testdox
+docker exec pendrej-app php bin/phpunit tests/Api/ApiReservationTest.php --testdox
+docker exec pendrej-app php bin/phpunit tests/Api/ApiGroupTest.php --testdox
+docker exec pendrej-app php bin/phpunit tests/Api/ApiUserTest.php --testdox
+docker exec pendrej-app php bin/phpunit tests/Voter/VoterTest.php --testdox
+docker exec pendrej-app php bin/phpunit tests/Integration/ReservationAccessTest.php --testdox
+
+# Run a single test by name
+docker exec pendrej-app php bin/phpunit tests/Api/ApiRoomTest.php --filter test_delete_room_as_admin --testdox
+
+# Without --testdox (shorter output, just dots)
+docker exec pendrej-app php bin/phpunit
+
+# If the test database doesn't exist yet (e.g. on a fresh clone), set it up first:
+docker exec pendrej-app php bin/console doctrine:database:create --env=test
+docker exec pendrej-app php bin/console doctrine:migrations:migrate --env=test --no-interaction
+```
+
 ### Authors
 
 - Petr Kudrnovský - kudrnpe3

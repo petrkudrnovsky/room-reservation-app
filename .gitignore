@@ -14,9 +14,13 @@ vendor/
 
 ###> phpunit/phpunit ###
 phpunit.xml
-phpunit.result.cache
+.phpunit.result.cache
 ###< phpunit/phpunit ###
 
 ###> lexik/jwt-authentication-bundle ###
 /config/jwt/*.pem
 ###< lexik/jwt-authentication-bundle ###
+
+###> Zone identifiers ###
+*:Zone.Identifier
+###< Zone identifiers ###

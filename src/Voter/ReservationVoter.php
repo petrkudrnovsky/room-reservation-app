@@ -74,7 +74,7 @@ class ReservationVoter extends Voter
 
     private function canCreate(AppUser $currentUser, Room $room): bool
     {
-        if($currentUser->getRoles() === ['ROLE_SUPER_ADMIN']) {
+        if(in_array('ROLE_SUPER_ADMIN', $currentUser->getRoles())) {
             return true;
         }
         if($room->getMembers()->contains($currentUser) || $room->getAdmins()->contains($currentUser)) {

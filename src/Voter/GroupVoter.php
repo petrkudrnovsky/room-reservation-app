@@ -27,15 +27,18 @@ class GroupVoter extends Voter
             return false;
         }
 
-        if(!($subject instanceof Group) && $attribute !== self::VIEW_INDEX && $attribute !== self::CREATE) {
-            return false;
-        }
-
         if($attribute === self::VIEW_INDEX) {
             return $this->canViewIndex($currentUser);
         }
         if($attribute === self::CREATE) {
             return $this->canCreate($currentUser);
+        }
+        if($attribute === self::DELETE) {
+            return $this->canDelete($currentUser);
+        }
+
+        if(!($subject instanceof Group)) {
+            return false;
         }
 
         /** @var Group $accessedGroup */
