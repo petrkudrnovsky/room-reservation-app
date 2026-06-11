@@ -4,15 +4,13 @@ namespace App\Api\Mapper;
 
 use App\Api\Model\GroupInput;
 use App\Entity\Group;
-use App\Service\AppUserManager;
-use App\Service\RoomManager;
+use App\Service\GroupManagerInterface;
 use Exception;
 
 class GroupInputMapper
 {
     public function __construct(
-        private readonly AppUserManager $appUserManager,
-        private readonly RoomManager $roomManager,
+        private readonly GroupManagerInterface $groupManager,
     ) {}
 
     /**
@@ -26,9 +24,9 @@ class GroupInputMapper
         $group->clearAdmins();
         $group->clearRooms();
 
-        $this->appUserManager->addGroupMembers($input->members, $group);
-        $this->appUserManager->addGroupAdmins($input->admins, $group);
-        $this->roomManager->addRooms($input->rooms, $group);
+        $this->groupManager->addGroupMembers($input->members, $group);
+        $this->groupManager->addGroupAdmins($input->admins, $group);
+        $this->groupManager->addRooms($input->rooms, $group);
 
         return $group;
     }

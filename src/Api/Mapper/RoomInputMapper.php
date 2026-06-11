@@ -5,15 +5,13 @@ namespace App\Api\Mapper;
 use App\Api\Model\RoomInput;
 use App\Entity\Room;
 use App\Repository\BuildingRepository;
-use App\Service\AppUserManager;
-use App\Service\GroupManager;
+use App\Service\RoomManagerInterface;
 use Exception;
 
 class RoomInputMapper
 {
     public function __construct(
-        private readonly AppUserManager $appUserManager,
-        private readonly GroupManager $groupManager,
+        private readonly RoomManagerInterface $roomManager,
         private readonly BuildingRepository $buildingRepository,
     ) {}
 
@@ -31,9 +29,9 @@ class RoomInputMapper
         $room->clearAdmins();
         $room->clearOwningGroups();
 
-        $this->appUserManager->addRoomMembers($input->members, $room);
-        $this->appUserManager->addRoomAdmins($input->admins, $room);
-        $this->groupManager->addOwningGroups($input->owningGroups, $room);
+        $this->roomManager->addRoomMembers($input->members, $room);
+        $this->roomManager->addRoomAdmins($input->admins, $room);
+        $this->roomManager->addOwningGroups($input->owningGroups, $room);
 
         return $room;
     }

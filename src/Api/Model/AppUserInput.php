@@ -3,11 +3,11 @@
 namespace App\Api\Model;
 
 use App\Entity\AppUser;
-use App\Form\Constraints\UniqueUsername;
+use App\Form\Constraints\AppUserConstraintsTrait;
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Validator\Mapping\ClassMetadata;
 
 class AppUserInput {
+    use AppUserConstraintsTrait;
     public ?int $id = null;
     #[Assert\NotBlank(message: 'Username cannot be blank')]
     #[Assert\Length(min: 3, max: 250, minMessage: 'Username must have at least 3 characters', maxMessage: 'Username must have maximum of 250 characters')]
@@ -34,9 +34,4 @@ class AppUserInput {
         return $this->password;
     }
 
-    public static function loadValidatorMetadata(ClassMetadata $metadata): void
-    {
-        $metadata->addPropertyConstraint('username', new Assert\NotBlank());
-        $metadata->addConstraint(new UniqueUsername());
-    }
 }

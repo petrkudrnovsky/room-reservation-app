@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Form\AppUserType;
 use App\Form\Model\AppUserTypeModel;
-use App\Service\AppUserManager;
+use App\Service\AppUserManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,7 +14,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class RegistrationController extends AbstractController
 {
     #[Route('/registration', name: 'app_user_registration')]
-    public function new(Request $request, AppUserManager $appUserManager, UserPasswordHasherInterface $passwordHasher): Response
+    public function new(Request $request, AppUserManagerInterface $appUserManager, UserPasswordHasherInterface $passwordHasher): Response
     {
         $appUserModel = new AppUserTypeModel();
         $form = $this->createForm(AppUserType::class, $appUserModel);

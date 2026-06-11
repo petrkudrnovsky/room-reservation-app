@@ -2,19 +2,21 @@
 
 namespace App\Service;
 
-use App\Entity\AppUser;
 use App\Entity\Group;
-use App\Entity\Room;
 use App\Filter\GroupFilterCriteria;
+use App\Repository\AppUserRepository;
 use App\Repository\GroupRepository;
+use App\Repository\RoomRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 
-class GroupManager
+class GroupManager implements GroupManagerInterface
 {
     public function __construct(
         public EntityManagerInterface $em,
         public GroupRepository $groupRepository,
+        private readonly AppUserRepository $appUserRepository,
+        private readonly RoomRepository $roomRepository,
     ) {}
 
     public function saveToDatabase(Group $group): Group
@@ -30,7 +32,8 @@ class GroupManager
         $this->em->flush();
     }
 
-    public function findGroupsByFilters(GroupFilterCriteria $criteria): array {
+    public function findGroupsByFilters(GroupFilterCriteria $criteria): array
+    {
         $qb = $this->groupRepository->createQueryBuilder('a');
 
         if ($criteria->name) {
@@ -62,20 +65,21 @@ class GroupManager
     /**
      * @throws Exception
      */
-    public function addOwningGroups(?array $owningGroups, Room $room): void {
-        if (!$owningGroups) {
+    public function addGroupMembers(?array $members, Group $group): void
+    {
+        if ($members === null) {
             return;
         }
-        foreach ($owningGroups as $groupId) {
-            if (is_numeric($groupId)){
-                $group = $this->groupRepository->find($groupId);
-                if ($group) {
-                    $room->addOwningGroup($group);
+        foreach ($members as $memberId) {
+            if (is_numeric($memberId)) {
+                $member = $this->appUserRepository->find($memberId);
+                if ($member) {
+                    $group->addMember($member);
                 } else {
-                    throw new Exception('Group not found');
+                    throw new Exception('User not found');
                 }
             } else {
-                throw new Exception('Group ID must be an integer value');
+                throw new Exception('Member must be an integer value');
             }
         }
     }
@@ -83,17 +87,22 @@ class GroupManager
     /**
      * @throws Exception
      */
-    public function addMemberUserGroups(?array $groups, AppUser $appUser): void
+    public function addGroupAdmins(?array $admins, Group $group): void
     {
-        if (!$groups) {
+        if ($admins === null) {
             return;
         }
-        foreach ($groups as $groupId) {
-            $group = $this->groupRepository->find($groupId);
-            if ($group) {
-                $appUser->addMemberGroup($group);
+        foreach ($admins as $adminId) {
+            if (is_numeric($adminId)) {
+                $admin = $this->appUserRepository->find($adminId);
+                if ($admin) {
+                    $group->addAdmin($admin);
+                    $group->addMember($admin);
+                } else {
+                    throw new Exception('User not found');
+                }
             } else {
-                throw new Exception('Group not found');
+                throw new Exception('Admin must be an integer value');
             }
         }
     }
@@ -101,17 +110,18 @@ class GroupManager
     /**
      * @throws Exception
      */
-    public function addAdminUserGroups(?array $groups, AppUser $appUser): void
+    public function addRooms(array $rooms, Group $group): void
     {
-        if (!$groups) {
-            return;
-        }
-        foreach ($groups as $groupId) {
-            $group = $this->groupRepository->find($groupId);
-            if ($group) {
-                $appUser->addAdminGroup($group);
+        foreach ($rooms as $roomId) {
+            if (is_numeric($roomId)) {
+                $room = $this->roomRepository->find($roomId);
+                if ($room) {
+                    $group->addRoom($room);
+                } else {
+                    throw new Exception('Room not found');
+                }
             } else {
-                throw new Exception('Group not found');
+                throw new Exception('Room ID must be an integer value');
             }
         }
     }

@@ -5,7 +5,7 @@ namespace App\Voter;
 use App\Entity\AppUser;
 use App\Entity\Reservation;
 use App\Entity\Room;
-use App\Service\RoomManager;
+use App\Service\ReservationManagerInterface;
 use App\Voter\Trait\RoomAdminCheckTrait;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
@@ -26,7 +26,7 @@ class RoomVoter extends Voter
     const CAN_TOGGLE_LOCK = 'room_can_lock';
 
     public function __construct(
-        private RoomManager $roomManager
+        private ReservationManagerInterface $reservationManager
     ) {}
 
     protected function supports(string $attribute, mixed $subject): bool
@@ -86,7 +86,7 @@ class RoomVoter extends Voter
             $accessedRoom->isIsPrivate() === false ||
             $accessedRoom->getAdmins()->contains($currentUser) ||
             $accessedRoom->getMembers()->contains($currentUser) ||
-            $this->roomManager->hasUserCurrentOrFutureReservations($accessedRoom, $currentUser)
+            $this->reservationManager->hasUserCurrentOrFutureReservations($accessedRoom, $currentUser)
             ) {
             return true;
         }

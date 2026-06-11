@@ -9,7 +9,7 @@ use App\Api\Service\EntityLinksFactory;
 use App\Entity\AppUser;
 use App\Filter\AppUserFilterCriteria;
 use App\Repository\AppUserRepository;
-use App\Service\AppUserManager;
+use App\Service\AppUserManagerInterface;
 use App\Voter\UserVoter;
 use Exception;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
@@ -24,7 +24,7 @@ use Symfony\Component\HttpFoundation\Request;
 class AppUserController extends AbstractFOSRestController {
     public function __construct(
         private readonly AppUserRepository $appUserRepository,
-        private readonly AppUserManager $appUserManager,
+        private readonly AppUserManagerInterface $appUserManager,
         private readonly AppUserInputMapper $appUserInputMapper,
         private readonly EntityLinksFactory $linksFactory,
         private UserPasswordHasherInterface $passwordHasher

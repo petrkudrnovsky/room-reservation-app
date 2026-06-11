@@ -8,7 +8,7 @@ use App\Form\GroupType;
 use App\Form\Mapper\GroupTypeMapper;
 use App\Form\Model\GroupTypeModel;
 use App\Repository\GroupRepository;
-use App\Service\GroupManager;
+use App\Service\GroupManagerInterface;
 use App\Voter\GroupVoter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -41,7 +41,7 @@ class GroupController extends AbstractController
 
     #[Route('/new', name: 'app_group_new')]
     #[IsGranted(GroupVoter::CREATE)]
-    public function new(Request $request, GroupManager $groupManager, GroupTypeMapper $mapper): Response
+    public function new(Request $request, GroupManagerInterface $groupManager, GroupTypeMapper $mapper): Response
     {
         $groupModel = new GroupTypeModel();
         $form = $this->createForm(GroupType::class, $groupModel, ['is_super_admin' => $this->isGranted('ROLE_SUPER_ADMIN')]);
@@ -72,7 +72,7 @@ class GroupController extends AbstractController
 
     #[Route('/{id}/edit', name: 'app_group_edit')]
     #[IsGranted(GroupVoter::EDIT, 'group')]
-    public function edit(Request $request, Group $group, GroupManager $groupManager, GroupTypeMapper $mapper): Response
+    public function edit(Request $request, Group $group, GroupManagerInterface $groupManager, GroupTypeMapper $mapper): Response
     {
         $groupModel = $mapper->fromEntity($group);
         $form = $this->createForm(GroupType::class, $groupModel, ['is_super_admin' => $this->isGranted('ROLE_SUPER_ADMIN')]);
@@ -94,7 +94,7 @@ class GroupController extends AbstractController
 
     #[Route('/{id}/delete', name: 'app_group_delete')]
     #[IsGranted(GroupVoter::DELETE)]
-    public function delete(Request $request, Group $group, GroupManager $groupManager): Response
+    public function delete(Request $request, Group $group, GroupManagerInterface $groupManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$group->getId(), $request->request->get('_token'))) {
             $groupManager->removeFromDatabase($group);

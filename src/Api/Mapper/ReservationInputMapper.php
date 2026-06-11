@@ -4,15 +4,15 @@ namespace App\Api\Mapper;
 
 use App\Api\Model\ReservationInput;
 use App\Entity\Reservation;
-use App\Service\AppUserManager;
-use App\Service\RoomManager;
+use App\Service\ReservationManagerInterface;
+use App\Service\RoomManagerInterface;
 use Exception;
 
 class ReservationInputMapper
 {
     public function __construct(
-        private readonly RoomManager $roomManager,
-        private readonly AppUserManager $appUserManager,
+        private readonly RoomManagerInterface $roomManager,
+        private readonly ReservationManagerInterface $reservationManager,
     ) {}
 
     /**
@@ -27,8 +27,8 @@ class ReservationInputMapper
 
         $reservation->setRoom($this->roomManager->findById($input->room));
 
-        $this->appUserManager->addApprovedReservation($input->approvedBy, $reservation);
-        $this->appUserManager->addReservedReservation($input->reservedFor, $reservation);
+        $this->reservationManager->addApprovedReservation($input->approvedBy, $reservation);
+        $this->reservationManager->addReservedReservation($input->reservedFor, $reservation);
 
         return $reservation;
     }

@@ -4,7 +4,7 @@ namespace App\Form\Constraints;
 
 use App\Api\Model\AppUserInput;
 use App\Form\Model\AppUserTypeModel;
-use App\Service\AppUserManager;
+use App\Service\AppUserManagerInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
@@ -12,7 +12,7 @@ use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 class UniqueUsernameValidator extends ConstraintValidator
 {
     public function __construct(
-        private readonly AppUserManager $appUserManager
+        private readonly AppUserManagerInterface $appUserManager
     ) {}
 
     public function validate(mixed $value, Constraint $constraint)

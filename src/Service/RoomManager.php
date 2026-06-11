@@ -4,19 +4,22 @@ namespace App\Service;
 
 use App\Entity\AppUser;
 use App\Entity\Group;
-use App\Entity\Reservation;
 use App\Entity\Room;
 use App\Filter\RoomFilterCriteria;
+use App\Repository\AppUserRepository;
+use App\Repository\GroupRepository;
 use App\Repository\RoomRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-class RoomManager
+class RoomManager implements RoomManagerInterface
 {
     public function __construct(
         public EntityManagerInterface $em,
         public RoomRepository $roomRepository,
+        private readonly AppUserRepository $appUserRepository,
+        private readonly GroupRepository $groupRepository,
     ) {}
 
     public function saveToDatabase(Room $room): Room
@@ -39,41 +42,15 @@ class RoomManager
     public function getRoomById(int $id): ?Room
     {
         $room = $this->roomRepository->find($id);
-        if(!$room) {
+        if (!$room) {
             throw new NotFoundHttpException('Room not found');
         }
         return $room;
     }
 
-    public function hasUserCurrentOrFutureReservations(Room $room, AppUser $user): bool
+    public function findById(?int $room): ?Room
     {
-        $reservations = $room->getReservations();
-        $today = new \DateTime();
-        foreach ($reservations as $reservation) {
-            if ($reservation->getEndDatetime() >= $today && $reservation->getReservedFor() === $user) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * @param Room $room
-     * @param string|array $status
-     * @return Room[]
-     */
-    public function getOrderedReservations(Room $room, string|array $status): array
-    {
-        $statuses = is_array($status) ? $status : [$status];
-        $orderedReservations = [];
-        $today = new \DateTime();
-        foreach ($room->getReservations() as $reservation) {
-            if ($reservation->getEndDatetime() >= $today && in_array($reservation->getStatus(), $statuses)) {
-                $orderedReservations[] = $reservation;
-            }
-        }
-        usort($orderedReservations, fn($a, $b) => $a->getStartDatetime() <=> $b->getStartDatetime());
-        return $orderedReservations;
+        return $this->roomRepository->find($room);
     }
 
     public function findRoomsByFilters(RoomFilterCriteria $criteria): array
@@ -117,78 +94,6 @@ class RoomManager
         return $qb->getQuery()->getResult();
     }
 
-    /**
-     * @throws Exception
-     */
-    public function addRooms(array $rooms, Group $group): void
-    {
-        foreach ($rooms as $roomId) {
-            if (is_numeric($roomId)) {
-                $room = $this->roomRepository->find($roomId);
-                if ($room) {
-                    $group->addRoom($room);
-                } else {
-                    throw new Exception('Room not found');
-                }
-            } else {
-                throw new Exception('Room ID must be an integer value');
-            }
-        }
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function addMemberRooms(?array $rooms, AppUser $appUser): void
-    {
-        if (!$rooms) {
-            return;
-        }
-        foreach ($rooms as $roomId) {
-            $room = $this->roomRepository->find($roomId);
-            if ($room) {
-                $appUser->addMemberRoom($room);
-            } else {
-                throw new Exception('Room not found');
-            }
-        }
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function addAdminRooms(?array $rooms, AppUser $appUser): void
-    {
-        if (!$rooms) {
-            return;
-        }
-        foreach ($rooms as $roomId) {
-            $room = $this->roomRepository->find($roomId);
-            if ($room) {
-                $appUser->addAdminRoom($room);
-            } else {
-                throw new Exception('Room not found');
-            }
-        }
-    }
-
-    public function findById(?int $room): ?Room
-    {
-        return $this->roomRepository->find($room);
-    }
-
-    public function hasApprovedReservation(Room $room, AppUser $user): bool
-    {
-        foreach ($room->getReservations() as $reservation) {
-            if (in_array($reservation->getStatus(), [Reservation::STATUS_APPROVED, Reservation::STATUS_ACTIVE])
-                && $reservation->getReservedFor() === $user
-            ) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public function unlockRoom(Room $room): void
     {
         $room->setLockState(Room::LOCK_STATE_UNLOCKED);
@@ -201,23 +106,70 @@ class RoomManager
         $this->em->flush();
     }
 
-    public function getOngoingReservation(Room $room): ?Reservation
+    /**
+     * @throws Exception
+     */
+    public function addRoomMembers(?array $members, Room $room): void
     {
-        foreach ($room->getReservations() as $reservation) {
-            if ($reservation->getStatus() === Reservation::STATUS_ACTIVE) {
-                return $reservation;
+        if ($members === null) {
+            return;
+        }
+        foreach ($members as $memberId) {
+            if (is_numeric($memberId)) {
+                $member = $this->appUserRepository->find($memberId);
+                if ($member) {
+                    $room->addMember($member);
+                } else {
+                    throw new Exception('User not found');
+                }
+            } else {
+                throw new Exception('Member must be an integer value');
             }
         }
-        return null;
     }
 
-    public function isRoomFree(Room $room): bool
+    /**
+     * @throws Exception
+     */
+    public function addRoomAdmins(?array $admins, Room $room): void
     {
-        foreach ($room->getReservations() as $reservation) {
-            if ($reservation->getStatus() === Reservation::STATUS_ACTIVE) {
-                return false;
+        if ($admins === null) {
+            return;
+        }
+        foreach ($admins as $adminId) {
+            if (is_numeric($adminId)) {
+                $admin = $this->appUserRepository->find($adminId);
+                if ($admin) {
+                    $room->addAdmin($admin);
+                    $room->addMember($admin);
+                } else {
+                    throw new Exception('User not found');
+                }
+            } else {
+                throw new Exception('Admin must be an integer value');
             }
         }
-        return true;
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function addOwningGroups(?array $owningGroups, Room $room): void
+    {
+        if (!$owningGroups) {
+            return;
+        }
+        foreach ($owningGroups as $groupId) {
+            if (is_numeric($groupId)) {
+                $group = $this->groupRepository->find($groupId);
+                if ($group) {
+                    $room->addOwningGroup($group);
+                } else {
+                    throw new Exception('Group not found');
+                }
+            } else {
+                throw new Exception('Group ID must be an integer value');
+            }
+        }
     }
 }

@@ -3,20 +3,21 @@
 namespace App\Service;
 
 use App\Entity\AppUser;
-use App\Entity\Group;
-use App\Entity\Reservation;
-use App\Entity\Room;
 use App\Filter\AppUserFilterCriteria;
 use App\Repository\AppUserRepository;
+use App\Repository\GroupRepository;
+use App\Repository\RoomRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-class AppUserManager
+class AppUserManager implements AppUserManagerInterface
 {
     public function __construct(
         public EntityManagerInterface $em,
         public AppUserRepository $userRepository,
+        private readonly GroupRepository $groupRepository,
+        private readonly RoomRepository $roomRepository,
     ) {}
 
     public function saveToDatabase(AppUser $appUser): AppUser
@@ -44,24 +45,23 @@ class AppUserManager
     public function getAppUserById(int $appUserId): AppUser
     {
         $appUser = $this->userRepository->find($appUserId);
-        if(!$appUser) {
+        if (!$appUser) {
             throw new NotFoundHttpException("User with ID $appUserId not found.");
         }
-
         return $appUser;
     }
 
     public function getAppUserByUsername(string $username): AppUser
     {
-        $appUser = $this->userRepository->findOneBy(array('username' => $username));
-        if(!$appUser) {
+        $appUser = $this->userRepository->findOneBy(['username' => $username]);
+        if (!$appUser) {
             throw new NotFoundHttpException("User with username $username not found.");
         }
-
         return $appUser;
     }
 
-    public function findAppUsersByFilters(AppUserFilterCriteria $criteria): array {
+    public function findAppUsersByFilters(AppUserFilterCriteria $criteria): array
+    {
         $qb = $this->userRepository->createQueryBuilder('a');
 
         if ($criteria->username) {
@@ -70,7 +70,6 @@ class AppUserManager
         }
 
         if ($criteria->name) {
-            // Split the name into parts and convert to lowercase
             $nameParts = explode(' ', strtolower($criteria->name));
             $qb->andWhere('(LOWER(a.firstName) LIKE :part1 OR LOWER(a.secondName) LIKE :part1)')
                 ->setParameter('part1', '%' . $nameParts[0] . '%');
@@ -94,132 +93,84 @@ class AppUserManager
         return $qb->getQuery()->getResult();
     }
 
-    /**
-     * @throws Exception
-     */
-    public function addGroupMembers(?array $members, Group $group): void
-    {
-        if ($members === null) {
-            return;
-        }
-        foreach ($members as $memberId) {
-            if (is_numeric($memberId)) {
-                $member = $this->userRepository->find($memberId);
-                if ($member) {
-                    $group->addMember($member);
-                } else {
-                    throw new Exception('User not found');
-                }
-            } else {
-                throw new Exception('Member must be an integer value');
-            }
-        }
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function addRoomMembers(?array $members, Room $room): void
-    {
-        if ($members === null) {
-            return;
-        }
-        foreach ($members as $memberId) {
-            if (is_numeric($memberId)) {
-                $member = $this->userRepository->find($memberId);
-                if ($member) {
-                    $room->addMember($member);
-                } else {
-                    throw new Exception('User not found');
-                }
-            } else {
-                throw new Exception('Member must be an integer value');
-            }
-        }
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function addGroupAdmins(?array $admins, Group $group): void
-    {
-        if ($admins === null) {
-            return;
-        }
-        foreach ($admins as $adminId) {
-            if (is_numeric($adminId)) {
-                $admin = $this->userRepository->find($adminId);
-                if ($admin) {
-                    $group->addAdmin($admin);
-                    $group->addMember($admin);
-                } else {
-                    throw new Exception('User not found');
-                }
-            } else {
-                throw new Exception('Admin must be an integer value');
-            }
-        }
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function addRoomAdmins(?array $admins, Room $room): void
-    {
-        if ($admins === null) {
-            return;
-        }
-        foreach ($admins as $adminId) {
-            if (is_numeric($adminId)) {
-                $admin = $this->userRepository->find($adminId);
-                if ($admin) {
-                    $room->addAdmin($admin);
-                    $room->addMember($admin);
-                } else {
-                    throw new Exception('User not found');
-                }
-            } else {
-                throw new Exception('Admin must be an integer value');
-            }
-        }
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function addApprovedReservation(?string $approvedBy, Reservation $reservation): void
-    {
-        if ($approvedBy) {
-            $appUser = $this->userRepository->find($approvedBy);
-            if ($appUser) {
-                $reservation->setApprovedBy($appUser);
-            } else {
-                throw new Exception('User not found');
-            }
-        }
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function addReservedReservation(?string $reservedFor, Reservation $reservation): void
-    {
-        if ($reservedFor) {
-            $appUser = $this->userRepository->find($reservedFor);
-            if ($appUser) {
-                $reservation->setReservedFor($appUser);
-            } else {
-                throw new Exception('User not found');
-            }
-        }
-    }
-
     public function isUniqueUsername(?string $username, ?int $userId): bool
     {
-        $appUser = $this->userRepository->findOneBy(array('username' => $username));
+        $appUser = $this->userRepository->findOneBy(['username' => $username]);
         if ($appUser !== null && $appUser->getId() === $userId) {
             return true;
         }
         return $appUser === null;
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function addMemberUserGroups(?array $groups, AppUser $appUser): void
+    {
+        if (!$groups) {
+            return;
+        }
+        foreach ($groups as $groupId) {
+            $group = $this->groupRepository->find($groupId);
+            if ($group) {
+                $appUser->addMemberGroup($group);
+            } else {
+                throw new Exception('Group not found');
+            }
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function addAdminUserGroups(?array $groups, AppUser $appUser): void
+    {
+        if (!$groups) {
+            return;
+        }
+        foreach ($groups as $groupId) {
+            $group = $this->groupRepository->find($groupId);
+            if ($group) {
+                $appUser->addAdminGroup($group);
+            } else {
+                throw new Exception('Group not found');
+            }
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function addMemberRooms(?array $rooms, AppUser $appUser): void
+    {
+        if (!$rooms) {
+            return;
+        }
+        foreach ($rooms as $roomId) {
+            $room = $this->roomRepository->find($roomId);
+            if ($room) {
+                $appUser->addMemberRoom($room);
+            } else {
+                throw new Exception('Room not found');
+            }
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function addAdminRooms(?array $rooms, AppUser $appUser): void
+    {
+        if (!$rooms) {
+            return;
+        }
+        foreach ($rooms as $roomId) {
+            $room = $this->roomRepository->find($roomId);
+            if ($room) {
+                $appUser->addAdminRoom($room);
+            } else {
+                throw new Exception('Room not found');
+            }
+        }
     }
 }

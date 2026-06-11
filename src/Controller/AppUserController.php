@@ -7,7 +7,7 @@ use App\Form\AppUserType;
 use App\Form\Mapper\AppUserTypeMapper;
 use App\Form\Model\AppUserTypeModel;
 use App\Repository\AppUserRepository;
-use App\Service\AppUserManager;
+use App\Service\AppUserManagerInterface;
 use App\Voter\UserVoter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -33,7 +33,7 @@ class AppUserController extends AbstractController
 
     #[Route('/new', name: 'app_user_new')]
     #[IsGranted(UserVoter::CREATE)]
-    public function new(Request $request, AppUserManager $appUserManager, UserPasswordHasherInterface $passwordHasher, AppUserTypeMapper $mapper): Response
+    public function new(Request $request, AppUserManagerInterface $appUserManager, UserPasswordHasherInterface $passwordHasher, AppUserTypeMapper $mapper): Response
     {
         $appUserModel = new AppUserTypeModel();
         $form = $this->createForm(AppUserType::class, $appUserModel, ['is_registration' => false, 'is_super_admin' => $this->isGranted('ROLE_SUPER_ADMIN')]);
@@ -70,7 +70,7 @@ class AppUserController extends AbstractController
 
     #[Route('/{id}/edit', name: 'app_user_edit')]
     #[IsGranted(UserVoter::EDIT, 'appUser')]
-    public function edit(Request $request, AppUser $appUser, AppUserManager $appUserManager, AppUserTypeMapper $mapper): Response
+    public function edit(Request $request, AppUser $appUser, AppUserManagerInterface $appUserManager, AppUserTypeMapper $mapper): Response
     {
         $appUserModel = $mapper->fromEntity($appUser);
         $form = $this->createForm(AppUserType::class, $appUserModel, ['is_edit' => true, 'is_registration' => false, 'is_super_admin' => $this->isGranted('ROLE_SUPER_ADMIN')]);
@@ -92,7 +92,7 @@ class AppUserController extends AbstractController
 
     #[Route('/{id}/delete', name: 'app_user_delete')]
     #[IsGranted(UserVoter::DELETE, 'appUser')]
-    public function delete(Request $request, AppUser $appUser, AppUserManager $appUserManager, SessionInterface $session): Response
+    public function delete(Request $request, AppUser $appUser, AppUserManagerInterface $appUserManager, SessionInterface $session): Response
     {
         // if the user is deleting their own account, log them out
         if($appUser === $this->getUser()) {

@@ -9,7 +9,8 @@ use App\Form\Mapper\RoomTypeMapper;
 use App\Form\Model\RoomTypeModel;
 use App\Form\RoomType;
 use App\Repository\RoomRepository;
-use App\Service\RoomManager;
+use App\Service\ReservationManagerInterface;
+use App\Service\RoomManagerInterface;
 use App\Voter\ReservationVoter;
 use App\Voter\RoomVoter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -67,7 +68,7 @@ class RoomController extends AbstractController
 
     #[Route('/new', name: 'app_room_new')]
     #[IsGranted(RoomVoter::CREATE)]
-    public function new(Request $request, RoomManager $roomManager, RoomTypeMapper $mapper): Response
+    public function new(Request $request, RoomManagerInterface $roomManager, RoomTypeMapper $mapper): Response
     {
         $roomModel = new RoomTypeModel();
         $form = $this->createForm(RoomType::class, $roomModel, ['is_super_admin' => $this->isGranted('ROLE_SUPER_ADMIN')]);
@@ -89,30 +90,30 @@ class RoomController extends AbstractController
 
     #[Route('/{id}', name: 'app_room_show')]
     #[IsGranted(RoomVoter::VIEW_DETAIL, 'room')]
-    public function show(Room $room, RoomManager $roomManager): Response
+    public function show(Room $room, ReservationManagerInterface $reservationManager): Response
     {
         $pendingReservations = null;
         /** @var AppUser $currentUser */
         $currentUser = $this->getUser();
         if($this->isGranted(RoomVoter::CAN_VIEW_FULL_RESERVATIONS, $room)) {
-            $pendingReservations = $roomManager->getOrderedReservations($room, Reservation::STATUS_PENDING);
+            $pendingReservations = $reservationManager->getOrderedReservations($room, Reservation::STATUS_PENDING);
         }
         else {
             /** @var Reservation[] $pendingReservations */
-            $pendingReservations = $roomManager->getOrderedReservations($room, Reservation::STATUS_PENDING);
+            $pendingReservations = $reservationManager->getOrderedReservations($room, Reservation::STATUS_PENDING);
             $pendingReservations = array_filter($pendingReservations, fn(Reservation $reservation) => $reservation->getReservedFor() === $currentUser);
         }
 
         return $this->render('room/show.html.twig', [
             'room' => $room,
-            'approvedReservations' => $roomManager->getOrderedReservations($room, [Reservation::STATUS_APPROVED, Reservation::STATUS_ACTIVE]),
+            'approvedReservations' => $reservationManager->getOrderedReservations($room, [Reservation::STATUS_APPROVED, Reservation::STATUS_ACTIVE]),
             'pendingReservations' => $pendingReservations,
         ]);
     }
 
     #[Route('/{id}/edit', name: 'app_room_edit')]
     #[IsGranted(RoomVoter::EDIT, 'room')]
-    public function edit(Request $request, Room $room, RoomManager $roomManager, RoomTypeMapper $mapper): Response
+    public function edit(Request $request, Room $room, RoomManagerInterface $roomManager, RoomTypeMapper $mapper): Response
     {
         $roomModel = $mapper->fromEntity($room);
         $form = $this->createForm(RoomType::class, $roomModel, ['is_super_admin' => $this->isGranted('ROLE_SUPER_ADMIN'), 'can_edit_members' => $this->isGranted(RoomVoter::EDIT_MEMBERS, $room), 'can_edit_admins' => $this->isGranted(RoomVoter::EDIT_ADMINS, $room)]);
@@ -134,7 +135,7 @@ class RoomController extends AbstractController
 
     #[Route('/{id}/delete', name: 'app_room_delete')]
     #[IsGranted(RoomVoter::DELETE, 'room')]
-    public function delete(Request $request, Room $room, RoomManager $roomManager): Response
+    public function delete(Request $request, Room $room, RoomManagerInterface $roomManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$room->getId(), $request->request->get('_token'))) {
             $roomManager->deleteFromDatabase($room);

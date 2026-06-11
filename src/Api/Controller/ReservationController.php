@@ -9,8 +9,9 @@ use App\Api\Model\ReservationOutput;
 use App\Api\Service\EntityLinksFactory;
 use App\Entity\AppUser;
 use App\Entity\Reservation;
-use App\Service\AppUserManager;
-use App\Service\ReservationManager;
+use App\Filter\ReservationFilterCriteria;
+use App\Service\AppUserManagerInterface;
+use App\Service\ReservationManagerInterface;
 use App\Voter\ReservationVoter;
 use Exception;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
@@ -24,8 +25,8 @@ use Symfony\Component\Validator\ConstraintViolationListInterface;
 class ReservationController extends AbstractFOSRestController
 {
     public function __construct(
-        private readonly ReservationManager $reservationManager,
-        private readonly AppUserManager $appUserManager,
+        private readonly ReservationManagerInterface $reservationManager,
+        private readonly AppUserManagerInterface $appUserManager,
         private readonly ReservationInputMapper $reservationInputMapper,
         private readonly EntityLinksFactory $linksFactory,
     ) {}
@@ -36,17 +37,17 @@ class ReservationController extends AbstractFOSRestController
     {
         $this->denyAccessUnlessGranted(ReservationVoter::VIEW_INDEX_ALL);
 
-        $filter = [
-            'title' => $request->query->get('title'),
-            'status' => $request->query->get('status'),
-            'room' => $request->query->get('room'),
-            'reservedFor' => $request->query->get('reserved_for'),
-            'visitors' => $request->query->get('visitors'),
-        ];
+        $criteria = new ReservationFilterCriteria(
+            title: $request->query->get('title'),
+            status: $request->query->get('status'),
+            room: $request->query->get('room') ? (int) $request->query->get('room') : null,
+            reservedFor: $request->query->get('reserved_for') ? (int) $request->query->get('reserved_for') : null,
+            visitors: $request->query->get('visitors'),
+        );
 
         $reservations = array_map(
             fn (Reservation $entity) => ReservationOutput::fromEntity($entity, $this->linksFactory->forReservation($entity)),
-            $this->reservationManager->findReservationsByFilters($filter)
+            $this->reservationManager->findReservationsByFilters($criteria)
         );
 
         return ['reservations' => $reservations];
@@ -82,8 +83,7 @@ class ReservationController extends AbstractFOSRestController
         if ($id !== null) {
             $reservation = $this->findOrFail($id);
         } else {
-            $reservation = new Reservation();
-            $reservation->setStatus(Reservation::STATUS_PENDING);
+            $reservation = $this->reservationManager->prepareNewReservation(new Reservation());
         }
 
         // convert ReservationInput to Reservation entity before determining access rights, because we need to know the room

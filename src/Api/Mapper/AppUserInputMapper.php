@@ -4,17 +4,15 @@ namespace App\Api\Mapper;
 
 use App\Api\Model\AppUserInput;
 use App\Entity\AppUser;
-use App\Service\GroupManager;
-use App\Service\ReservationManager;
-use App\Service\RoomManager;
+use App\Service\AppUserManagerInterface;
+use App\Service\ReservationManagerInterface;
 use Exception;
 
 class AppUserInputMapper
 {
     public function __construct(
-        private readonly GroupManager $groupManager,
-        private readonly RoomManager $roomManager,
-        private readonly ReservationManager $reservationManager,
+        private readonly AppUserManagerInterface $appUserManager,
+        private readonly ReservationManagerInterface $reservationManager,
     ) {}
 
     /**
@@ -37,10 +35,10 @@ class AppUserInputMapper
         $appUser->clearApprovedReservations();
         $appUser->clearReservations();
 
-        $this->groupManager->addMemberUserGroups($input->memberGroups, $appUser);
-        $this->groupManager->addAdminUserGroups($input->adminGroups, $appUser);
-        $this->roomManager->addMemberRooms($input->memberRooms, $appUser);
-        $this->roomManager->addAdminRooms($input->adminRooms, $appUser);
+        $this->appUserManager->addMemberUserGroups($input->memberGroups, $appUser);
+        $this->appUserManager->addAdminUserGroups($input->adminGroups, $appUser);
+        $this->appUserManager->addMemberRooms($input->memberRooms, $appUser);
+        $this->appUserManager->addAdminRooms($input->adminRooms, $appUser);
         $this->reservationManager->addApprovedReservations($input->approvedReservations, $appUser);
         $this->reservationManager->addPendingReservations($input->reservations, $appUser);
 

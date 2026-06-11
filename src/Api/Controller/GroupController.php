@@ -15,7 +15,7 @@ use App\Filter\GroupFilterCriteria;
 use App\Repository\AppUserRepository;
 use App\Repository\GroupRepository;
 use App\Repository\RoomRepository;
-use App\Service\GroupManager;
+use App\Service\GroupManagerInterface;
 use App\Voter\GroupVoter;
 use Exception;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
@@ -30,7 +30,7 @@ use Symfony\Component\HttpFoundation\Request;
 class GroupController extends AbstractFOSRestController {
     public function __construct(
         private readonly GroupRepository $groupRepository,
-        private readonly GroupManager $groupManager,
+        private readonly GroupManagerInterface $groupManager,
         private readonly AppUserRepository $appUserRepository,
         private readonly RoomRepository $roomRepository,
         private readonly GroupInputMapper $groupInputMapper,

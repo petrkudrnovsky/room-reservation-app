@@ -11,7 +11,9 @@ use App\Entity\AppUser;
 use App\Entity\Room;
 use App\Filter\RoomFilterCriteria;
 use App\Repository\RoomRepository;
-use App\Service\RoomManager;
+use App\Service\ReservationManagerInterface;
+use App\Service\RoomAccessServiceInterface;
+use App\Service\RoomManagerInterface;
 use App\Voter\RoomVoter;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -28,7 +30,9 @@ use Symfony\Component\Validator\ConstraintViolationListInterface;
 class RoomController extends AbstractFOSRestController
 {
     public function __construct(
-        private readonly RoomManager $roomManager,
+        private readonly RoomManagerInterface $roomManager,
+        private readonly ReservationManagerInterface $reservationManager,
+        private readonly RoomAccessServiceInterface $roomAccessService,
         private readonly RoomInputMapper $roomInputMapper,
         private readonly EntityLinksFactory $linksFactory,
         private readonly EntityManagerInterface $em,
@@ -62,7 +66,7 @@ class RoomController extends AbstractFOSRestController
             $allRooms,
             fn (Room $room) => $this->isGranted(RoomVoter::VIEW_DETAIL, $room)
                 || $room->isIsPrivate() === false
-                || $this->roomManager->hasApprovedReservation($room, $currentUser)
+                || $this->reservationManager->hasApprovedReservation($room, $currentUser)
         ));
 
         return ['rooms' => array_map(
@@ -128,7 +132,7 @@ class RoomController extends AbstractFOSRestController
         /** @var ?AppUser $user */
         $user = $this->getUser();
 
-        $result = $this->computeAccess($room, $user);
+        $result = $this->roomAccessService->computeAccess($room, $user);
 
         $log = new AccessLog();
         $log->setRoom($room)
@@ -139,24 +143,6 @@ class RoomController extends AbstractFOSRestController
         $this->em->flush();
 
         return $this->json(['hasAccess' => $result]);
-    }
-
-    private function computeAccess(Room $room, ?AppUser $user): bool
-    {
-        if ($room->getLockState() === Room::LOCK_STATE_LOCKED) {
-            return false;
-        }
-
-        $ongoingReservation = $this->roomManager->getOngoingReservation($room);
-        if (!$ongoingReservation) {
-            return $this->isGranted(RoomVoter::HAS_FULL_ACCESS_TO_ROOM, $room)
-                || $room->getMembers()->contains($user)
-                || $room->getOwningGroups()->exists(fn (int $key, $group) => $group->getMembers()->contains($user));
-        }
-
-        return $this->isGranted(RoomVoter::HAS_FULL_ACCESS_TO_ROOM, $room)
-            || $ongoingReservation->getReservedFor() === $user
-            || $ongoingReservation->getVisitors()->contains($user);
     }
 
     #[Rest\Patch('/room/{id}/toggleLock', name: 'api_rooms_toggle_lock', requirements: ['id' => '\d+'])]

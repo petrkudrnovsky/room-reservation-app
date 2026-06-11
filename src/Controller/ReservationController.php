@@ -8,8 +8,8 @@ use App\Form\Mapper\ReservationTypeMapper;
 use App\Form\Model\ReservationTypeModel;
 use App\Form\ReservationType;
 use App\Repository\ReservationRepository;
-use App\Service\ReservationManager;
-use App\Service\RoomManager;
+use App\Service\ReservationManagerInterface;
+use App\Service\RoomManagerInterface;
 use App\Voter\ReservationVoter;
 use App\Voter\RoomVoter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -23,7 +23,7 @@ class ReservationController extends AbstractController
 {
     #[Route('/', name: 'app_room_reservation_index')]
     #[IsGranted('IS_AUTHENTICATED_FULLY')] // further access is checked in RoomVoter
-    public function index(int $roomId, ReservationRepository $reservationRepository, RoomManager $roomManager): Response
+    public function index(int $roomId, ReservationRepository $reservationRepository, RoomManagerInterface $roomManager): Response
     {
         $room = $roomManager->getRoomById($roomId);
         $this->denyAccessUnlessGranted(RoomVoter::VIEW_DETAIL, $room);
@@ -44,7 +44,7 @@ class ReservationController extends AbstractController
 
     #[Route('/new', name: 'app_room_reservation_new')]
     #[IsGranted('IS_AUTHENTICATED_FULLY')] // further access is checked in ReservationVoter
-    public function new(Request $request, int $roomId, ReservationManager $reservationManager, RoomManager $roomManager, ReservationTypeMapper $mapper): Response
+    public function new(Request $request, int $roomId, ReservationManagerInterface $reservationManager, RoomManagerInterface $roomManager, ReservationTypeMapper $mapper): Response
     {
         $reservationModel = new ReservationTypeModel();
         $reservationModel->room = $roomManager->getRoomById($roomId);
@@ -71,7 +71,7 @@ class ReservationController extends AbstractController
             'reservation' => $reservationModel,
             'form' => $form,
             'room' => $reservationModel->room,
-            'approvedReservations' => $roomManager->getOrderedReservations($reservationModel->room, [Reservation::STATUS_APPROVED, Reservation::STATUS_ACTIVE]),
+            'approvedReservations' => $reservationManager->getOrderedReservations($reservationModel->room, [Reservation::STATUS_APPROVED, Reservation::STATUS_ACTIVE]),
         ]);
     }
 
@@ -86,7 +86,7 @@ class ReservationController extends AbstractController
 
     #[Route('/{id}/edit', name: 'app_room_reservation_edit')]
     #[IsGranted(ReservationVoter::EDIT, 'reservation')]
-    public function edit(Request $request, Reservation $reservation, ReservationManager $reservationManager, ReservationTypeMapper $mapper): Response
+    public function edit(Request $request, Reservation $reservation, ReservationManagerInterface $reservationManager, ReservationTypeMapper $mapper): Response
     {
         $reservationModel = $mapper->fromEntity($reservation);
         $form = $this->createForm(ReservationType::class, $reservationModel, [
@@ -112,7 +112,7 @@ class ReservationController extends AbstractController
 
     #[Route('/{id}/delete', name: 'app_room_reservation_delete')]
     #[IsGranted(ReservationVoter::DELETE, 'reservation')]
-    public function delete(Request $request, Reservation $reservation, ReservationManager $reservationManager): Response
+    public function delete(Request $request, Reservation $reservation, ReservationManagerInterface $reservationManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$reservation->getId(), $request->request->get('_token'))) {
             $reservationManager->deleteFromDatabase($reservation);
@@ -124,7 +124,7 @@ class ReservationController extends AbstractController
 
     #[Route('/{id}/approve', name: 'app_room_reservation_approve')]
     #[IsGranted(ReservationVoter::CAN_APPROVE, 'reservation')]
-    public function approve(Request $request, Reservation $reservation, ReservationManager $reservationManager): Response
+    public function approve(Request $request, Reservation $reservation, ReservationManagerInterface $reservationManager): Response
     {
         if ($this->isCsrfTokenValid('approve'.$reservation->getId(), $request->request->get('_token'))) {
             try {
@@ -140,7 +140,7 @@ class ReservationController extends AbstractController
 
     #[Route('/{id}/reject', name: 'app_room_reservation_reject')]
     #[IsGranted(ReservationVoter::CAN_REJECT, 'reservation')]
-    public function reject(Request $request, Reservation $reservation, ReservationManager $reservationManager): Response
+    public function reject(Request $request, Reservation $reservation, ReservationManagerInterface $reservationManager): Response
     {
         if ($this->isCsrfTokenValid('reject'.$reservation->getId(), $request->request->get('_token'))) {
             try {
