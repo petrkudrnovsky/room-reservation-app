@@ -139,19 +139,33 @@ class RoomManager
     /**
      * @throws Exception
      */
-    public function addUserRooms(?array $memberRooms, AppUser $appUser, bool $false): void
+    public function addMemberRooms(?array $rooms, AppUser $appUser): void
     {
-        if (!$memberRooms) {
+        if (!$rooms) {
             return;
         }
-        foreach ($memberRooms as $roomId) {
+        foreach ($rooms as $roomId) {
             $room = $this->roomRepository->find($roomId);
             if ($room) {
-                if ($false) {
-                    $appUser->addAdminRoom($room);
-                } else {
-                    $appUser->addMemberRoom($room);
-                }
+                $appUser->addMemberRoom($room);
+            } else {
+                throw new Exception('Room not found');
+            }
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function addAdminRooms(?array $rooms, AppUser $appUser): void
+    {
+        if (!$rooms) {
+            return;
+        }
+        foreach ($rooms as $roomId) {
+            $room = $this->roomRepository->find($roomId);
+            if ($room) {
+                $appUser->addAdminRoom($room);
             } else {
                 throw new Exception('Room not found');
             }
@@ -162,27 +176,6 @@ class RoomManager
     {
         return $this->roomRepository->find($room);
     }
-
-
-//    public function hasAccessToRoom(Room $room): bool
-//    {
-//        if ($this->isOccupied($room)) {
-//            return false;
-//        }
-//        return true;
-//    }
-//
-//    public function isOccupied(Room $room): bool
-//    {
-//        $reservations = $room->getReservations();
-//        $today = new \DateTime();
-//        foreach ($reservations as $reservation) {
-//            if ($reservation->getEndDatetime() >= $today) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
 
     public function hasApprovedReservation(Room $room, AppUser $user): bool
     {

@@ -37,12 +37,12 @@ class AppUserInputMapper
         $appUser->clearApprovedReservations();
         $appUser->clearReservations();
 
-        $this->groupManager->addUserGroups($input->memberGroups, $appUser, false);
-        $this->groupManager->addUserGroups($input->adminGroups, $appUser, true);
-        $this->roomManager->addUserRooms($input->memberRooms, $appUser, false);
-        $this->roomManager->addUserRooms($input->adminRooms, $appUser, true);
-        $this->reservationManager->addReservations($input->approvedReservations, $appUser, true);
-        $this->reservationManager->addReservations($input->reservations, $appUser, false);
+        $this->groupManager->addMemberUserGroups($input->memberGroups, $appUser);
+        $this->groupManager->addAdminUserGroups($input->adminGroups, $appUser);
+        $this->roomManager->addMemberRooms($input->memberRooms, $appUser);
+        $this->roomManager->addAdminRooms($input->adminRooms, $appUser);
+        $this->reservationManager->addApprovedReservations($input->approvedReservations, $appUser);
+        $this->reservationManager->addPendingReservations($input->reservations, $appUser);
 
         return $appUser;
     }

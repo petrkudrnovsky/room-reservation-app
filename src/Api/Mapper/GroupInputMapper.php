@@ -26,8 +26,8 @@ class GroupInputMapper
         $group->clearAdmins();
         $group->clearRooms();
 
-        $this->appUserManager->addMembers($input->members, $group);
-        $this->appUserManager->addAdmins($input->admins, $group);
+        $this->appUserManager->addGroupMembers($input->members, $group);
+        $this->appUserManager->addGroupAdmins($input->admins, $group);
         $this->roomManager->addRooms($input->rooms, $group);
 
         return $group;

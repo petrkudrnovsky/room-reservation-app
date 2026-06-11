@@ -124,24 +124,15 @@ class ReservationController extends AbstractController
 
     #[Route('/{id}/approve', name: 'app_room_reservation_approve')]
     #[IsGranted(ReservationVoter::CAN_APPROVE, 'reservation')]
-    public function approve(Request $request, Reservation $reservation, ReservationManager $reservationManager, ReservationRepository $reservationRepository): Response
+    public function approve(Request $request, Reservation $reservation, ReservationManager $reservationManager): Response
     {
         if ($this->isCsrfTokenValid('approve'.$reservation->getId(), $request->request->get('_token'))) {
-            $overlappingReservations = $reservationRepository->findOverlappingReservations(
-                $reservation->getRoom()->getId(),
-                $reservation->getStartDatetime(),
-                $reservation->getEndDatetime(),
-                null
-            );
-            if(count($overlappingReservations) > 0) {
-                $this->addFlash('error', 'Cannot approve reservation because it overlaps with another reservation.');
-                return $this->redirectToRoute('app_room_show', ['id' => $reservation->getRoom()->getId()]);
+            try {
+                $reservationManager->approve($reservation, $this->getUser());
+                $this->addFlash('success', 'Reservation approved.');
+            } catch (\DomainException $e) {
+                $this->addFlash('error', $e->getMessage());
             }
-            $reservation->setStatus(Reservation::STATUS_APPROVED);
-            $reservation->setApprovedBy($this->getUser());
-            $reservation->setApprovedAt(new \DateTime());
-            $reservationManager->saveToDatabase($reservation);
-            $this->addFlash('success', 'Reservation approved.');
         }
 
         return $this->redirectToRoute('app_room_show', ['id' => $reservation->getRoom()->getId()]);
@@ -152,9 +143,12 @@ class ReservationController extends AbstractController
     public function reject(Request $request, Reservation $reservation, ReservationManager $reservationManager): Response
     {
         if ($this->isCsrfTokenValid('reject'.$reservation->getId(), $request->request->get('_token'))) {
-            $reservation->setStatus(Reservation::STATUS_REJECTED);
-            $reservationManager->saveToDatabase($reservation);
-            $this->addFlash('error', 'Reservation rejected.');
+            try {
+                $reservationManager->reject($reservation);
+                $this->addFlash('error', 'Reservation rejected.');
+            } catch (\DomainException $e) {
+                $this->addFlash('error', $e->getMessage());
+            }
         }
 
         return $this->redirectToRoute('app_room_show', ['id' => $reservation->getRoom()->getId()]);

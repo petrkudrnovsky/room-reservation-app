@@ -97,7 +97,7 @@ class AppUserManager
     /**
      * @throws Exception
      */
-    public function addMembers(?array $members, ?Group $group = null, ?Room $room = null): void
+    public function addGroupMembers(?array $members, Group $group): void
     {
         if ($members === null) {
             return;
@@ -106,7 +106,7 @@ class AppUserManager
             if (is_numeric($memberId)) {
                 $member = $this->userRepository->find($memberId);
                 if ($member) {
-                    $group !== null ? $group->addMember($member) : $room->addMember($member);
+                    $group->addMember($member);
                 } else {
                     throw new Exception('User not found');
                 }
@@ -119,7 +119,29 @@ class AppUserManager
     /**
      * @throws Exception
      */
-    public function addAdmins(?array $admins, ?Group $group = null, ?Room $room = null): void
+    public function addRoomMembers(?array $members, Room $room): void
+    {
+        if ($members === null) {
+            return;
+        }
+        foreach ($members as $memberId) {
+            if (is_numeric($memberId)) {
+                $member = $this->userRepository->find($memberId);
+                if ($member) {
+                    $room->addMember($member);
+                } else {
+                    throw new Exception('User not found');
+                }
+            } else {
+                throw new Exception('Member must be an integer value');
+            }
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function addGroupAdmins(?array $admins, Group $group): void
     {
         if ($admins === null) {
             return;
@@ -128,8 +150,31 @@ class AppUserManager
             if (is_numeric($adminId)) {
                 $admin = $this->userRepository->find($adminId);
                 if ($admin) {
-                    $group !== null ? $group->addAdmin($admin) : $room->addAdmin($admin);
-                    $group !== null ? $group->addMember($admin) : $room->addMember($admin);
+                    $group->addAdmin($admin);
+                    $group->addMember($admin);
+                } else {
+                    throw new Exception('User not found');
+                }
+            } else {
+                throw new Exception('Admin must be an integer value');
+            }
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function addRoomAdmins(?array $admins, Room $room): void
+    {
+        if ($admins === null) {
+            return;
+        }
+        foreach ($admins as $adminId) {
+            if (is_numeric($adminId)) {
+                $admin = $this->userRepository->find($adminId);
+                if ($admin) {
+                    $room->addAdmin($admin);
+                    $room->addMember($admin);
                 } else {
                     throw new Exception('User not found');
                 }

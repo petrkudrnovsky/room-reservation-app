@@ -83,19 +83,33 @@ class GroupManager
     /**
      * @throws Exception
      */
-    public function addUserGroups(?array $memberGroups, AppUser $appUser, bool $isAdmin): void
+    public function addMemberUserGroups(?array $groups, AppUser $appUser): void
     {
-        if (!$memberGroups) {
+        if (!$groups) {
             return;
         }
-        foreach ($memberGroups as $groupId) {
+        foreach ($groups as $groupId) {
             $group = $this->groupRepository->find($groupId);
             if ($group) {
-                if ($isAdmin) {
-                    $appUser->addAdminGroup($group);
-                } else {
-                    $appUser->addMemberGroup($group);
-                }
+                $appUser->addMemberGroup($group);
+            } else {
+                throw new Exception('Group not found');
+            }
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function addAdminUserGroups(?array $groups, AppUser $appUser): void
+    {
+        if (!$groups) {
+            return;
+        }
+        foreach ($groups as $groupId) {
+            $group = $this->groupRepository->find($groupId);
+            if ($group) {
+                $appUser->addAdminGroup($group);
             } else {
                 throw new Exception('Group not found');
             }

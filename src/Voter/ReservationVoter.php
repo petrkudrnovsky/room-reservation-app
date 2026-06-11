@@ -5,11 +5,13 @@ namespace App\Voter;
 use App\Entity\AppUser;
 use App\Entity\Reservation;
 use App\Entity\Room;
+use App\Voter\Trait\RoomAdminCheckTrait;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 class ReservationVoter extends Voter
 {
+    use RoomAdminCheckTrait;
     const VIEW_INDEX_ALL = 'reservation_index_view_all';
     const VIEW_INDEX = 'reservation_index_view';
     const VIEW_DETAIL = 'reservation_detail_view';
@@ -92,113 +94,38 @@ class ReservationVoter extends Voter
     // determines if the user can view the full details of a reservation - limited details are shown to all that can view the room
     private function canViewDetail(AppUser $currentUser, Reservation $accessedReservation): bool
     {
-        if(
-            in_array('ROLE_SUPER_ADMIN', $currentUser->getRoles()) ||
-            $accessedReservation->getRoom()->getAdmins()->contains($currentUser) ||
-            $accessedReservation->getReservedFor() === $currentUser ||
-            $accessedReservation->getVisitors()->contains($currentUser)
-        ) {
+        if ($accessedReservation->getReservedFor() === $currentUser ||
+            $accessedReservation->getVisitors()->contains($currentUser)) {
             return true;
         }
-
-        $owningRooms = $accessedReservation->getRoom()->getOwningGroups();
-        if($owningRooms->count() > 0) {
-            foreach($owningRooms as $owningRoom) {
-                if($currentUser->getAdminGroups()->contains($owningRoom)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        return $this->isAdminOfRoom($currentUser, $accessedReservation->getRoom());
     }
 
     private function canEdit(AppUser $currentUser, Reservation $accessedReservation): bool
     {
         // only pending reservations can be edited by the user that are reserved for
-        if($accessedReservation->getStatus() === Reservation::STATUS_PENDING && $accessedReservation->getReservedFor() === $currentUser) {
+        if ($accessedReservation->getStatus() === Reservation::STATUS_PENDING &&
+            $accessedReservation->getReservedFor() === $currentUser) {
             return true;
         }
-        if(
-            in_array('ROLE_SUPER_ADMIN', $currentUser->getRoles()) ||
-            $accessedReservation->getRoom()->getAdmins()->contains($currentUser)
-        ) {
-            return true;
-        }
-
-        $owningRooms = $accessedReservation->getRoom()->getOwningGroups();
-        if($owningRooms->count() > 0) {
-            foreach($owningRooms as $owningRoom) {
-                if($currentUser->getAdminGroups()->contains($owningRoom)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        return $this->isAdminOfRoom($currentUser, $accessedReservation->getRoom());
     }
 
     private function canDelete(AppUser $currentUser, Reservation $accessedReservation): bool
     {
-        if(
-            in_array('ROLE_SUPER_ADMIN', $currentUser->getRoles()) ||
-            $accessedReservation->getRoom()->getAdmins()->contains($currentUser) ||
-            $accessedReservation->getReservedFor() === $currentUser
-        ) {
+        if ($accessedReservation->getReservedFor() === $currentUser) {
             return true;
         }
-
-        $owningRooms = $accessedReservation->getRoom()->getOwningGroups();
-        if($owningRooms->count() > 0) {
-            foreach($owningRooms as $owningRoom) {
-                if($currentUser->getAdminGroups()->contains($owningRoom)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        return $this->isAdminOfRoom($currentUser, $accessedReservation->getRoom());
     }
 
     private function canApprove(AppUser $currentUser, Reservation $accessedReservation): bool
     {
-        if(
-            in_array('ROLE_SUPER_ADMIN', $currentUser->getRoles()) ||
-            $accessedReservation->getRoom()->getAdmins()->contains($currentUser)
-        ) {
-            return true;
-        }
-
-        $owningRooms = $accessedReservation->getRoom()->getOwningGroups();
-        if($owningRooms->count() > 0) {
-            foreach($owningRooms as $owningRoom) {
-                if($currentUser->getAdminGroups()->contains($owningRoom)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        return $this->isAdminOfRoom($currentUser, $accessedReservation->getRoom());
     }
 
     private function canReject(AppUser $currentUser, Reservation $accessedReservation): bool
     {
-        if(
-            in_array('ROLE_SUPER_ADMIN', $currentUser->getRoles()) ||
-            $accessedReservation->getRoom()->getAdmins()->contains($currentUser)
-        ) {
-            return true;
-        }
-
-        $owningRooms = $accessedReservation->getRoom()->getOwningGroups();
-        if($owningRooms->count() > 0) {
-            foreach($owningRooms as $owningRoom) {
-                if($currentUser->getAdminGroups()->contains($owningRoom)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        return $this->isAdminOfRoom($currentUser, $accessedReservation->getRoom());
     }
 }

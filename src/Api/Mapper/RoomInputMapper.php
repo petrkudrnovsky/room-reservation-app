@@ -31,8 +31,8 @@ class RoomInputMapper
         $room->clearAdmins();
         $room->clearOwningGroups();
 
-        $this->appUserManager->addMembers($input->members, null, $room);
-        $this->appUserManager->addAdmins($input->admins, null, $room);
+        $this->appUserManager->addRoomMembers($input->members, $room);
+        $this->appUserManager->addRoomAdmins($input->admins, $room);
         $this->groupManager->addOwningGroups($input->owningGroups, $room);
 
         return $room;

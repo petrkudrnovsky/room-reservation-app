@@ -110,9 +110,6 @@ class ReservationController extends AbstractFOSRestController
         $this->reservationManager->deleteFromDatabase($reservation);
     }
 
-    /**
-     * @throws Exception
-     */
     #[Rest\Patch('/reservation/{id}/approve', name: 'api_reservations_approve', requirements: ['id' => '\d+'])]
     #[Rest\View(statusCode: 200)]
     public function approve(int $id): ReservationOutput
@@ -120,21 +117,15 @@ class ReservationController extends AbstractFOSRestController
         $reservation = $this->findOrFail($id);
         $this->denyAccessUnlessGranted(ReservationVoter::CAN_APPROVE, $reservation);
 
-        if($reservation->getStatus() !== Reservation::STATUS_PENDING) {
-            throw new HttpException(400, message: 'Reservation is not pending');
+        try {
+            $reservation = $this->reservationManager->approve($reservation, $this->getUser());
+        } catch (\DomainException $e) {
+            throw new HttpException(400, $e->getMessage());
         }
-
-        $reservation->setStatus(Reservation::STATUS_APPROVED);
-        $reservation->setApprovedBy($this->getUser());
-        $reservation->setApprovedAt(new \DateTime());
-        $reservation = $this->reservationManager->saveToDatabase($reservation);
 
         return ReservationOutput::fromEntity($reservation, $this->linksFactory->forReservation($reservation));
     }
 
-    /**
-     * @throws Exception
-     */
     #[Rest\Patch('/reservation/{id}/reject', name: 'api_reservations_reject', requirements: ['id' => '\d+'])]
     #[Rest\View(statusCode: 200)]
     public function reject(int $id): ReservationOutput
@@ -142,12 +133,11 @@ class ReservationController extends AbstractFOSRestController
         $reservation = $this->findOrFail($id);
         $this->denyAccessUnlessGranted(ReservationVoter::CAN_REJECT, $reservation);
 
-        if($reservation->getStatus() !== Reservation::STATUS_PENDING) {
-            throw new HttpException(400, message: 'Reservation is not pending');
+        try {
+            $reservation = $this->reservationManager->reject($reservation);
+        } catch (\DomainException $e) {
+            throw new HttpException(400, $e->getMessage());
         }
-
-        $reservation->setStatus(Reservation::STATUS_REJECTED);
-        $reservation = $this->reservationManager->saveToDatabase($reservation);
 
         return ReservationOutput::fromEntity($reservation, $this->linksFactory->forReservation($reservation));
     }

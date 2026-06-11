@@ -37,6 +37,41 @@ class ReservationManager
         return $reservation;
     }
 
+    /**
+     * @throws \DomainException if the reservation is not pending or overlaps an existing approved reservation
+     */
+    public function approve(Reservation $reservation, AppUser $approvedBy): Reservation
+    {
+        if ($reservation->getStatus() !== Reservation::STATUS_PENDING) {
+            throw new \DomainException('Reservation is not pending.');
+        }
+        $overlapping = $this->reservationRepository->findOverlappingReservations(
+            $reservation->getRoom()->getId(),
+            $reservation->getStartDatetime(),
+            $reservation->getEndDatetime(),
+            null
+        );
+        if (count($overlapping) > 0) {
+            throw new \DomainException('Cannot approve reservation because it overlaps with another reservation.');
+        }
+        $reservation->setStatus(Reservation::STATUS_APPROVED);
+        $reservation->setApprovedBy($approvedBy);
+        $reservation->setApprovedAt(new \DateTime());
+        return $this->saveToDatabase($reservation);
+    }
+
+    /**
+     * @throws \DomainException if the reservation is not pending
+     */
+    public function reject(Reservation $reservation): Reservation
+    {
+        if ($reservation->getStatus() !== Reservation::STATUS_PENDING) {
+            throw new \DomainException('Reservation is not pending.');
+        }
+        $reservation->setStatus(Reservation::STATUS_REJECTED);
+        return $this->saveToDatabase($reservation);
+    }
+
     /*public function getReservationsForUser(AppUser $user): array
     {
         $userReservations = null;
@@ -87,20 +122,38 @@ class ReservationManager
     /**
      * @throws Exception
      */
-    public function addReservations(?array $reservations, AppUser $appUser, bool $isApproved): void
+    public function addApprovedReservations(?array $reservations, AppUser $appUser): void
     {
         if (!$reservations) {
             return;
         }
         foreach ($reservations as $reservationId) {
-            if (is_numeric($reservationId)){
+            if (is_numeric($reservationId)) {
                 $reservation = $this->reservationRepository->find($reservationId);
                 if ($reservation) {
-                    if ($isApproved) {
-                        $reservation->setApprovedBy($appUser);
-                    } else {
-                        $reservation->setReservedFor($appUser);
-                    }
+                    $reservation->setApprovedBy($appUser);
+                } else {
+                    throw new Exception('Reservation not found');
+                }
+            } else {
+                throw new Exception('Reservation ID must be an integer value');
+            }
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function addPendingReservations(?array $reservations, AppUser $appUser): void
+    {
+        if (!$reservations) {
+            return;
+        }
+        foreach ($reservations as $reservationId) {
+            if (is_numeric($reservationId)) {
+                $reservation = $this->reservationRepository->find($reservationId);
+                if ($reservation) {
+                    $reservation->setReservedFor($appUser);
                 } else {
                     throw new Exception('Reservation not found');
                 }
